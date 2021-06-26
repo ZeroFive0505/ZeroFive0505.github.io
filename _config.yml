@@ -104,6 +104,6 @@ author:
 
 # Footer Links
 footer_links:
-  - title: Feed
-    url: atom.xml
-    icon: fas fa-rss-square
+  - title: Github
+    url: https://github.com/ZeroFive0505/
+    icon: fab fa-github-alt
