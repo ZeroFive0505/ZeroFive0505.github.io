@@ -7,8 +7,8 @@ categories: Blender
 
 # Nintendo Switch
 
-![Imgur](https://i.imgur.com/KSU3ZUp.gifv)
-![Imgur](https://i.imgur.com/ZmzpnFa.gifv)
+![Imgur](https://i.imgur.com/KSU3ZUp.gif)
+![Imgur](https://i.imgur.com/ZmzpnFa.gif)
 
 
 

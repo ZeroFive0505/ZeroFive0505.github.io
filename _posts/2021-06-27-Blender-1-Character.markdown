@@ -8,4 +8,4 @@ categories: Blender
 # 캐릭터
 
 ![Imgur](https://i.imgur.com/58edAwy.jpg)
-![Imgur](https://i.imgur.com/k6OEnz6.mp4)
+![Imgur](https://i.imgur.com/EjOeu1B.gif)
