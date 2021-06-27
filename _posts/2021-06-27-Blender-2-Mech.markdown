@@ -7,4 +7,4 @@ categories: Blender
 
 # Mech
 
-![Imgur](https://i.imgur.com/MDRBdYz.mp4)
+![Imgur](https://i.imgur.com/UB0YXdN.gifv)
