@@ -1,0 +1,124 @@
+---
+layout: post
+title:  "그림 백준(1926)"
+date:   2021-06-28 08:16:52 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1926)
+# 그림
+
+# 문제
+> 어떤 큰 도화지에 그림이 그려져 있을 때, 그 그림의 개수와, 그 그림 중 넓이가 가장 넓은 것의 넓이를 출력하여라. 단, 그림이라는 것은 1로 연결된 것을 한 그림이라고 정의하자. 가로나 세로로 연결된 것은 연결이 된 것이고 대각선으로 연결이 된 것은 떨어진 그림이다. 그림의 넓이란 그림에 포함된 1의 개수이다.
+
+# 입력
+> 첫째 줄에 도화지의 세로 크기 n(1 ≤ n ≤ 500)과 가로 크기 m(1 ≤ m ≤ 500)이 차례로 주어진다. 두 번째 줄부터 n+1 줄 까지 그림의 정보가 주어진다. (단 그림의 정보는 0과 1이 공백을 두고 주어지며, 0은 색칠이 안된 부분, 1은 색칠이 된 부분을 의미한다)
+
+# 출력
+> 첫째 줄에는 그림의 개수, 둘째 줄에는 그 중 가장 넓은 그림의 넓이를 출력하여라. 단, 그림이 하나도 없는 경우에는 가장 넓은 그림의 넓이는 0이다.
+
+# 코드
+```C++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+const int INF = 987654321;
+
+struct sDleta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+int BFS(const vector<vector<int>>& v, vector<vector<bool>>& visited, int y, int x)
+{
+	queue<pair<int, int>> q;
+	visited[y][x] = true;
+
+	q.push({ y, x });
+	int cnt = 1;
+	while (!q.empty())
+	{
+		pair<int, int> f = q.front();
+		q.pop();
+		int y = f.first;
+		int x = f.second;
+		for (int i = 0; i < 4; i++)
+		{
+			int ny = y + Delta[i].y;
+			int nx = x + Delta[i].x;
+
+			if (ny < 0 || nx < 0 || ny >= v.size() || nx >= v[y].size())
+				continue;
+
+			if (v[ny][nx] != 0 && !visited[ny][nx])
+			{
+				cnt++;
+				visited[ny][nx] = true;
+				q.push({ ny, nx });
+			}
+		}
+	}
+
+	return cnt;
+}
+
+int main()
+{
+	int n, m;
+
+	cin >> n >> m;
+
+	vector<vector<int>> v(n, vector<int>(m, 0));
+	vector<vector<bool>> visited(n, vector<bool>(m, false));
+
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+			cin >> v[i][j];
+		}
+	}
+
+	int ans = -INF;
+	int areaCnt = 0;
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < m; j++)
+		{
+            // 방문되지 않은 곳이 있다면 방문하고 영역수를 늘린다.
+			if (v[i][j] != 0 && !visited[i][j])
+			{
+				int ret = BFS(v, visited, i, j);
+                // 가장 큰 영역을 찾아야함.
+				ans = max(ans, ret);
+				areaCnt++;
+			}
+		}
+	}
+
+	cout << areaCnt << "\n";
+
+    // 영역이 없을 경우 0을 출력해야한다.
+	if (areaCnt != 0)
+		cout << ans << "\n";
+	else
+		cout << 0 << "\n";
+
+	
+
+	return 0;
+}
+```
+
+# 느낀점
+BFS를 하면서 도달 가능한 곳까지 탐색을 하면서 영역수를 늘리면 되는 문제였다.

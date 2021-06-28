@@ -7,7 +7,10 @@ categories: Blender
 
 # Nintendo Switch
 
+> 조이콘
 ![Imgur](https://i.imgur.com/KSU3ZUp.gif)
+
+> 스위치
 ![Imgur](https://i.imgur.com/ZmzpnFa.gif)
 
 
