@@ -1,0 +1,113 @@
+---
+layout: post
+title: 무지의 먹방 라이브
+date: 2021-06-29 10:08:06 +0900
+categories: Programmers-Level4
+---
+
+# 무지의 먹방 라이브
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/42891)
+
+# 풀이
+간단하게 생각나는대로 작성을 해봤는데...
+
+
+```C++
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(vector<int> food_times, long long k) 
+{
+    int answer = 0;
+
+    long long idx = 0;
+
+    for (long long i = 0; i < k;)
+    {
+        if (food_times[idx % food_times.size()] != 0)
+        {
+            food_times[idx % food_times.size()]--;
+            idx++;
+            i++;
+        }
+        else
+            idx++;
+    }
+
+    for (long long i = idx; i < idx + food_times.size(); i++)
+    {
+        if (food_times[i % food_times.size()] != 0)
+        {
+            answer = i % food_times.size() + 1;
+            break;
+        }
+    }
+
+    return answer;
+}
+
+```
+
+# 결과
+역시나 답은 아니었다.. 정확도에서도 2~3개 틀리고 무엇보다 효율성에서는 하나도 점수를 얻지 못했다. 자료를 찾아본 결과 최소 힙을 이용해서 Greedy method로 풀어야 한다는 것을 알아냈다.
+
+```C++
+#include <iostream>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int solution(vector<int> food_times, long long k) 
+{
+    int answer = 0;
+    long long sum = 0;
+    long long before = 0;
+
+    priority_queue<pair<int, int>> pq;
+
+    // 일단 음식을 먹는시간의 총합을 구한다.
+    // 동시에 최소 힙에다가도 넣는다.
+    for (int i = 0; i < food_times.size(); i++)
+    {
+        sum += food_times[i];
+        pq.push({ -food_times[i], (i + 1) });
+    }
+
+    // 만약 총걸리는 시간이 K보다 작거나 같으면 시간내에 모든 음식을 먹을 수 있다.
+    if (sum <= k)
+        return -1;
+
+    // 최소 힙에는 가장 적은 시간이 걸리는 음식이 맨 위에 있다.
+    // 이제 그 음식 먹을때 걸리는 시간을 k에서 뺀다. 여기서 가장 최근에 뺀 시간을 새롭게 갱신하면서 빼간다. (가장 적게 걸리는 음식의 시간 - 최근에 제거된 음식에 걸리는 시간) * 최소 힙의 크기
+    while ((-pq.top().first - before) * pq.size() <= k)
+    {
+        k -= (-pq.top().first - before) * pq.size();
+        before = -pq.top().first;
+        pq.pop();
+    }
+
+    vector<pair<int, int>> v;
+    
+    // 이제 최소 힙에 남은 값들을 모조리 벡터에 집어넣는다.
+    while (!pq.empty())
+    {
+        v.push_back(pq.top());
+        pq.pop();
+    }
+
+    // 정렬을 할때 페어에서 두번째 값 즉 인덱스 기준으로 정렬한다.
+    sort(v.begin(), v.end(), [](const pair<int, int>& a, const pair<int, int>& b) {
+        return a.second < b.second;
+    });
+    
+    answer = v[k % v.size()].second;
+
+    return answer;
+}
+```

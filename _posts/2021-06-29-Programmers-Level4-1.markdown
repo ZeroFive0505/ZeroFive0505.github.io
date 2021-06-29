@@ -1,0 +1,99 @@
+---
+layout: post
+title: 호텔 방 배정
+date: 2021-06-29 08:49:10 +0900
+categories: Programmers-Level4
+---
+
+# 호텔 방 배정
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/64063)
+
+# 풀이
+배열을 써볼려고 했는데 크기가 너무 커서 map을 써서 작성을 해봤다..
+```C++
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<long long> solution(long long k, vector<long long> room_number)
+{
+    vector<long long> answer;
+
+    map<long long, long long> hash;
+
+    for (int i = 0; i < room_number.size(); i++)
+    {
+        if (hash.find(room_number[i]) == hash.end())
+        {
+            hash[room_number[i]] = 1;
+            answer.push_back(room_number[i]);
+        }
+        else
+        {
+            long long j = room_number[i];
+            for (; j < k; j++)
+            {
+                if (hash.find(j) == hash.end())
+                    break;
+            }
+
+            hash[j] = 1;
+            answer.push_back(j);
+        }
+    }
+
+
+    return answer;
+}
+```
+# 결과
+정확도는 모두 통과했지만 효율성은 하나도 통과를 하지 못했다.. 자료를 찾아보 결과 Union-Find를 써야된다는 것을 알게되었다.. map과 Union-Find를 동시에 쓰는것은 처음 본 유형이었다. 코드는 아래와 같다.
+
+```C++
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+map<long long, long long> hashMap;
+
+long long Find(long long v)
+{
+    // 끝에 도달하면 현재의 정점 값을 반환
+    if (hashMap.find(v) == hashMap.end())
+    {
+        return v;
+    }
+
+    return hashMap[v] = Find(hashMap[v]);
+}
+
+void Union(long long u, long long v)
+{
+    // 부모노드를 찾고 합친다.
+    u = Find(u);
+    v = Find(v);
+    hashMap[u] = v;
+}
+
+vector<long long> solution(long long k, vector<long long> room_number)
+{
+    vector<long long> answer;
+
+    for (int i = 0; i < room_number.size(); i++)
+    {
+        long long num = room_number[i];
+        long long ret = Find(num);
+        answer.push_back(ret);
+        // 합칠때 자기보다 하나 더 큰 값이랑 묶어서 합친다.
+        Union(ret, ret + 1);
+    }
+
+    return answer;
+}
+```
