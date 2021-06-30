@@ -1,0 +1,79 @@
+---
+layout: post
+title: 가운데를 말해요
+date: 2021-06-30 09:36:12 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1655)
+# 가운데를 말해요
+
+# 문제
+> 수빈이는 동생에게 "가운데를 말해요" 게임을 가르쳐주고 있다. 수빈이가 정수를 하나씩 외칠때마다 동생은 지금까지 수빈이가 말한 수 중에서 중간값을 말해야 한다. 만약, 그동안 수빈이가 외친 수의 개수가 짝수개라면 중간에 있는 두 수 중에서 작은 수를 말해야 한다.
+
+예를 들어 수빈이가 동생에게 1, 5, 2, 10, -99, 7, 5를 순서대로 외쳤다고 하면, 동생은 1, 1, 2, 2, 2, 2, 5를 차례대로 말해야 한다. 수빈이가 외치는 수가 주어졌을 때, 동생이 말해야 하는 수를 구하는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에는 수빈이가 외치는 정수의 개수 N이 주어진다. N은 1보다 크거나 같고, 100,000보다 작거나 같은 자연수이다. 그 다음 N줄에 걸쳐서 수빈이가 외치는 정수가 차례대로 주어진다. 정수는 -10,000보다 크거나 같고, 10,000보다 작거나 같다.
+
+# 출력
+> 한 줄에 하나씩 N줄에 걸쳐 수빈이의 동생이 말해야하는 수를 순서대로 출력한다.
+
+# 풀이
+아무래도 중간 값을 어떻게 출력해야되는지 감이 안 오는 문제였다.. 혹시 최대 힙, 최소 힙을 동시에 쓰는 건가 라는 생각까지 해봤지만 걍 생각에 그쳤다.. 결국에는 다른 사람들의 풀이를 참고했다. [풀이](https://yabmoons.tistory.com/478) 
+
+다음과 같이 2개의 규칙을 지켜주면서 힙을 유지한다.
+1. 최대 힙의 크기는 항상 최소 힙의 크기보다 같거나 1만큼 더 크다.
+2. 최소 힙의 모든 원소는 최대 힙의 모든 원소보다 크거나 같아야 한다. 즉, 최소 힙의 top() 값은 최대 힙의 top()의 값보다 커야 한다. 
+
+이런 방식으로 최대, 최소 힙을 유지하면 최대 힙의 top()에는 항상 가운데 값이 존재하게 된다.
+
+# 코드
+```C++
+#include <iostream>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+int main()
+{
+	int N;
+
+	cin >> N;
+	priority_queue<int> maxPQ;
+	priority_queue<int, vector<int>, greater<int>> minPQ;
+	vector<int> v(N);
+	for (int i = 0; i < N; i++)
+	{
+		cin >> v[i];
+	}
+
+	for (int i = 0; i < v.size(); i++)
+	{
+		if (maxPQ.size() > minPQ.size())
+			minPQ.push(v[i]);
+		else
+			maxPQ.push(v[i]);
+
+		if (!maxPQ.empty() && !minPQ.empty())
+		{
+			if (maxPQ.top() > minPQ.top())
+			{
+				int M = maxPQ.top();
+				int m = minPQ.top();
+
+				maxPQ.pop();
+				minPQ.pop();
+
+				maxPQ.push(m);
+				minPQ.push(M);
+			}
+		}
+
+		cout << maxPQ.top() << "\n";
+	}
+
+	return 0;
+}
+```
