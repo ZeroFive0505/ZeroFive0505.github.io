@@ -2,12 +2,12 @@
 layout: post
 title: Unity Command pattern
 date: 2021-06-28 14:04:41 +0900
-catergories: Unity DesignPattern
+categories: Unity DesignPattern
 ---
 
 # Unity 커맨드 패턴
 
-# 게임에 쓰이는 커맨드 패턴
+## 게임에 쓰이는 커맨드 패턴
 예를들어 패드로 게임을 한다고 생각해보자 유저는 패드 각 버튼의 입력을 설정에 가서 바꿀 수 있다. 이때 커맨드 패턴을 이용하면 간단하게 각 키에 새로운 액션을 할당 할 수 있다. 
 
 ![https://gameprogrammingpatterns.com/command.html](https://gameprogrammingpatterns.com/images/command-buttons-one.png)

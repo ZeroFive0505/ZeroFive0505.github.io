@@ -2,12 +2,12 @@
 layout: post
 title: Unity Flyweight pattern
 date: 2021-06-28 15:05:55 +0900
-catergories: Unity DesignPattern
+categories: Unity DesignPattern
 ---
 
 # Unity Flyweight 패턴
 
-# Unity에 쓰이는 Flyweight 패턴
+## Unity에 쓰이는 Flyweight 패턴
 Unity는 이미 Flyweight 패턴을 지원하고 있다. 예를 들면 Prefab를 들 수 있겠다. 한 화면의 무수히 많은 큐브를 만든다고 예를 들어보자 큐브를 다음과 같이 2가지 방법으로 큐브를 생성 해봤다
 1. 직접 메쉬를 만들어서 큐브를 만든다.
 
