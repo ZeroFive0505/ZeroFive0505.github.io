@@ -1,0 +1,44 @@
+---
+layout: post
+title: 거스름 돈
+date: 2021-06-30 08:51:43 +0900
+categories: Programmers-Level3
+---
+
+# 거스름 돈
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12907)
+
+# 풀이
+일단 0원을 거스름돈으로 주는 경우의 수는 딱 하나 존재하니 그것을 기록한다. 그 다음에는 각각 돈의 경우의 수를 누적해나가면 된다.
+
+# 코드
+```C++
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+const int MOD = 1000000007;
+
+int solution(int n, vector<int> money) 
+{
+    int answer = 0;
+
+    vector<int> cache(n + 1);
+
+    cache[0] = 1;
+
+    for (int m : money)
+    {
+        for (int i = m; i <= n; i++)
+        {
+            cache[i] += cache[i - m];
+            cache[i] %= MOD;
+        }
+    }
+
+    answer = cache[n];
+    return answer;
+}
+```

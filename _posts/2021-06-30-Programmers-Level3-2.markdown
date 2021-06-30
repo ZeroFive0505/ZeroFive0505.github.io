@@ -1,0 +1,38 @@
+---
+layout: post
+title: 멀리 뛰기
+date: 2021-06-30 08:45:34 +0900
+categories: Programmers-Level3
+---
+
+# 멀리 뛰기
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12914)
+
+# 풀이
+Tabulation 방식으로 문제를 풀 수 있다. 먼저 1칸 뛰는 경우의 수를 cache[1]에 기록하고 2칸 뛰는 경우의 수를 cache[2]에 기록한다 그 이후에는 i = 3부터 시작해서 n까지 반복문을 돌면서 계속해서 누적해가면 된다.
+
+# 코드
+```C++
+#include <iostream>
+
+using namespace std;
+const int SIZE = 2001;
+const int MOD = 1234567;
+
+long long cache[SIZE];
+
+long long solution(int n) 
+{
+    long long answer = 0;
+    cache[1] = 1;
+    cache[2] = 2;
+
+    for (int i = 3; i <= n; i++)
+    {
+        cache[i] = (cache[i - 2] + cache[i - 1]) % MOD;
+    }
+
+    answer = cache[n];
+    return answer;
+}
+```

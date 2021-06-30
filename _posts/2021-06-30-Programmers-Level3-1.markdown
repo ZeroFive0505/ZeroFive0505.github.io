@@ -1,0 +1,56 @@
+---
+layout: post
+title: 스티커 모으기(2)
+date: 2021-06-30 08:31:02 +0900
+categories: Programmers-Level3
+---
+
+# 스티커 모으기(2)
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12971)
+
+# 풀이
+레벨4에 있는 도둑질이랑 똑같은 문제이다.. 첫번째 스티커를 떼면서 시작할지 아님 그 다음에 있는 스티커를 떼면서 시작할지를 잘 기록해놓고 매 순간마다 최대 값을 기록해 나가야한다.
+
+# 코드
+```C++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int cache[100001];
+
+int solution(vector<int> sticker)
+{
+    int answer = 0;
+
+    // 만약 스티커의 갯수가 하나라면 바로 반환.
+    if (sticker.size() == 1)
+        return sticker[0];
+
+    // 첫번째 스티커를 떼는 경우
+    cache[0] = sticker[0];
+    cache[1] = cache[0];
+
+    for (int i = 2; i < sticker.size() - 1; i++)
+    {
+        cache[i] = max(cache[i - 2] + sticker[i], cache[i - 1]);
+    }
+
+    answer = max(answer, cache[sticker.size() - 2]);
+
+    // 두번째 스티커를 떼는 경우
+    cache[0] = 0;
+    cache[1] = sticker[1];
+
+    for (int i = 2; i < sticker.size(); i++)
+    {
+        cache[i] = max(cache[i - 2] + sticker[i], cache[i - 1]);
+    }
+
+    answer = max(answer, cache[sticker.size() - 1]);
+
+    return answer;
+}
+```
