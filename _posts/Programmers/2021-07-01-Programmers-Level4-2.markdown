@@ -1,0 +1,49 @@
+---
+layout: post
+title: 3N 타일링
+date: 2021-07-01 10:50:52 +0900
+categories: Programmers-Level4
+---
+
+# 3N 타일링
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12902)
+
+# 풀이
+레벨3에 있는 2N 타일링이 생각나는 문제였지만 더 복잡했다.. 점화식이 쉽게 떠오르지 않아 다른 사람들의 풀이를 참고했다... [풀이](https://yabmoons.tistory.com/471)
+
+```C++
+#include <iostream>
+#include <cstring>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+const int MOD = 1000000007;
+
+const int SIZE = 5001;
+
+long long cache[SIZE];
+
+int solution(int n)
+{
+    int answer = 0;
+    memset(cache, -1, sizeof(cache));
+    cache[0] = 1;
+    cache[2] = 3;
+
+    for (int i = 4; i <= n; i += 2)
+    {
+        cache[i] = cache[i - 2] * 3;
+        for (int j = i - 4; j >= 0; j -= 2)
+        {
+            cache[i] = cache[i] + cache[j] * 2;
+        }
+
+        cache[i] = cache[i] % MOD;
+    }
+
+    answer = cache[n];
+    return answer;
+}
+```

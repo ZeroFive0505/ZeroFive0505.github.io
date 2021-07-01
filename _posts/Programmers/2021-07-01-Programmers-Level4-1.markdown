@@ -1,0 +1,84 @@
+---
+layout: post
+title: 동굴 탐험
+date: 2021-07-01 10:39:18 +0900
+categories: Programmers-Level4
+---
+
+# 동굴 탐험
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/67260)
+
+# 풀이
+선행 순서를 부모 - 자식 노드 이렇게 나타내는 것 까지는 생각을 해봤고 실행을 해봤지만... 모든 노드를 방문할 수 있음에도 불구하고 방문 배열은 모두 참이 되지 않았다.. 다른 사람들의 풀이를 참고 했는데 방문 방식의 차이점과 만약 해당 노드의 부모 노드를 방문을 안 했을 경우에는 따로 기록을 해놓는 방법이었다.
+
+# 코드
+```C++
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+void DFS(vector<vector<int>>& graph, vector<bool>& visited, vector<int>& parents, vector<int>& mark, int v)
+{
+    if (visited[v])
+        return;
+
+    // 만약 선행 노드가 아직 방문이 되지 않았다면
+    if (!visited[parents[v]])
+    {   
+        // 기록한다.
+        mark[parents[v]] = v;
+        return;
+    }
+
+    visited[v] = true;
+
+    DFS(graph, visited, parents, mark, mark[v]);
+
+    for (int i : graph[v])
+        DFS(graph, visited, parents, mark, i);
+}
+
+bool solution(int n, vector<vector<int>> path, vector<vector<int>> order) 
+{
+    bool answer = true;
+
+    vector<vector<int>> graph(n);
+    vector<int> parents(n, 0);
+    vector<bool> visited(n, false);
+
+    for (int i = 0; i < order.size(); i++)
+    {
+        int parent = order[i][0];
+        int child = order[i][1];
+
+        parents[child] = parent;
+    }
+
+    if (parents[0])
+        return false;
+
+    for (int i = 0; i < path.size(); i++)
+    {
+        int u = path[i][0];
+        int v = path[i][1];
+
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+
+    visited[0] = true;
+    vector<int> mark(n, 0);
+    for (int i : graph[0])
+        DFS(graph, visited, parents, mark, i);
+
+    for (int i = 0; i < visited.size(); i++)
+    {
+        if (!visited[i])
+            return false;
+    }
+
+    return answer;
+}
+```
