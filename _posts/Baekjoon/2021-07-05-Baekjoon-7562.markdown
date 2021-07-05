@@ -1,0 +1,118 @@
+---
+layout: post
+title: 나이트의 이동
+date: 2021-07-05 11:45:03 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/7562)
+# 나이트의 이동
+
+# 문제
+> 체스판 위에 한 나이트가 놓여져 있다. 나이트가 한 번에 이동할 수 있는 칸은 아래 그림에 나와있다. 나이트가 이동하려고 하는 칸이 주어진다. 나이트는 몇 번 움직이면 이 칸으로 이동할 수 있을까? 
+![Img](https://www.acmicpc.net/upload/images/knight.png)
+
+# 입력
+> 입력의 첫째 줄에는 테스트 케이스의 개수가 주어진다.
+각 테스트 케이스는 세 줄로 이루어져 있다. 첫째 줄에는 체스판의 한 변의 길이 l(4 ≤ l ≤ 300)이 주어진다. 체스판의 크기는 l × l이다. 체스판의 각 칸은 두 수의 쌍 {0, ..., l-1} × {0, ..., l-1}로 나타낼 수 있다. 둘째 줄과 셋째 줄에는 나이트가 현재 있는 칸, 나이트가 이동하려고 하는 칸이 주어진다.
+
+# 출력
+> 각 테스트 케이스마다 나이트가 최소 몇 번만에 이동할 수 있는지 출력한다.
+
+# 풀이
+상하좌우에서 나이트가 이동 가능한 방향 총 8방향을 고려해서 BFS를 하면 풀 수 있다.
+
+```C++
+#include <iostream>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+struct sKnight
+{
+	int x;
+	int y;
+	int move;
+};
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{2, 1},
+	{-2, 1},
+	{1, 2},
+	{-1, 2},
+	{2, -1},
+	{-2, -1},
+	{1, -2},
+	{-1, -2}
+};
+
+int BFS(vector<vector<bool>> board, int startX, int startY, int endX, int endY)
+{
+	board[startY][startX] = true;
+	queue<sKnight> q;
+
+	q.push({ startX, startY, 0 });
+
+	while (!q.empty())
+	{
+		sKnight current = q.front();
+		q.pop();
+
+		int currentX = current.x;
+		int currentY = current.y;
+		int move = current.move;
+
+		if (currentX == endX && currentY == endY)
+			return move;
+
+		for (int i = 0; i < 8; i++)
+		{
+			int ny = currentY + Delta[i].y;
+			int nx = currentX + Delta[i].x;
+
+			if (ny < 0 || nx < 0 || ny >= board.size() || nx >= board.size())
+				continue;
+
+			if (board[ny][nx])
+				continue;
+
+			board[ny][nx] = true;
+			q.push({ nx, ny, move + 1 });
+		}
+	}
+
+
+	return -1;
+}
+
+int main()
+{
+	int T;
+
+	cin >> T;
+	while (T--)
+	{
+		int size;
+		int startX, startY;
+		int endX, endY;
+
+		cin >> size;
+
+		cin >> startX >> startY;
+		cin >> endX >> endY;
+
+		vector<vector<bool>> board(size, vector<bool>(size, false));
+
+		int move = BFS(board, startX, startY, endX, endY);
+
+		cout << move << "\n";
+	}
+
+	return 0;
+}
+```
