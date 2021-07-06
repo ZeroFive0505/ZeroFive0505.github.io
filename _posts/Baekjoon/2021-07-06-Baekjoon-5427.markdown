@@ -1,0 +1,165 @@
+---
+layout: post
+title: 불
+date: 2021-07-06 11:08:45 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/5427)
+# 불
+
+# 문제
+> 상근이는 빈 공간과 벽으로 이루어진 건물에 갇혀있다. 건물의 일부에는 불이 났고, 상근이는 출구를 향해 뛰고 있다. 매 초마다, 불은 동서남북 방향으로 인접한 빈 공간으로 퍼져나간다. 벽에는 불이 붙지 않는다. 상근이는 동서남북 인접한 칸으로 이동할 수 있으며, 1초가 걸린다. 상근이는 벽을 통과할 수 없고, 불이 옮겨진 칸 또는 이제 불이 붙으려는 칸으로 이동할 수 없다. 상근이가 있는 칸에 불이 옮겨옴과 동시에 다른 칸으로 이동할 수 있다. 빌딩의 지도가 주어졌을 때, 얼마나 빨리 빌딩을 탈출할 수 있는지 구하는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 테스트 케이스의 개수가 주어진다. 테스트 케이스는 최대 100개이다. 각 테스트 케이스의 첫째 줄에는 빌딩 지도의 너비와 높이 w와 h가 주어진다. (1 ≤ w,h ≤ 1000) 다음 h개 줄에는 w개의 문자, 빌딩의 지도가 주어진다.
+> 1. '.': 빈 공간
+> 2. '#': 벽
+> 3. '@': 상근이의 시작 위치
+> 4. '*': 불
+> 5. 각 지도에 @의 개수는 하나이다.
+
+# 출력
+> 각 테스트 케이스마다 빌딩을 탈출하는데 가장 빠른 시간을 출력한다. 빌딩을 탈출할 수 없는 경우에는 "IMPOSSIBLE"을 출력한다.
+
+# 풀이
+[Baekjoon](https://www.acmicpc.net/problem/4179)와 동일한 문제였다. 먼제 불들을 BFS로 최단 방문 거리를 구한 다음에 상근이를 BFS로 가장자리에 도달할 수 있는지를 체크하면 됬다.
+
+# 코드
+```C++
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+
+using namespace std;
+
+int H, W;
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+
+const int INF = 987654321;
+
+int Escape(queue<pair<int, int>>& player, vector<vector<int>>& visitCnt, vector<string>& v)
+{
+	while (!player.empty())
+	{
+		pair<int, int> cur = player.front();
+		player.pop();
+		int y = cur.first;
+		int x = cur.second;
+
+		if (y == H - 1 || x == W - 1 || x == 0 || y == 0)
+			return visitCnt[y][x];
+
+		for (int i = 0; i < 4; i++)
+		{
+			int ny = y + Delta[i].y;
+			int nx = x + Delta[i].x;
+
+			if (ny < 0 || nx < 0 || ny >= H || nx >= W)
+				continue;
+
+			if (v[ny][nx] == '#')
+				continue;
+
+			if (visitCnt[ny][nx] > visitCnt[y][x] + 1)
+			{
+				visitCnt[ny][nx] = visitCnt[y][x] + 1;
+				player.push({ ny, nx });
+			}
+		}
+	}
+
+	return -1;
+}
+
+int main()
+{
+	int t;
+
+	cin >> t;
+
+	while (t--)
+	{
+		cin >> W >> H;
+
+		vector<string> v;
+		string s;
+		queue<pair<int, int>> fires;
+		queue<pair<int, int>> player;
+		for (int i = 0; i < H; i++)
+		{
+			cin >> s;
+			v.push_back(s);
+		}
+
+		vector<vector<int>> visitCnt(H, vector<int>(W, INF));
+
+		for (int i = 0; i < v.size(); i++)
+		{
+			for (int j = 0; j < v[i].size(); j++)
+			{
+				if (v[i][j] == '*')
+				{
+					fires.push({ i, j });
+					visitCnt[i][j] = 1;
+				}
+
+				if (v[i][j] == '@')
+					player.push({ i, j });
+			}
+		}
+
+
+		while (!fires.empty())
+		{
+			pair<int, int> cur = fires.front();
+			fires.pop();
+			int x = cur.second;
+			int y = cur.first;
+
+			for (int i = 0; i < 4; i++)
+			{
+				int nx = x + Delta[i].x;
+				int ny = y + Delta[i].y;
+
+				if (nx < 0 || ny < 0 || nx >= W || ny >= H)
+					continue;
+
+				if (v[ny][nx] == '#')
+					continue;
+
+				if (visitCnt[ny][nx] > visitCnt[y][x] + 1)
+				{
+					visitCnt[ny][nx] = visitCnt[y][x] + 1;
+					fires.push({ ny, nx });
+				}
+			}
+		}
+
+
+		visitCnt[player.front().first][player.front().second] = 1;
+
+
+		int cnt = Escape(player, visitCnt, v);
+
+		if (cnt != -1)
+			cout << cnt << "\n";
+		else
+			cout << "IMPOSSIBLE" << "\n";
+	}
+
+	return 0;
+}
+```

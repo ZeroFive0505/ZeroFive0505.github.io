@@ -1,0 +1,230 @@
+---
+layout: post
+title: 벽 부수고 이동하기
+date: 2021-07-06 10:12:26 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/2206)
+# 벽 부수고 이동하기
+
+# 문제
+> N×M의 행렬로 표현되는 맵이 있다. 맵에서 0은 이동할 수 있는 곳을 나타내고, 1은 이동할 수 없는 벽이 있는 곳을 나타낸다. 당신은 (1, 1)에서 (N, M)의 위치까지 이동하려 하는데, 이때 최단 경로로 이동하려 한다. 최단경로는 맵에서 가장 적은 개수의 칸을 지나는 경로를 말하는데, 이때 시작하는 칸과 끝나는 칸도 포함해서 센다. 만약에 이동하는 도중에 한 개의 벽을 부수고 이동하는 것이 좀 더 경로가 짧아진다면, 벽을 한 개 까지 부수고 이동하여도 된다. 한 칸에서 이동할 수 있는 칸은 상하좌우로 인접한 칸이다. 맵이 주어졌을 때, 최단 경로를 구해 내는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 N(1 ≤ N ≤ 1,000), M(1 ≤ M ≤ 1,000)이 주어진다. 다음 N개의 줄에 M개의 숫자로 맵이 주어진다. (1, 1)과 (N, M)은 항상 0이라고 가정하자.
+
+# 출력
+> 첫째 줄에 최단 거리를 출력한다. 불가능할 때는 -1을 출력한다.
+
+# 첫 시도
+간단하게 구조체에 벽을 부쉈는지 안 부쉈는지를 저장해서 풀어봤는데 예제는 다 통과하길래 한번 제출했더니 11퍼에서 막혔다...
+
+```C++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+struct sPos
+{
+	int x;
+	int y;
+	int cnt;
+	bool hasRemovedWall;
+
+	sPos(int x, int y, int cnt, bool hasRemovedWall) : x(x), y(y), cnt(cnt), hasRemovedWall(hasRemovedWall) {}
+};
+
+int N, M;
+
+int BFS(vector<vector<int>>& maze, vector<vector<bool>>& visited, int y, int x)
+{
+	visited[y][x] = true;
+	queue<sPos> q;
+	q.push(sPos(x, y, 1, false));
+
+	while (!q.empty())
+	{
+		sPos cur = q.front();
+		q.pop();
+
+		int cx = cur.x;
+		int cy = cur.y;
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nx = cx + Delta[i].x;
+			int ny = cy + Delta[i].y;
+
+			if (ny == N - 1 && nx == M - 1)
+				return cur.cnt + 1;
+
+			if (nx < 0 || ny < 0 || ny >= N || nx >= M)
+				continue;
+
+			if (visited[ny][nx])
+				continue;
+
+			if (maze[ny][nx] == 1)
+			{
+				if (!cur.hasRemovedWall)
+				{
+					visited[ny][nx] = true;
+					q.push(sPos(nx, ny, cur.cnt + 1, true));
+				}
+			}
+			else
+			{
+				visited[ny][nx] = true;
+				q.push(sPos(nx, ny, cur.cnt + 1, cur.hasRemovedWall));
+			}
+		}
+	}
+
+	return -1;
+}
+
+int main()
+{
+
+	cin >> N >> M;
+
+	vector<vector<int>> maze(N, vector<int>(M, 0));
+	string s;
+	for (int i = 0; i < N; i++)
+	{
+		cin >> s;
+		for (int j = 0; j < M; j++)
+		{
+			maze[i][j] = s[j] - '0';
+		}
+	}
+
+	vector<vector<bool>> visited(N, vector<bool>(M, false));
+
+	int cnt = BFS(maze, visited, 0, 0);
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
+
+# 풀이
+결국 해결법이 떠오르지 않아 다른 사람들의 풀이를 참고한 결과 방문배열을 3차원으로 써야했다. 부서졌을 경우와 안 부셔졌을 경우를 나눠서 생각해야 했다.
+
+# 코드
+```C++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+struct sPos
+{
+	int x;
+	int y;
+	int wallCount;
+
+	sPos(int x, int y, bool wallCount) : x(x), y(y), wallCount(wallCount) {}
+};
+
+int N, M;
+
+const int SIZE = 1001;
+
+int visitCnt[2][SIZE][SIZE];
+
+int BFS(vector<vector<int>>& maze, int y, int x)
+{
+	visitCnt[1][y][x] = 1;
+	queue<sPos> q;
+	q.push(sPos(x, y, 1));
+
+	while (!q.empty())
+	{
+		sPos cur = q.front();
+		q.pop();
+
+		int cx = cur.x;
+		int cy = cur.y;
+
+		if (cy == N - 1 && cx == M - 1)
+			return visitCnt[cur.wallCount][cy][cx];
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nx = cx + Delta[i].x;
+			int ny = cy + Delta[i].y;
+
+			if (nx < 0 || ny < 0 || ny >= N || nx >= M)
+				continue;
+			
+			if (maze[ny][nx] == 1 && cur.wallCount == 1)
+			{
+				visitCnt[cur.wallCount - 1][ny][nx] = visitCnt[cur.wallCount][cy][cx] + 1;
+				q.push(sPos(nx, ny, cur.wallCount - 1));
+			}
+			else if (maze[ny][nx] == 0 && visitCnt[cur.wallCount][ny][nx] == 0)
+			{
+				visitCnt[cur.wallCount][ny][nx] = visitCnt[cur.wallCount][cy][cx] + 1;
+				q.push(sPos(nx, ny, cur.wallCount));
+			}
+		}
+	}
+
+	return -1;
+}
+
+int main()
+{
+
+	cin >> N >> M;
+
+	vector<vector<int>> maze(N, vector<int>(M, 0));
+	string s;
+	for (int i = 0; i < N; i++)
+	{
+		cin >> s;
+		for (int j = 0; j < M; j++)
+		{
+			maze[i][j] = s[j] - '0';
+		}
+	}
+
+	int cnt = BFS(maze, 0, 0);
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
