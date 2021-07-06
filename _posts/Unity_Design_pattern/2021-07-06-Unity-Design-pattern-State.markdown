@@ -1,0 +1,132 @@
+---
+layout: post
+title: Unity State Pattern
+date: 2021-07-06 14:24:01 +0900
+categories: Unity DesignPattern
+---
+
+# Unity State 패턴
+## 복잡한 AI를 State로 간단하게 만들기
+
+댄스킹 팔라딘의 AI를 State로 만들어 보자. 이 댄스킹 팔라딘은 플레이어가 보이면 가까이와서 춤을 출 것이고 만약 플레이어가 안 보이는 공간에서 다가오면 안전지대로 도망을 치고 분해 할 것이며 정찰 지점을 순회하고 가끔 브레이크 댄스를 출 것이다.
+State에는 3가지 단계가 있다. Enter -> Update -> Exit 이 있으며 Enter에서는 주로 Update에서 쓰일 변수의 설정과 초기화를 담당하며 Update에서는 해당 State에서의 동작을 수행하다가 특정 상황이 생기면 다른 State로 넘어갈 것이다. Exit에서는 주로 Enter에서 쓰인 변수를 다시 초기화 시키는 작업을 할 것이다.
+
+먼저 가장 베이스가 되는 클래스 State 클래스이다.
+
+```C#
+public class State
+{
+    public enum STATE
+    {
+        IDLE, PATROL, PURSUE, ATTACK, DEFEATED, RUNAWAY, FLAIR
+    };
+
+    public enum EVENT
+    {
+        ENTER, UPDATE, EXIT
+    };
+
+    public STATE name;
+    protected EVENT stage;
+    protected GameObject npc;
+    protected Animator anim;
+    protected Transform player;
+    protected State nextState;
+    protected NavMeshAgent agent;
+
+    float visDist = 10.0f;
+    float visAngle = 30.0f;
+    float shootDist = 7.0f;
+
+    public State(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
+    {
+        npc = _npc;
+        agent = _agent;
+        anim = _anim;
+        stage = EVENT.ENTER;
+        player = _player;
+    }
+
+    public virtual void Enter() { stage = EVENT.UPDATE; }
+    public virtual void Update() { stage = EVENT.UPDATE; }
+    public virtual void Exit() { stage = EVENT.EXIT; }
+
+    public State Process()
+    {
+        if (stage == EVENT.ENTER) 
+            Enter();
+        if (stage == EVENT.UPDATE)
+            Update();
+        if (stage == EVENT.EXIT)
+        {
+            Exit();
+            return nextState;
+        }
+        return this;
+    }
+
+    .....
+```
+이제 이 State를 상속받아서 각각 State마다 특별한 동작을 하게하면 된다. Idle State를 예로 들면 아래와 같다.
+
+```C#
+public class Idle : State
+{
+    public Idle(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player) : base(_npc, _agent, _anim, _player)
+    {
+        name = STATE.IDLE;
+    }
+
+    public override void Enter()
+    {
+        anim.SetTrigger("isIdle");
+        base.Enter();
+    }
+
+    public override void Update()
+    {
+        if(CanSeePlayer())
+        {
+            nextState = new Pursue(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+            return;
+        }
+
+        // 정찰단계로 가기.
+        if(Random.Range(0, 1000) < 10)
+        {
+            nextState = new Patrol(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+            return;
+        }
+
+        // 춤추기
+        if(Random.Range(0, 5000) < 10)
+        {
+            nextState = new Flair(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
+    }
+
+    public override void Exit()
+    {
+        anim.ResetTrigger("isIdle");
+        base.Exit();
+    }
+}
+
+```
+
+State 클래스에서 virtual로 선언된 Enter, Update, Exit을 각각 State의 상황에 맞게 재정의를 하면 복잡해 보이는 AI도 크게 어렵지 않게 만들 수 있다.
+
+팔라딘의 애니메이터에가 어떻게 구성되어있는지를 먼저 봐보면
+
+![Img](https://user-images.githubusercontent.com/39051679/124546392-889d3780-de65-11eb-9902-139ecfeed8bf.jpg)
+
+위와 같이 구성되어 있으며 모두 트리거로 동작되게 했다. 따라서 Exit이나 Enter에서 트리거를 설정하고 초기화하는게 매우 중요하다.
+
+마지막으로 댄스킹 팔라딘의 AI 테스트 이미지로 마치겠다.
+
+![Img](https://user-images.githubusercontent.com/39051679/124546016-f9901f80-de64-11eb-82e9-22ed6f680e6e.gif)
+
+![Img](https://user-images.githubusercontent.com/39051679/124546291-5d1a4d00-de65-11eb-8716-42b2fde97623.gif)
