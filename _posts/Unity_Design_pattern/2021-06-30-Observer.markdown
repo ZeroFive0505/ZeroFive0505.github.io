@@ -78,6 +78,7 @@ public class EventListener : MonoBehaviour
     }
 }
 ```
+# 결과
 
 예제는 두가지 종류의 큐브를 이용해서 각각 아이템이 소환될때와 픽업될때의 이벤트를 만들고 레이더는 이 2가지 이벤트를 구독하게 했다.
 

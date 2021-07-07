@@ -47,6 +47,8 @@ Flyweight 패턴과 많이 유사하다. 자가복제를 한다는 말은 즉 �
     .....
 ```
 
+# 결과
+
 ![Image](https://user-images.githubusercontent.com/39051679/123902933-b3404980-d9a8-11eb-9565-74f67134e104.jpg)
 ![Image](https://user-images.githubusercontent.com/39051679/123902937-b4717680-d9a8-11eb-98cd-f230f8dbe2b0.jpg)
 

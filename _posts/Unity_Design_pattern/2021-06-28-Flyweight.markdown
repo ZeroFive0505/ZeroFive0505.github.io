@@ -13,6 +13,7 @@ Unity는 이미 Flyweight 패턴을 지원하고 있다. 예를 들면 Prefab를
 
 2. 큐브를 Prefab으로 만들고 이를 이용한다.
 
+# 결과
 먼저 첫번째 방법을 이용했을때 메모리 사용량을 확인해봤다.
 ![Ex1](https://user-images.githubusercontent.com/39051679/123587227-f079cf80-d820-11eb-83ae-8ce4c7f4c55b.jpg)
 

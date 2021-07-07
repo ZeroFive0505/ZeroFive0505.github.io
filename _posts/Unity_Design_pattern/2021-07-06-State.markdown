@@ -116,7 +116,7 @@ public class Idle : State
 }
 
 ```
-
+# 결과
 State 클래스에서 virtual로 선언된 Enter, Update, Exit을 각각 State의 상황에 맞게 재정의를 하면 복잡해 보이는 AI도 크게 어렵지 않게 만들 수 있다.
 
 팔라딘의 애니메이터에가 어떻게 구성되어있는지를 먼저 봐보면
