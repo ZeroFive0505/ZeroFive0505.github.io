@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "그림 백준(1926)"
+title:  그림
 date:   2021-06-28 08:16:52 +0900
 categories: Baekjoon
 ---
@@ -39,7 +39,7 @@ struct sDleta
 	{0, 1}
 };
 
-int BFS(const vector<vector<int>>& v, vector<vector<bool>>& visited, int y, int x)
+int BFS(const vector<vector<int>>& v, vector<vector<bool>>&     visited,int y, int x)
 {
 	queue<pair<int, int>> q;
 	visited[y][x] = true;
@@ -57,7 +57,7 @@ int BFS(const vector<vector<int>>& v, vector<vector<bool>>& visited, int y, int 
 			int ny = y + Delta[i].y;
 			int nx = x + Delta[i].x;
 
-			if (ny < 0 || nx < 0 || ny >= v.size() || nx >= v[y].size())
+			if (ny < 0 || nx < 0 || ny >= v.size() || nx >= v[y].    siz())
 				continue;
 
 			if (v[ny][nx] != 0 && !visited[ny][nx])
@@ -120,5 +120,5 @@ int main()
 }
 ```
 
-# 느낀점
+# 풀이
 BFS를 하면서 도달 가능한 곳까지 탐색을 하면서 영역수를 늘리면 되는 문제였다.

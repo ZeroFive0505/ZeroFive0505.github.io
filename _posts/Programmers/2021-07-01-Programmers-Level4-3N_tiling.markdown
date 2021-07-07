@@ -9,7 +9,7 @@ categories: Programmers-Level4
 ## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12902)
 
 # 풀이
-레벨3에 있는 2N 타일링이 생각나는 문제였지만 더 복잡했다.. 점화식이 쉽게 떠오르지 않아 다른 사람들의 풀이를 참고했다... [풀이](https://yabmoons.tistory.com/471)
+레벨3에 있는 2N 타일링이 생각나는 문제였지만 더 복잡했다.. 점화식이 쉽게 떠오르지 않아 다른 사람들의 풀이를 참고했다... [링크](https://yabmoons.tistory.com/471)
 
 ```C++
 #include <iostream>

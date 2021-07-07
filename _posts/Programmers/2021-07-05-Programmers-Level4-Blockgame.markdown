@@ -6,7 +6,7 @@ categories: Programmers-Level4
 ---
 
 # 블록 게임
-## 문제 링크 ->[Programmers](https://programmers.co.kr/learn/courses/30/lessons/42894)
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/42894)
 
 
 # 첫 시도
@@ -311,7 +311,10 @@ int solution(vector<vector<int>> board)
 ```
 
 # 풀이
-인터넷에서 다른 사람들의 풀이법을 참고해봤다. [유튜브](https://www.youtube.com/watch?v=YqiqrhRSi54)
+인터넷에서 다른 사람들의 풀이법을 참고해봤다. 
+
+### [Youtube](https://www.youtube.com/watch?v=YqiqrhRSi54)
+
 간단하게 2X3, 3X2 형태의 직사각형 만든 다음에 빈곳이 있다면 위에서부터 채울 수 있는지 또는 빈칸은 2곳인지를 체크하고 같은 숫자로 이루어졌는지를 계속 확인한다. 그렇게 검사가 통과되면 0으로 채워서 지우고 다시 배열의 왼쪽 위부터 다시 시작해서 갯수를 센다.
 
 # 코드

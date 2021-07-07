@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "오늘의 벳지 작업"
+title:  오늘의 블렌더 작업
 date:   2021-06-30 20:53:20 +0900
 categories: Blender
 ---

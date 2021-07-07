@@ -10,7 +10,8 @@ categories: Baekjoon
 
 # 문제
 > 체스판 위에 한 나이트가 놓여져 있다. 나이트가 한 번에 이동할 수 있는 칸은 아래 그림에 나와있다. 나이트가 이동하려고 하는 칸이 주어진다. 나이트는 몇 번 움직이면 이 칸으로 이동할 수 있을까? 
-![Img](https://www.acmicpc.net/upload/images/knight.png)
+
+> ![Img](https://www.acmicpc.net/upload/images/knight.png)
 
 # 입력
 > 입력의 첫째 줄에는 테스트 케이스의 개수가 주어진다.
@@ -18,9 +19,6 @@ categories: Baekjoon
 
 # 출력
 > 각 테스트 케이스마다 나이트가 최소 몇 번만에 이동할 수 있는지 출력한다.
-
-# 풀이
-상하좌우에서 나이트가 이동 가능한 방향 총 8방향을 고려해서 BFS를 하면 풀 수 있다.
 
 ```C++
 #include <iostream>
@@ -116,3 +114,6 @@ int main()
 	return 0;
 }
 ```
+
+# 풀이
+상하좌우에서 나이트가 이동 가능한 방향 총 8방향을 고려해서 BFS를 하면 풀 수 있다.

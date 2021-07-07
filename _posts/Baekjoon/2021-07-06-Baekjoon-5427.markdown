@@ -22,8 +22,6 @@ categories: Baekjoon
 # 출력
 > 각 테스트 케이스마다 빌딩을 탈출하는데 가장 빠른 시간을 출력한다. 빌딩을 탈출할 수 없는 경우에는 "IMPOSSIBLE"을 출력한다.
 
-# 풀이
-[Baekjoon](https://www.acmicpc.net/problem/4179)와 동일한 문제였다. 먼제 불들을 BFS로 최단 방문 거리를 구한 다음에 상근이를 BFS로 가장자리에 도달할 수 있는지를 체크하면 됬다.
 
 # 코드
 ```C++
@@ -163,3 +161,6 @@ int main()
 	return 0;
 }
 ```
+
+# 풀이
+[Baekjoon](https://www.acmicpc.net/problem/4179)와 동일한 문제였다. 먼제 불들을 BFS로 최단 방문 거리를 구한 다음에 상근이를 BFS로 가장자리에 도달할 수 있는지를 체크하면 됬다.

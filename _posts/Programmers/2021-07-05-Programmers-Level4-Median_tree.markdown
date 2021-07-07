@@ -76,7 +76,8 @@ int solution(int n, vector<vector<int>> edges)
 ```
 
 # 풀이
-트리의 지름을 구해서 푸는 방법을 인터넷에서 찾을 수 있었다.. 자세한 풀이는 여기서 확인 할 수 있다. [풀이](https://yabmoons.tistory.com/597)
+트리의 지름을 구해서 푸는 방법을 인터넷에서 찾을 수 있었다.. 자세한 풀이는 여기서 확인 할 수 있다. 
+### [링크](https://yabmoons.tistory.com/597)
 
 ```C++
 #include <iostream>
