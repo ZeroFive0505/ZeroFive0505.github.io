@@ -2,7 +2,7 @@
 layout: post
 title: 숫자 문자열과 영단어
 date: 2021-07-12 07:13:09 +0900
-categories: Programmers-Level2
+categories: Programmers-Level1
 ---
 
 # 숫자 문자열과 영단어
