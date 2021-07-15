@@ -1,0 +1,97 @@
+---
+layout: post
+title: 스타트 링크
+date: 2021-07-15 11:11:39 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/5014)
+# 스타트 링크
+
+# 문제
+> 강호는 코딩 교육을 하는 스타트업 스타트링크에 지원했다. 오늘은 강호의 면접날이다. 하지만, 늦잠을 잔 강호는 스타트링크가 있는 건물에 늦게 도착하고 말았다. 스타트링크는 총 F층으로 이루어진 고층 건물에 사무실이 있고, 스타트링크가 있는 곳의 위치는 G층이다. 강호가 지금 있는 곳은 S층이고, 이제 엘리베이터를 타고 G층으로 이동하려고 한다. 보통 엘리베이터에는 어떤 층으로 이동할 수 있는 버튼이 있지만, 강호가 탄 엘리베이터는 버튼이 2개밖에 없다. U버튼은 위로 U층을 가는 버튼, D버튼은 아래로 D층을 가는 버튼이다. (만약, U층 위, 또는 D층 아래에 해당하는 층이 없을 때는, 엘리베이터는 움직이지 않는다) 강호가 G층에 도착하려면, 버튼을 적어도 몇 번 눌러야 하는지 구하는 프로그램을 작성하시오. 만약, 엘리베이터를 이용해서 G층에 갈 수 없다면, "use the stairs"를 출력한다.
+
+# 입력
+> 첫째 줄에 F, S, G, U, D가 주어진다. (1 ≤ S, G ≤ F ≤ 1000000, 0 ≤ U, D ≤ 1000000) 건물은 1층부터 시작하고, 가장 높은 층은 F층이다.
+
+# 출력
+> 첫째 줄에 강호가 S층에서 G층으로 가기 위해 눌러야 하는 버튼의 수의 최솟값을 출력한다. 만약, 엘리베이터로 이동할 수 없을 때는 "use the stairs"를 출력한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+const int SIZE = 1000001;
+const int INF = 987654321;
+int dists[SIZE];
+	
+int F, S, G, U, D;
+
+int BFS()
+{
+	queue<pair<int, int>> q;
+	dists[S] = 0;
+	q.push({ S, 0 });
+
+	while (!q.empty())
+	{
+		pair<int, int> cur = q.front();
+		q.pop();
+
+		int ch = cur.first;
+		int buttonHit = cur.second;
+
+		if (ch == G)
+			return buttonHit;
+
+		int nh = ch + U;
+
+		if (nh <= F)
+		{
+			if (dists[nh] > buttonHit + 1)
+			{
+				dists[nh] = buttonHit + 1;
+				q.push({ nh, dists[nh] });
+			}
+		}
+
+		nh = ch - D;
+
+		if (nh > 0)
+		{
+			if (dists[nh] > buttonHit + 1)
+			{
+				dists[nh] = buttonHit + 1;
+				q.push({ nh, dists[nh] });
+			}
+		}
+	}
+
+	return -1;
+}
+
+int main()
+{
+
+	cin >> F >> S >> G >> U >> D;
+
+	for (int i = 0; i < SIZE; i++)
+		dists[i] = INF;
+
+
+	int dist = BFS();
+
+	if (dist == -1)
+		cout << "use the stairs\n";
+	else
+		cout << dist << "\n";
+
+	return 0;
+}
+```
+
+# 풀이
+[숨바꼭질](https://www.acmicpc.net/problem/1697)이 좌우로 BFS를 하는 문제였다면, 이 문제는 상하로 BFS를 하는 문제였다. 상하로 BFS를 하고 도달하는 순간 그 거리를 반환하면 된다.
