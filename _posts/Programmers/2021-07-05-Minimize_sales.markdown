@@ -13,7 +13,7 @@ categories: Programmers-Level4
 [풀이](https://yabmoons.tistory.com/625) DP를 이용한 방식으로 매출 최소합을 구해야하며, 말단 노드일 경우 간단하게 참가하는 경우와 불참하는 경우를 기록하고 말단 노드가 자식 노드들을 확인하면서 최소가되는 경우를 갱신한다..
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <algorithm>

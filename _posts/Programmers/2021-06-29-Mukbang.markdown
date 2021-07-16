@@ -12,7 +12,7 @@ categories: Programmers-Level4
 간단하게 생각나는대로 작성을 해봤는데...
 
 
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <vector>

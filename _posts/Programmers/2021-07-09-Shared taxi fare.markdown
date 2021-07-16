@@ -12,7 +12,7 @@ categories: Programmers-Level3
 처음에는 다익스트라로 풀어보려 했지만.. 플로이드로 풀 게 되면 훨씬 간단하다. 모든 정점까지의 최단 거리를 구하고 초기값으로는 s -> a, s -> b의 값으로 각각 따로 갈때를 계산해두고 반복문으로 s -> i지점으로 가는 길이 있고 i -> a와 i -> b로 가는 길이 존재한다면 최솟값을 업데이트한다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <vector>

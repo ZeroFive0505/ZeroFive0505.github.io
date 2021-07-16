@@ -13,7 +13,7 @@ State에는 3가지 단계가 있다. Enter -> Update -> Exit 이 있으며 Ente
 
 먼저 가장 베이스가 되는 클래스 State 클래스이다.
 
-```C#
+```c#
 public class State
 {
     public enum STATE
@@ -69,7 +69,7 @@ public class State
 ```
 이제 이 State를 상속받아서 각각 State마다 특별한 동작을 하게하면 된다. Idle State를 예로 들면 아래와 같다.
 
-```C#
+```c#
 public class Idle : State
 {
     public Idle(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player) : base(_npc, _agent, _anim, _player)

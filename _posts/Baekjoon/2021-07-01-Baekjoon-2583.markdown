@@ -24,7 +24,7 @@ M, N과 K 그리고 K개의 직사각형의 좌표가 주어질 때, K개의 직
 
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <queue>
 #include <algorithm>

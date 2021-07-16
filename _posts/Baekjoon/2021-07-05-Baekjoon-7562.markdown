@@ -20,7 +20,9 @@ categories: Baekjoon
 # 출력
 > 각 테스트 케이스마다 나이트가 최소 몇 번만에 이동할 수 있는지 출력한다.
 
-```C++
+
+# 코드
+```c++
 #include <iostream>
 #include <queue>
 #include <vector>

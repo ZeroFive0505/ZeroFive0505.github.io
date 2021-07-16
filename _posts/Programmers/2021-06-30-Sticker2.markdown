@@ -12,7 +12,7 @@ categories: Programmers-Level3
 레벨4에 있는 도둑질이랑 똑같은 문제이다.. 첫번째 스티커를 떼면서 시작할지 아님 그 다음에 있는 스티커를 떼면서 시작할지를 잘 기록해놓고 매 순간마다 최대 값을 기록해 나가야한다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <vector>
 #include <algorithm>

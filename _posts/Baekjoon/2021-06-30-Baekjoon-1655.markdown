@@ -20,7 +20,7 @@ categories: Baekjoon
 > 한 줄에 하나씩 N줄에 걸쳐 수빈이의 동생이 말해야하는 수를 순서대로 출력한다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <queue>
 #include <vector>

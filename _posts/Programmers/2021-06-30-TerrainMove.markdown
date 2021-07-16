@@ -12,7 +12,7 @@ categories: Programmers-Level4
 일단 BFS로 영역을 나눌 수는 있겠다고 까지는 생각했지만 사다리가 여러개 놓일경우 어떻게 최소 높이 차의 사다리를 찾아낼 수 있을까를 너무 어렵게 생각했는데 간단하게 최소 힙을 써서 해결할 수 있었다. 영역을 나눴다면 이제 영역별로 간선이 여러 있다고 생각하고 MST 알고리즘을 이용하여 해결할 수 있었다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <queue>
 #include <string>

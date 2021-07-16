@@ -13,7 +13,7 @@ categories: Programmers-Level4
 블록이 위에서 내려온다면 특정 모양 빼고는 조건을 만족하지 않는다고 생각해서 각각 모양과 비교해서 만약 조건을 만족한다면 해당 블록의 영역을 0으로 없애는 방법으로 풀어봤다.. 결과는 역시나 대참사.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <vector>

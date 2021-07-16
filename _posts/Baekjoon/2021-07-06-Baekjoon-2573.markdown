@@ -9,7 +9,7 @@ categories: Baekjoon
 # 빙산
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <vector>
 #include <queue>

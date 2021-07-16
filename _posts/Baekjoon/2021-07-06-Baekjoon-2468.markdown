@@ -19,7 +19,7 @@ categories: Baekjoon
 
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <algorithm>
 #include <vector>

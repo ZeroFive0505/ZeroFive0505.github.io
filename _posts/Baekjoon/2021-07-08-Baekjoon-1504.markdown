@@ -18,7 +18,7 @@ categories: Baekjoon
 > 첫째 줄에 두 개의 정점을 지나는 최단 경로의 길이를 출력한다. 그러한 경로가 없을 때에는 -1을 출력한다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <algorithm>
 #include <queue>

@@ -12,7 +12,7 @@ categories: Programmers-Level3
 DFS 백트랙킹 문제였다. 모든 경우를 확인하고 가능한 경우를 반환하면 된다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <vector>

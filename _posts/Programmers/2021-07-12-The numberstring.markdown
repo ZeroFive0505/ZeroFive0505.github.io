@@ -12,7 +12,7 @@ categories: Programmers-Level1
 map을 이용해서 일단 각 문자열과 매칭되는 정수 값을 할당하고 정답 변수에 자릿수에 알맞게 더해주면 된다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <ctype.h>
 #include <map>

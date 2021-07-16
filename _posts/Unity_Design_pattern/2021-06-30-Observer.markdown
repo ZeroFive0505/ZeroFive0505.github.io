@@ -10,7 +10,7 @@ categories: Unity DesignPattern
 ## 레이더를 이용한 Observer 패턴
 
 크게 Event와 EventListener로 이루어졌다. Event의 코드는 아래와 같다.
-```C#
+```c#
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -45,7 +45,7 @@ public class Event : ScriptableObject
 
 다음은 EventListener의 코드이다.
 
-```C#
+```c#
 using UnityEngine;
 using UnityEngine.Events;
 

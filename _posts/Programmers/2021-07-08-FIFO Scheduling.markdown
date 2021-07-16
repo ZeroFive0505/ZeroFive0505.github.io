@@ -12,7 +12,7 @@ categories: Programmers-Level4
 덱을 이용해서 가장 속도가 빠른 코어를 앞에 넣고 시간을 확인해서 빼고 다시 넣는 식으로 했는데 예제는 통과했지만, 답은 아니었다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <queue>
 #include <algorithm>

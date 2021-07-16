@@ -12,7 +12,7 @@ categories: Programmers-Level4
 뭔가 이분탐색으로 풀면 되지 않을까 싶었는데.. 어느때 왼쪽 경계선과 오른쪽 경계선을 수정해야 할 지 도저히 감이 안와서 결국 이분탐색으로 작성하는 코드를 포기하고 정말 간단하게 최소, 최대의 평균 값으로 풀어봤다..
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <algorithm>
 #include <limits.h>

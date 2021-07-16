@@ -12,7 +12,7 @@ categories: Programmers-Level4
 플로이드 알고리즘으로 모든 정점에서 모든 정점까지 거리를 구한 후에 최대 힙에다 모든 거리를 넣고 거기서 3개만 빼고 최대 값을 구했는데... 역시 n의 범위가 최대 250,000까지 가니까 테스트 7까지는 정답이었지만 그 이후부터는 전부 시간 초과가 떴다..
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <algorithm>
 #include <queue>

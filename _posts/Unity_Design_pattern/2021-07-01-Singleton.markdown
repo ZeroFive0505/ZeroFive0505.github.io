@@ -10,7 +10,7 @@ categories: Unity DesignPattern
 
 게임내에서 공유되는 자원을 관리할때 편하게 쓰이는 패턴이다. 예제에서는 공유되는 지점과 자원이 있다. 이러한 요소에 접근할때 싱글톤을 쓰면 간편하다.
 
-```C#
+```c#
     public static GameEnvironment Singleton
     {
         get

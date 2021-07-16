@@ -10,7 +10,7 @@ categories: Programmers-Level4
 
 # 풀이
 형식이 프로그래머스 Level 3의 불량 유저랑 비슷해서 그거랑 비슷한 느낌으로 풀어봤다.. 코드는 아래와 같다.
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <vector>

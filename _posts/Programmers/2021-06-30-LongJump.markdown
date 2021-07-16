@@ -12,7 +12,7 @@ categories: Programmers-Level3
 Tabulation 방식으로 문제를 풀 수 있다. 먼저 1칸 뛰는 경우의 수를 cache[1]에 기록하고 2칸 뛰는 경우의 수를 cache[2]에 기록한다 그 이후에는 i = 3부터 시작해서 n까지 반복문을 돌면서 계속해서 누적해가면 된다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 
 using namespace std;

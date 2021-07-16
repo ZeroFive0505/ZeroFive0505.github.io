@@ -20,7 +20,8 @@ categories: Baekjoon
 # 첫 시도
 간단하게 구조체에 벽을 부쉈는지 안 부쉈는지를 저장해서 풀어봤는데 예제는 다 통과하길래 한번 제출했더니 11퍼에서 막혔다...
 
-```C++
+# 코드
+```c++
 #include <iostream>
 #include <string>
 #include <vector>

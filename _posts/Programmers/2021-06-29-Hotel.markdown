@@ -10,7 +10,7 @@ categories: Programmers-Level4
 
 # 풀이
 배열을 써볼려고 했는데 크기가 너무 커서 map을 써서 작성을 해봤다..
-```C++
+```c++
 #include <iostream>
 #include <map>
 #include <string>

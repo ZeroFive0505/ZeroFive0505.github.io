@@ -26,7 +26,7 @@ categories: Baekjoon
 > 첫째 줄에 가장 짧은 다리의 길이를 출력한다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <queue>
 

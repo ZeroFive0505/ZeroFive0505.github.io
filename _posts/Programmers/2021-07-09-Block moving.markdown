@@ -12,7 +12,7 @@ categories: Programmers-Level3
 개인적으로 많이 어려웠던 문제였다.. 인터넷에 다른 사람들의 풀이를 보고 겨우 풀 수 있었다.. 기존 BFS에 블록이 2칸을 차지하며 회전까지도 가능한 문제였다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <queue>

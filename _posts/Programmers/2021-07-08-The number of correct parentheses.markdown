@@ -12,7 +12,7 @@ categories: Programmers-Level4
 생각외로 간단한 문제였다... C++에서 제공하는 next_permutation으로 모든 경우의 수에서 괄호가 올바른지 체크를 하면 된다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <algorithm>
 #include <string>

@@ -14,7 +14,7 @@ left 부터 right까지 곱셈의 최적의 해는 left 부터 k까지 더하기
 
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <algorithm>
 #include <string>

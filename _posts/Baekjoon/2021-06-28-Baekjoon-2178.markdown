@@ -19,7 +19,7 @@ categories: Baekjoon
 > 첫째 줄에 지나야 하는 최소의 칸 수를 출력한다. 항상 도착위치로 이동할 수 있는 경우만 입력으로 주어진다.
 
 # 코드
-``` C++
+```c++
 #include <iostream>
 #include <vector>
 #include <queue>

@@ -12,7 +12,7 @@ categories: Programmers-Level2
 맨하튼 거리를 어떻게 체크할지 좀 고민했던 문제였다.. 고민하다 간단하게 BFS를 상하좌우로 한번하고 다시한번 BFS를 하면서 만약 거리두기 조건에 만족하지 않는다면 바로 거짓을 반환하게 했다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <queue>
 #include <string>

@@ -11,7 +11,7 @@ categories: Unity DesignPattern
 고전게임에서는 지금의 하드웨어와 달리 메모리가 많이 부족했기에 메모리 관리를 효율적으로 해야했다. 이 메모리 관리를 위해 화면에 표시또는 소환이 되는 투사체 등을 정해진 양만큼 써야했다. 가장 핵심이 되는 풀링을 관리하는 코드는 다음과 같다.
 
 # Pool
-```C#
+```c#
 ....
     private void Start()
     {
@@ -60,7 +60,7 @@ categories: Unity DesignPattern
 
 # Spawner
 이제 소환을 하면된다. 풀을 가지고 소환을하는 코드는 다음과 같다.
-```C#
+```c#
     void SpawnBall()
     {
         // 풀에서 해당 태그의 아이템을 가져오고

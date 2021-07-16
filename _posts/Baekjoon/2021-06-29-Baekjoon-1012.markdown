@@ -25,7 +25,7 @@ categories: Baekjoon
 
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <cmath>
 #include <queue>

@@ -24,7 +24,7 @@ categories: Baekjoon
 
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <vector>
 #include <string>

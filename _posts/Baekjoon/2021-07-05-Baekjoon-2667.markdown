@@ -18,7 +18,7 @@ categories: Baekjoon
 > 첫 번째 줄에는 총 단지수를 출력하시오. 그리고 각 단지내 집의 수를 오름차순으로 정렬하여 한 줄에 하나씩 출력하시오.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <algorithm>

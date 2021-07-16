@@ -12,7 +12,7 @@ categories: Programmers-Level4
 숫자의 범위도 크고 무슨 규칙성이 있는지를 찾기 힘들었다.. 결국 인터넷을 조사해보니 1과 자기 자신을 제외한 약수로 나눈 몫이 들어가는 법칙이 있었다. 만약 그 사이의 숫자로 나눠지는게 없다면 1은 반환하며 최대 범위를 잘 조절하면 풀 수 있는 문제였다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <cmath>

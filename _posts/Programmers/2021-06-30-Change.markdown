@@ -12,7 +12,7 @@ categories: Programmers-Level3
 일단 0원을 거스름돈으로 주는 경우의 수는 딱 하나 존재하니 그것을 기록한다. 그 다음에는 각각 돈의 경우의 수를 누적해나가면 된다.
 
 # 코드
-```C++
+```c++
 #include <iostream>
 #include <string>
 #include <vector>

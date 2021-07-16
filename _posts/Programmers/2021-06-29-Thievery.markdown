@@ -11,7 +11,7 @@ categories: Programmers-Level4
 # 풀이
 레벨3에 있는 스티커 문제랑 완전히 똑같았다. 표현만 다를 뿐이었다.
 
-```C++
+```c++
 #include <iostream>
 #include <algorithm>
 #include <string>

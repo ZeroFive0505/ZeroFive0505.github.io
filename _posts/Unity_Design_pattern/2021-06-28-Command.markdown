@@ -14,7 +14,7 @@ categories: Unity DesignPattern
 
 # 과정
 먼저 커맨드 클래스를 가상화로 구현한다.
-```C#
+```c#
 public abstract class Command
 {
     public abstract void Execute(Animator anim);
@@ -22,7 +22,7 @@ public abstract class Command
 ```
 그리고 이를 상속받아서 실제로 해당 애니메이션을 실행할 클래스들을 만든다.
 
-```C#
+```c#
 public class Punch : Command
 {
     public override void Execute(Animator anim)
@@ -42,7 +42,7 @@ public class Kick : Command
 ```
 이 다음 유저의 입력을 관리할 클래스를 만들고 거기에 Command 형식의 변수를 선언해 자유롭게 커맨드 클래스를 상속받는 클래스를 할당 받을 수 있게 한다.
 
-```C#
+```c#
 Command keyP, keyK;
 Command combo;
 List<Command> commands = new List<Command>();
