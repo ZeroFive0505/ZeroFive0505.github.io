@@ -11,39 +11,39 @@ categories: Blender
 
 ## 1 세대
 
-![Imgur](https://imgur.com/sl9eAoK)
+![Imgur](https://imgur.com/sl9eAoK.gif)
 
-![Imgur](https://imgur.com/HT9kykg)
+![Imgur](https://imgur.com/HT9kykg.gif)
 
-![Imgur](https://imgur.com/J7RD160)
+![Imgur](https://imgur.com/J7RD160.gif)
 
-![Imgur](https://imgur.com/z5tWgu4)
+![Imgur](https://imgur.com/z5tWgu4.gif)
 
-![Imgur](https://imgur.com/LuDqE1w)
+![Imgur](https://imgur.com/LuDqE1w.gif)
 
-![Imgur](https://imgur.com/Hrcp336)
+![Imgur](https://imgur.com/Hrcp336.gif)
 
-![Imgur](https://imgur.com/8P7EoLd)
+![Imgur](https://imgur.com/8P7EoLd.gif)
 
-![Imgur](https://imgur.com/fvd4OSl)
+![Imgur](https://imgur.com/fvd4OSl.gif)
 
 ## 2세대
 
-![Imgur](https://imgur.com/vML7p3y)
+![Imgur](https://imgur.com/vML7p3y.gif)
 
-![Imgur](https://imgur.com/JpIj9zO)
+![Imgur](https://imgur.com/JpIj9zO.gif)
 
-![Imgur](https://imgur.com/AzKmFtn)
+![Imgur](https://imgur.com/AzKmFtn.gif)
 
-![Imgur](https://imgur.com/UrMSKht)
+![Imgur](https://imgur.com/UrMSKht.gif)
 
-![Imgur](https://imgur.com/uBtRRL1)
+![Imgur](https://imgur.com/uBtRRL1.gif)
 
-![Imgur](https://imgur.com/9jRwBiQ)
+![Imgur](https://imgur.com/9jRwBiQ.gif)
 
-![Imgur](https://imgur.com/3onrlNi)
+![Imgur](https://imgur.com/3onrlNi.gif)
 
-![Imgur](https://imgur.com/seBP7P3)
+![Imgur](https://imgur.com/seBP7P3.gif)
 
 ## 단체 샷
 
