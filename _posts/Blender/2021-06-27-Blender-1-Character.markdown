@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "블렌더 작업물 #1"
+title:  블렌더 작업물 #1
 date:   2021-06-27 10:30:27 +0900
 categories: Blender
 ---
