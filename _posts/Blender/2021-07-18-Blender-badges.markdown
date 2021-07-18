@@ -13,7 +13,6 @@ categories: Blender
 
 ![Imgur](https://imgur.com/sl9eAoK)
 
-
 ![Imgur](https://imgur.com/HT9kykg)
 
 ![Imgur](https://imgur.com/J7RD160)
@@ -45,4 +44,10 @@ categories: Blender
 ![Imgur](https://imgur.com/3onrlNi)
 
 ![Imgur](https://imgur.com/seBP7P3)
+
+## 단체 샷
+
+![Imgur](https://imgur.com/EmHtqsI)
+
+![Imgur](https://imgur.com/CneGFL9)
 
