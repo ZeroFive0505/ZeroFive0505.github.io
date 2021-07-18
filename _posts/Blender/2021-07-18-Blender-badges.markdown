@@ -47,7 +47,7 @@ categories: Blender
 
 ## 단체 샷
 
-![Imgur](https://imgur.com/EmHtqsI)
+![Imgur](https://imgur.com/EmHtqsI.png)
 
-![Imgur](https://imgur.com/CneGFL9)
+![Imgur](https://imgur.com/CneGFL9.png)
 
