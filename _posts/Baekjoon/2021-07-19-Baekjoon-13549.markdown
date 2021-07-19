@@ -1,0 +1,82 @@
+---
+layout: post
+title: 숨바꼭질 3
+date: 2021-07-19 10:41:43 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/13549)
+# 숨바꼭질 3
+
+# 문제
+> 수빈이는 동생과 숨바꼭질을 하고 있다. 수빈이는 현재 점 N(0 ≤ N ≤ 100,000)에 있고, 동생은 점 K(0 ≤ K ≤ 100,000)에 있다. 수빈이는 걷거나 순간이동을 할 수 있다. 만약, 수빈이의 위치가 X일 때 걷는다면 1초 후에 X-1 또는 X+1로 이동하게 된다. 순간이동을 하는 경우에는 0초 후에 2*X의 위치로 이동하게 된다. 수빈이와 동생의 위치가 주어졌을 때, 수빈이가 동생을 찾을 수 있는 가장 빠른 시간이 몇 초 후인지 구하는 프로그램을 작성하시오.
+
+# 입력
+> 첫 번째 줄에 수빈이가 있는 위치 N과 동생이 있는 위치 K가 주어진다. N과 K는 정수이다.
+
+# 출력
+> 수빈이가 동생을 찾는 가장 빠른 시간을 출력한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+int N, K;
+
+const int SIZE = 100000 + 1;
+
+bool VISITED[SIZE];
+
+int BFS()
+{
+	priority_queue <pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+	VISITED[N] = true;
+
+	pq.push({ 0, N });
+
+	while (!pq.empty())
+	{
+		int curTime = pq.top().first;
+		int cx = pq.top().second;
+		pq.pop();
+
+		if (cx == K)
+			return curTime;
+
+		if (cx * 2 < SIZE && !VISITED[cx * 2])
+		{
+			pq.push({ curTime, cx * 2 });
+			VISITED[cx * 2] = true;
+		}
+
+		if (cx - 1 >= 0 && !VISITED[cx - 1])
+		{
+			pq.push({ curTime + 1, cx - 1 });
+			VISITED[cx - 1] = true;
+		}
+
+		if (cx + 1 < SIZE && !VISITED[cx + 1])
+		{
+			pq.push({ curTime + 1, cx + 1 });
+			VISITED[cx + 1] = true;
+		}
+	}
+
+	return -1;
+}
+
+int main()
+{
+	cin >> N >> K;
+
+	cout << BFS() << "\n";
+
+	return 0;
+}
+```
+
+# 풀이
+순간이동을 할때는 현 카운트를 유지하면서 BFS를 하면 되는 문제인데.. 처음에는 일반 큐로 풀었다가 계속 오답이 나오길래 알아보니 우선순위 큐를 이용해서 푸는 문제였다.. 아무래도 순간이동을 하는 순간에는 현 상태의 카운트를 유지하다보니 더 짧은 거리를 구하려면 우선순위 큐를 이용해야 하는 것 같다.
