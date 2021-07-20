@@ -1,0 +1,49 @@
+---
+layout: post
+title: 네트워크
+date: 2021-07-20 10:42:43 +0900
+categories: Programmers-Level3
+---
+
+# 네트워크
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/43162)
+
+# 풀이
+그래프에서 연결요소를 세는 문제와 동일하다. DFS를 이용해가면서 방문할 수 있는 곳은 모두 방문하고 카운트를 늘려준다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+void DFS(vector<vector<int>>& computers, vector<bool>& visited, int u, int n)
+{
+    visited[u] = true;
+
+    for (int v = 0; v < n; v++)
+    {
+        if (computers[u][v] == 1 && !visited[v])
+            DFS(computers, visited, v, n);
+    }
+}
+
+int solution(int n, vector<vector<int>> computers) 
+{
+    int answer = 0;
+
+    vector<bool> visited(n, false);
+
+    for (int i = 0; i < n; i++)
+    {
+        if (!visited[i])
+        {
+            answer++;
+            DFS(computers, visited, i, n);
+        }
+    }
+
+    return answer;
+}
+```

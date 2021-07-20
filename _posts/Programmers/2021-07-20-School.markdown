@@ -1,0 +1,62 @@
+---
+layout: post
+title: 등굣길
+date: 2021-07-20 11:31:36 +0900
+categories: Programmers-Level3
+---
+
+# 등굣길
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/42898)
+
+# 풀이
+DP 문제였다. M, N을 1씩 줄여나가면서 만약 둘중에 하나라도 0이라면 더 이상 그쪽 방향으로는 이동이 불가능하다 즉 0을 반환하고, 만약 1, 1이라면 경우의 수는 1이 된다. 물웅덩이의 경우 0을 줘서 경우의 수 합에 영향이 없도록 한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <cstring>
+
+using namespace std;
+
+const int DIV = 1000000007;
+
+const int SIZE = 101;
+
+int cache[SIZE][SIZE];
+
+int DP(int m, int n)
+{
+    if (m == 0 || n == 0)
+        return 0;
+
+    if (m == 1 && n == 1)
+        return 1;
+
+    int& ret = cache[m][n];
+
+    if (ret != -1)
+        return ret;
+
+    return ret = (DP(m - 1, n) + DP(m, n - 1)) % DIV;
+}
+
+int solution(int m, int n, vector<vector<int>> puddles) 
+{
+    int answer = 0;
+
+    memset(cache, -1, sizeof(cache));
+
+    for (int i = 0; i < puddles.size(); i++)
+    {
+        int y = puddles[i][0];
+        int x = puddles[i][1];
+
+        cache[y][x] = 0;
+    }
+
+    answer = DP(m, n);
+
+    return answer;
+}
+```
