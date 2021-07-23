@@ -1,0 +1,77 @@
+---
+layout: post
+title: GPS
+date: 2021-07-23 08:15:03 +0900
+categories: Programmers-Level3
+---
+
+# GPS
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/1837)
+
+# 풀이
+처음에는 다익스트라로 어떻게든 풀어보려고 했는데 답이 나오질 않아서 인터넷을 참고해보니 DP로 풀 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int INF = 987654321;
+
+int solution(int n, int m, vector<vector<int>> edge_list, int k, vector<int> gps_log) 
+{
+    int answer = 0;
+    
+    vector<vector<int>> edge(n, vector<int>(n, 0));
+
+    for (int i = 0; i < edge_list.size(); i++)
+    {
+        // 노드가 1 ~ K 까지 있으나 편의상 -1을 해서 0부터 쓸 수 있도록한다.
+        int u = edge_list[i][0] - 1;
+        int v = edge_list[i][1] - 1;
+
+        // 인접행렬 연결
+        edge[u][v] = 1;
+        edge[v][u] = 1;
+    }
+
+    // 위와같은 이유로 1을 빼서 0부터 시작하게 한다.
+    for (auto& i : gps_log)
+        i--;
+
+    vector<vector<int>> cache(n, vector<int>(n, INF));
+
+    // 초기값
+    cache[0][gps_log.front()] = 0;
+
+    // 위에서 0은 값을 대입했으니 1부터 시작한다.
+    for (int i = 1; i < gps_log.size(); i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            // 만약 i번째 로그에서 j라면 추가 위치 수정은 없다.
+            int additional = (gps_log[i] == j ? 0 : 1);
+
+            for (int e = 0; e < edge[j].size(); e++)
+            {
+                // i - j - e 이렇게 연결되었을때 최소 값으로 갱신한다.
+                if (edge[j][e] == 1)
+                {
+                    cache[i][j] = min(cache[i - 1][e] + additional, cache[i][j]);
+                }
+            }
+        }
+    }
+
+    // 최종 GPS 로그 기록에 도달했을때 값을 구한다.
+    answer = cache[k - 1][gps_log[k - 1]];
+
+    if (answer == INF)
+        answer = -1;
+    
+    return answer;
+}
+```

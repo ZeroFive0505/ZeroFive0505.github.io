@@ -1,0 +1,76 @@
+---
+layout: post
+title: 다단계 칫솔 판매
+date: 2021-07-23 08:19:46 +0900
+categories: Programmers-Level3
+---
+
+# 풀이
+해쉬를 이용해서 풀 수 있었다. 한가지 주의할 점은 상위 노드로 이익을 넘길때 그 값이 0보다 작거나 같을 경우를 고려해야한다. 이 경우 `break`로 빠져나가야 하는데 이를 고려하지 않았을 경우 몇개의 테스트 케이스에서 시간 초과가 나온다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+const int PROFIT = 100;
+
+vector<int> solution(vector<string> enroll, vector<string> referral, vector<string> seller, vector<int> amount) 
+{
+    vector<int> answer;
+    map<string, string> hashRef;
+    map<string, int> hashProfit;
+
+    // 초기화
+    for (int i = 0; i < enroll.size(); i++)
+    {
+        hashRef[enroll[i]] = referral[i];
+        hashProfit[enroll[i]] = 0;
+    }
+
+
+    for (int i = 0; i < seller.size(); i++)
+    {
+        // 현재 판매자의 부모 노드와 이익을 계산한다.
+        string name = seller[i];
+        int profit = amount[i] * PROFIT;
+        hashProfit[name] += profit;
+        string ref = hashRef[name];
+
+        // 거슬러 올라가면서 이익을 더해준다.
+        while (1)
+        {
+            double percent = (int)(profit * 0.1f);
+
+            if (percent <= 0.0f)
+                break;
+
+            // 만약 부모가 -이면 끝낸다.
+            if (ref == "-")
+            {
+                if(percent >= 1.0)
+                    hashProfit[name] -= (int)percent;
+                break;
+            }
+			else if (percent >= 1.0)
+			{
+				hashProfit[name] -= (int)percent;
+				hashProfit[ref] += (int)percent;
+			}
+   
+            name = ref;
+            ref = hashRef[name];
+            profit = percent;
+        }
+    }
+
+    for (int i = 0; i < enroll.size(); i++)
+        answer.push_back(hashProfit[enroll[i]]);
+
+    return answer;
+}
+```
