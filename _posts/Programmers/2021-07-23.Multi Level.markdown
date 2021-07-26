@@ -5,6 +5,9 @@ date: 2021-07-23 08:19:46 +0900
 categories: Programmers-Level3
 ---
 
+# 다단계 칫솔 판매
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/77486)
+
 # 풀이
 해쉬를 이용해서 풀 수 있었다. 한가지 주의할 점은 상위 노드로 이익을 넘길때 그 값이 0보다 작거나 같을 경우를 고려해야한다. 이 경우 `break`로 빠져나가야 하는데 이를 고려하지 않았을 경우 몇개의 테스트 케이스에서 시간 초과가 나온다.
 
