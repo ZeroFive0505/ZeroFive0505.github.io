@@ -1,0 +1,103 @@
+---
+layout: post
+title: 섬 연결하기
+date: 2021-07-29 07:31:21 +0900
+categories: Programmers-Level3
+---
+
+# 섬 연결하기
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/42861)
+
+# 풀이
+MST 문제다. 크루스컬 알고리즘을 이용해서 풀 수 있었다. 크루스컬 이용시 union-find를 이용해야 하기에 간단하게 배열을 이용했다. n - 1번 만큼 반복하면서 같은 집합에 포함되지 않은 정점들끼리 합치고 그 가중치를 정답에 더 하고 그 값을 반환한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int SIZE = 101;
+
+int parents[SIZE];
+
+int numSize[SIZE];
+
+struct sNode
+{
+    int u;
+    int v;
+    int w;
+
+    bool operator<(const sNode& rhs) const
+    {
+        return this->w < rhs.w;
+    }
+
+    bool operator>(const sNode& rhs) const
+    {
+        return this->w > rhs.w;
+    }
+};
+
+int GetParent(int v)
+{
+    int i;
+    for (i = v; parents[i] != -1; i = parents[i]);
+    return i;
+}
+
+void SetUnion(int u, int v)
+{
+    if (numSize[u] < numSize[v])
+    {
+        numSize[v] += numSize[u];
+        parents[u] = v;
+    }
+    else
+    {
+        numSize[u] += numSize[v];
+        parents[v] = u;
+    }
+}
+
+int solution(int n, vector<vector<int>> costs) 
+{
+    int answer = 0;
+    priority_queue<sNode, vector<sNode>, greater<sNode>> pq;
+    memset(parents, -1, sizeof(parents));
+
+    for (int i = 0; i < costs.size(); i++)
+    {
+        int u = costs[i][0];
+        int v = costs[i][1];
+        int w = costs[i][2];
+
+        pq.push({ u, v, w });
+    }
+
+    int nEdge = 0;
+
+    while (nEdge < n - 1)
+    {
+        sNode current = pq.top();
+        pq.pop();
+
+        int uParent = GetParent(current.u);
+        int vParent = GetParent(current.v);
+
+        if (uParent != vParent)
+        {
+            SetUnion(uParent, vParent);
+            answer += current.w;
+            nEdge++;
+        }
+    }
+
+    return answer;
+}
+```
