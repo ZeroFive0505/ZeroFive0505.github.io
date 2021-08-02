@@ -1,0 +1,78 @@
+---
+layout: post
+title: 별 찍기 - 11
+date: 2021-08-02 14:12:24 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/2448)
+# 별 찍기
+
+# 문제
+> 예제를 보고 규칙을 유추한 뒤에 별을 찍어 보세요.
+
+# 입력
+> 첫째 줄에 N이 주어진다. N은 항상 3×2k 수이다. (3, 6, 12, 24, 48, ...) (0 ≤ k ≤ 10, k는 정수)
+
+# 출력
+> 첫째 줄부터 N번째 줄까지 별을 출력한다.
+
+# 풀이
+삼각형의 최소 높이는 3이다. 따라서 3이 될때 삼각형을 만들고 맨 위쪽부터 왼쪽아래와 오른쪽아래의 삼각형을 만들어나간다.
+
+# 코드
+```c++
+#include <iostream>
+
+using namespace std;
+
+char arr[3072][6144];
+
+int N;
+
+void star(int n, int x, int y)
+{
+	if (n == 3)
+	{
+		arr[y][x] = '*';
+		arr[y + 1][x - 1] = '*';
+		arr[y + 1][x + 1] = '*';
+		arr[y + 2][x - 2] = '*';
+		arr[y + 2][x - 1] = '*';
+		arr[y + 2][x] = '*';
+		arr[y + 2][x + 1] = '*';
+		arr[y + 2][x + 2] = '*';
+		return;
+	}
+
+	star(n / 2, x, y);
+	star(n / 2, x - (n / 2), y + (n / 2));
+	star(n / 2, x + (n / 2), y + (n / 2));
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N * 2 - 1; j++)
+		{
+			arr[i][j] = ' ';
+		}
+	}
+
+	star(N, N - 1, 0);
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < 2 * N - 1; j++)
+		{
+			cout << arr[i][j];
+		}
+		cout << "\n";
+	}
+
+	return 0;
+}
+```
