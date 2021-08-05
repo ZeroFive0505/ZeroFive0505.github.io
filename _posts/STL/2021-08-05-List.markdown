@@ -1,11 +1,11 @@
 ---
 layout: post
-title: STL 리스트 만들기 
+title: STL list
 date: 2021-08-05 10:38:57 +0900
 categories: STL
 ---
 
-# STL에서 제공하는 리스트 만들어보기
+# STL에서 제공하는 list 만들어보기
 STL에서 제공하는 list의 기능들을 비슷하게 만들어봤다. list에서 제공하는 push_back, push_front, iterator, erase를 제공한다. 자세한 설명은 코드와 함께 적어놨다.
 
 # 코드

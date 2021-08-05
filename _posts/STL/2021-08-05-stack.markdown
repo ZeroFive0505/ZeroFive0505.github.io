@@ -1,0 +1,120 @@
+---
+layout: post
+title: STL stack
+date: 2021-08-05 12:06:14 +0900
+categories: STL
+---
+
+# STL에서 제공하는 stack 만들어 보기
+STL에서 기본으로 제공하는 스택과 비슷하게 만들어본 스택이다. 자세한 코드는 아래와 같다. 스택의 동작은 간단해서 많지 않은 코드로 탬플릿 스택을 만들어 볼 수 있었다.
+
+# 코드
+```c++
+#include <assert.h>
+
+// 노드 클래스
+template <typename T>
+class CStackNode
+{
+	template <typename T>
+	friend class CStack;
+
+private:
+	CStackNode()
+		: m_next(nullptr)
+	{
+
+	}
+
+	~CStackNode()
+	{
+
+	}
+
+public:
+	CStackNode<T>* m_next;
+	T m_data;
+};
+
+// 스택 클래스
+template <typename T>
+class CStack
+{
+public:
+	CStack() : m_head(nullptr)
+	{
+
+	}
+
+
+	~CStack()
+	{
+		clear();
+	}
+
+// 헤드 노드는 가장 최상단 노드를 가리킨다.
+private:
+	CStackNode<T>* m_head;
+	int m_size;
+
+
+public:
+	inline bool empty() const
+	{
+		return m_size == 0;
+	}
+
+	inline int size() const
+	{
+		return m_size;
+	}
+
+	void push(const T& data)
+	{
+		CStackNode<T>* node = new CStackNode<T>;
+        // 간단하게 새로운 노드를 할당받고 데이터를 넣는다.
+		node->m_data = data;
+        // 다음 노드는 헤드 노드로 한다. 헤드노드 가장 초기 상태에서는 nullptr
+        // 그 이후에는 헤드 노드에는 가장 최근의 값이 된다.
+		node->m_next = m_head;
+        // 헤드를 현재 추가된 노드로 옮겨준다.
+		m_head = node;
+        // 사이즈를 늘려준다.
+		m_size++;
+	}
+
+    // 헤드에있는 데이터를 반환
+	T top() const
+	{
+		return m_head->m_data;
+	}
+
+    
+	void pop()
+	{
+		if (empty())
+			assert(false);
+        // 사이즈를 줄이고
+		m_size--;
+        // 헤드는 앞으로 이동
+        CStackNode<T>* temp = m_head;
+		m_head = m_head->m_next;
+        delete temp;
+	}
+
+	void clear()
+	{
+		CStackNode<T>* cur = m_head;
+        // nullptr을 만날때까지 지운다.
+		while (cur)
+		{
+			CStackNode<T>* next = cur->m_next;
+			delete cur;
+			cur = next;
+		}
+
+		m_head = nullptr;
+		m_size = 0;
+	}
+};
+```

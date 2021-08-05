@@ -1,0 +1,134 @@
+---
+layout: post
+title: STL queue
+date: 2021-08-05 14:02:29 +0900
+categories: STL
+---
+
+# STL에서 제공하는 queue 만들어보기
+stl에서 제공하는 queue와 비슷한 템플릿 기반의 queue를 만들어보았다. 자세한 코드와 설명은 아래에서 확인 할 수 있다.
+
+# 코드
+```c++
+#include <assert.h>
+
+template <typename T>
+class CQueueNode
+{
+	template <typename T>
+	friend class CQueue;
+
+private:
+	CQueueNode()
+		: m_next(nullptr)
+	{
+		
+	}
+
+	~CQueueNode()
+	{
+
+	}
+
+private:
+	CQueueNode<T>* m_next;
+	T m_data;
+};
+
+
+template <typename T>
+class CQueue
+{
+public:
+	CQueue() :
+		m_head(nullptr), m_tail(nullptr), m_size(0)
+	{
+
+	}
+
+	~CQueue()
+	{
+		clear();
+	}
+
+private:
+    // queue는 선입선출이기에 두개의 포인터를 준비한다. 헤드는 가장 앞, 테일은 가장 뒤를 가리킬 것이다.
+	CQueueNode<T>* m_head;
+	CQueueNode<T>* m_tail;
+	int m_size;
+
+public:
+
+	inline bool empty() const
+	{
+		return m_size == 0;
+	}
+
+	inline int size() const
+	{
+		return m_size;
+	}
+
+	void push(const T& data)
+	{
+		CQueueNode<T>* node = new CQueueNode<T>;
+
+		node->m_data = data;
+        // 일단 헤드와 테일이 처음에는 nullptr이기에 같은 노드를 가리키게 한다.
+        // 그 다음에 데이터가 삽입 될 때에는 이제 헤드와 테일이 nullptr가 아니기에
+        // else문에 들어가게 된다.
+		if (m_head == nullptr)
+			m_head = node;
+
+		if (m_tail == nullptr)
+			m_tail = node;
+		else
+		{
+            // 꼬리 다음에 노드를 연결
+			m_tail->m_next = node;
+            // 꼬리를 새롭게 갱신
+			m_tail = node;
+		}
+
+		m_size++;
+	}
+
+	void pop()
+	{
+		if (empty())
+			assert(false);
+
+		CQueueNode<T>* temp = m_head;
+
+		m_head = m_head->m_next;
+
+		if (m_head == nullptr)
+			m_tail = nullptr;
+
+		delete temp;
+
+		m_size--;
+	}
+
+	T front() const
+	{
+		return m_head->m_data;
+	}
+
+	void clear()
+	{
+
+		CQueueNode<T>* cur = m_head;
+
+		while (cur)
+		{
+			CQueueNode<T>* next = cur->m_next;
+			delete cur;
+			cur = next;
+		}
+		m_head = nullptr;
+		m_tail = nullptr;
+		m_size = 0;
+	}
+};
+```

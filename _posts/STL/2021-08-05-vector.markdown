@@ -1,11 +1,11 @@
 ---
 layout: post
-title: STL 벡터
+title: STL vector
 date: 2021-08-05 12:06:14 +0900
 categories: STL
 ---
 
-# STL에서 제공하는 벡터 만들어보기
+# STL에서 제공하는 vector 만들어보기
 STL에서 제공하는 vector의 기능들을 비슷하게 만들어봤다. vector에서 제공하는 기본 기능을 가지고 있다. iterator는 구현하지 않았다.
 
 # 코드
