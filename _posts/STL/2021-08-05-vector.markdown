@@ -1,0 +1,219 @@
+---
+layout: post
+title: STL 벡터
+date: 2021-08-05 12:06:14 +0900
+categories: STL
+---
+
+# STL에서 제공하는 벡터 만들어보기
+STL에서 제공하는 vector의 기능들을 비슷하게 만들어봤다. vector에서 제공하는 기본 기능을 가지고 있다. iterator는 구현하지 않았다.
+
+# 코드
+```c++
+#include <assert.h>
+
+template <typename T>
+class CArray
+{
+public:
+	CArray()
+	{
+        // 초기 총 용량은 8로 설정한다.
+		m_size = 0;
+		m_capacity = 8;
+		arr = new T[m_capacity];
+	}
+
+    // 대입 생성자
+	CArray(const CArray<T>& rhs)
+	{
+        // 사이즈와 용량을 그대로 받아와서
+		m_size = rhs.m_size;
+		m_capacity = rhs.m_capacity;
+
+        // 할당을 한다.
+		arr = new T[m_capacity];
+
+        // 그리고 그대로 다 대입한다.
+		for (int i = 0; i < m_size; i++)
+		{
+			arr[i] = rhs.arr[i];
+		}
+	}
+
+	~CArray()
+	{
+		delete[] arr;
+	}
+
+private:
+	int m_size;
+	int m_capacity;
+	T* arr;
+
+public:
+	inline int size() const
+	{
+		return m_size;
+	}
+
+	inline bool empty() const
+	{
+		return m_size == 0;
+	}
+
+	void push_back(const T& data)
+	{
+        // 만약 사이즈와 용량이 같아진다면
+		if (m_size == m_capacity)
+		{
+            // 용량을 두배로 늘린다.
+			m_capacity *= 2;
+            // 임시 배열을 할당한다.
+			T* temp = new T[m_capacity];
+
+            // 임시 배열에 기존 배열에 있는 값들을 모조리 넣는다.
+			for (int i = 0; i < m_size; i++)
+			{
+				temp[i] = arr[i];
+			}
+
+            // 기존 배열을 삭제
+			delete[] arr;
+
+            // 대입
+			arr = temp;
+		}
+
+		arr[m_size++] = data;
+	}
+
+	T front() const
+	{
+		if (empty())
+			assert(false);
+
+		return arr[0];
+	}
+
+	T back() const
+	{
+		if (empty())
+			assert(false);
+
+		return arr[m_size - 1];
+	}
+
+	void pop()
+	{
+		m_size--;
+	}
+
+	void erase(const T& data)
+	{
+		int index = Find(data);
+
+        // 만약 찾을 수 없으면 바로 리턴
+		if (index == -1)
+			return;
+
+        // 만약 지울려는 값이 배열 최후방에 있는 값이라면 간단히 pop()호출 하고 리턴
+		if (index == m_size - 1)
+		{
+			pop();
+			return;
+		}
+
+        // 값들을 땡겨 온다.
+		for (int i = index; i < m_size - 1; i++)
+		{
+			arr[i] = arr[i + 1];
+		}
+
+		m_size--;
+	}
+
+
+    // 인덱스를 반환하는데 찾지못하면 -1을 반환한다.
+	int Find(const T& data) const
+	{
+		int index = -1;
+
+		for (int i = 0; i < m_size; i++)
+		{
+			if (arr[i] == data)
+			{
+				index = i;
+				break;
+			}
+		}
+
+		return index;
+	}
+
+    // quick sort
+	void sort()
+	{
+		sort(0, m_size - 1);
+	}
+
+    // 간단하게 사이즈를 0으로 만든다.
+	void clear()
+	{
+		m_size = 0;
+	}
+
+    // 
+	T& operator[](const int index)
+	{
+		if (index < 0 || index >= m_size)
+			assert(false);
+
+		return arr[index];
+	}
+
+	void operator=(const CArray<T>& rhs)
+	{
+		clear();
+        // 사이즈를 0으로 만들고 그냥 집어넣는다.
+		for (int i = 0; i < rhs.m_size; i++)
+		{
+			push_back(rhs.arr[i]);
+		}
+	}
+
+private:
+	void sort(int left, int right)
+	{
+		int pivot = arr[left];
+
+		int pl = left;
+		int pr = right;
+
+		do
+		{
+			while (arr[pl] < pivot)
+				pl++;
+
+			while (arr[pr] > pivot)
+				pr--;
+
+			if (pl <= pr)
+			{
+				T temp = arr[pl];
+				arr[pl] = arr[pr];
+				arr[pr] = temp;
+				pl++;
+				pr--;
+			}
+
+		} while (pl <= pr);
+
+		if (left < pr)
+			sort(left, pr);
+
+		if (pl < right)
+			sort(pl, right);
+	}
+};
+```
