@@ -1,0 +1,483 @@
+---
+layout: post
+title: STL 리스트 만들기 
+date: 2021-08-05 10:38:57 +0900
+categories: STL
+---
+
+# STL에서 제공하는 리스트 만들어보기
+STL에서 제공하는 list의 기능들을 비슷하게 만들어봤다. list에서 제공하는 push_back, push_front, iterator, erase를 제공한다. 자세한 설명은 코드와 함께 적어놨다.
+
+# 코드
+```c++
+// 예외 처리를 위한 assert
+#include <assert.h>
+
+// 리스트에 들어갈 노드 클래스
+template <typename T>
+class CListNode
+{
+	// 리스트는 노드에 자유롭게 접근이 가능하다. 사용자는 노드를 직접 생성, 접근 할 수 없으며
+	// 리스트나, iterator를 이용해서 접근한다.
+	template <typename T>
+	friend class CList;
+	template <typename T>
+	friend class CListIterator;
+	template <typename T>
+	friend class CListReverseIterator;
+
+private:
+	// 생성자와 파괴자는 private에 선언
+	CListNode() : m_prev(nullptr), m_next(nullptr)
+	{
+
+	}
+
+	~CListNode()
+	{
+
+	}
+
+public:
+	CListNode<T>* m_prev;
+	CListNode<T>* m_next;
+	T m_data;
+};
+
+// 정방향 iterator
+template <typename T>
+class CListIterator
+{
+	template <typename T>
+	friend class CList;
+public:
+	CListIterator()
+		: m_node(nullptr)
+	{
+
+	}
+
+	~CListIterator()
+	{
+
+	}
+
+	CListIterator(const CListIterator<T>& iter)
+	{
+		m_node = iter.m_node;
+	}
+
+private:
+	CListNode<T>* m_node;
+
+public:
+	// iterator 연산시 필요한 연산자 오버로딩들을 정의
+	void operator=(const CListIterator<T>& iter)
+	{
+		m_node = iter.m_node;
+	}
+
+	// iterator끼리 비교할 경우
+	bool operator==(const CListIterator<T>& iter) const
+	{
+		return m_node == iter.m_node;
+	}
+
+	// 직접 노드와 비교할 경우
+	bool operator==(const CListNode<T>* node) const
+	{
+		return m_node == node;
+	}
+
+	bool operator!=(const CListIterator<T>& iter) const
+	{
+		return m_node != iter.m_node;
+	}
+
+	bool operator!=(const CListNode<T>* node) const
+	{
+		return m_node != node;
+	}
+
+	void operator++()
+	{
+		m_node = m_node->m_next;
+	}
+
+	void operator++(int)
+	{
+		m_node = m_node->m_next;
+	}
+
+	void operator--()
+	{
+		m_node = m_node->m_prev;
+	}
+
+	void operator--(int)
+	{
+		m_node = m_node->m_prev;
+	}
+
+	T& operator*()
+	{
+		return m_node->m_data;
+	}
+};
+
+// 역방향 iterator
+template <typename T>
+class CListReverseIterator
+{
+	template <typename T>
+	friend class CList;
+public:
+	CListReverseIterator()
+		: m_node(nullptr)
+	{
+
+	}
+
+	~CListReverseIterator()
+	{
+
+	}
+
+
+	CListReverseIterator(const CListReverseIterator<T>& iter)
+	{
+		m_node = iter.m_node;
+	}
+
+private:
+	CListNode<T>* m_node;
+
+public:
+	void operator=(const CListReverseIterator<T>& iter)
+	{
+		m_node = iter.m_node;
+	}
+
+	bool operator==(const CListReverseIterator<T>& iter) const
+	{
+		return m_node == iter.m_node;
+	}
+
+	bool operator==(const CListNode<T>* rhs) const
+	{
+		return m_node == rhs;
+	}
+
+	bool operator!=(const CListReverseIterator<T>& iter) const
+	{
+		return m_node != iter.m_node;
+	}
+
+	bool operator!=(const CListNode<T>* rhs) const
+	{
+		return m_node != rhs;
+	}
+
+	// 정방향과 정반대이다.
+	void operator++()
+	{
+		m_node = m_node->m_prev;
+	}
+
+	void operator++(int)
+	{
+		m_node = m_node->m_prev;
+	}
+
+	void operator--()
+	{
+		m_node = m_node->m_next;
+	}
+
+	void operator--(int)
+	{
+		m_node = m_node->m_next;
+	}
+
+	T& operator*()
+	{
+		return m_node->m_data;
+	}
+};
+
+template <typename T>
+class CList
+{
+public:
+	CList() : m_begin(nullptr), m_end(nullptr)
+	{
+		m_begin = new Node;
+		m_end = new Node;
+
+		m_begin->m_next = m_end;
+		m_end->m_prev = m_begin;
+
+		m_size = 0;
+	}
+
+	~CList()
+	{
+		pNode cur = m_begin;
+
+		while (cur)
+		{
+			pNode next = cur->m_next;
+			delete cur;
+			cur = next;
+		}
+	}
+
+private:
+	CListNode<T>* m_begin;
+	CListNode<T>* m_end;
+	int m_size;
+
+
+private:
+	typedef CListNode<T>* pNode;
+	typedef CListNode<T> Node;
+
+public:
+	typedef CListIterator<T> iterator;
+	typedef CListReverseIterator<T> reverse_iterator;
+
+public:
+
+	inline bool empty() const
+	{
+		return m_size == 0;
+	}
+
+	inline int size() const
+	{
+		return m_size;
+	}
+
+	// 리스트 앞쪽에 노드를 삽입
+	void push_front(const T& data)
+	{
+		// 새로운 노드에 데이터를 넣는다.
+		pNode node = new Node;
+
+		node->m_data = data;
+
+		// 미리 앞쪽의 노드를 받아온다.
+		pNode next = m_begin->m_next;
+
+		// 새로 들어온 노드는 시작노드와 그 바로 앞쪽 노드 사이에 넣는다.
+		node->m_prev = m_begin;
+		m_begin->m_next = node;
+		node->m_next = next;
+		next->m_prev = node;
+
+		// 크기를 하나 늘려준다.
+		m_size++;
+	}
+
+	// 리스트를 뒤에 삽입
+	void push_back(const T& data)
+	{
+		// 새로운 노드를 만들고 데이터를 넣는다.
+		pNode node = new Node;
+
+		node->m_data = data;
+
+		// 이번에는 마지막 노드의 전 노드를 미리 가져온다.
+		pNode prev = m_end->m_prev;
+
+		// 마지막 노드와 그 전 노드 사이에 넣는다.
+		node->m_next = m_end;
+		m_end->m_prev = node;
+		node->m_prev = prev;
+		prev->m_next = node;
+
+		// 사이즈를 늘려준다.
+		m_size++;
+	}
+
+    // 제일 뒤쪽의 노드를 제거한다.
+	void pop_back()
+	{
+		if (empty())
+			assert(false);
+
+        // 먼저 지울 노드를 가져온다.
+		pNode targetNode = m_end->m_prev;
+        // 지울 노드의 바로 전 노드를 가져온다.
+		pNode prev = targetNode->m_prev;
+
+        // 지울 노드의 양 옆에 있는 노드를 서로 연결한다.
+		prev->m_next = targetNode->m_next;
+		m_end->m_prev = prev;
+
+		delete targetNode;
+
+        // 사이즈를 줄인다.
+		m_size--;
+	}
+
+    // 맨 앞쪽의 노드를 제거한다.
+	void pop_front()
+	{
+		if (empty())
+			assert(false);
+
+        // 지울 노드를 가져온다.
+		pNode targetNode = m_begin->m_next;
+        // 지울 노드의 바로 앞 노드를 가져온다.
+		pNode next = targetNode->m_next;
+
+        // 지울 노드 사이의 노드를 연결한다.
+		m_begin->m_next = next;
+		next->m_prev = m_begin;
+
+		delete targetNode;
+        // 사이즈를 줄인다.
+		m_size--;
+	}
+
+	inline T front() const
+	{
+		return m_begin->m_next->m_data;
+	}
+
+	inline T back() const
+	{
+		return m_end->m_prev->m_data;
+	}
+
+    // 모든 노드 삭제
+	void clear()
+	{
+		pNode cur = m_begin->m_next;
+
+		while (cur != m_end)
+		{
+			pNode next = cur->m_next;
+			delete cur;
+			cur = next;
+		}
+
+		m_begin->m_next = m_end;
+		m_end->m_prev = m_begin;
+		m_size = 0;
+	}
+
+
+    // 함수 포인터를 이용해서 사용자가 원하는 기준으로 정렬을 가능하게 한다.
+	void sort(bool (*comp)(const T&, const T&))
+	{
+		if (empty())
+			return;
+
+        // iterator를 두개 선언해서 간단한 버블 정렬을 한다.
+		iterator outer;
+		iterator inner;
+
+		for (outer = begin(); outer != end(); outer++)
+		{
+			inner = outer;
+			inner++;
+			for (; inner != end(); inner++)
+			{   
+                // if문이 참일 시 값을 바꾼다.
+				if (comp(outer.m_node->m_data, inner.m_node->m_data))
+				{
+					T temp;
+					temp = outer.m_node->m_data;
+					outer.m_node->m_data = inner.m_node->m_data;
+					inner.m_node->m_data = temp;
+				}
+			}
+		}
+	}
+
+    // iterator를 제공한다.
+	iterator begin() const
+	{
+		iterator iter;
+		iter.m_node = m_begin->m_next;
+
+		return iter;
+	}
+
+	iterator end() const
+	{
+		iterator iter;
+		iter.m_node = m_end;
+		return iter;
+	}
+
+	reverse_iterator rbegin() const
+	{
+		reverse_iterator iter;
+		iter.m_node = m_end->m_prev;
+		return iter;
+	}
+
+	reverse_iterator rend() const
+	{
+		reverse_iterator iter;
+		iter.m_node = m_begin;
+		return iter;
+	}
+
+    // 데이터 삭제
+	iterator erase(const T& data)
+	{
+		iterator iter = Find(data);
+
+        // Find 함수에서 데이터를 찾지 못하면 end가 담긴 iterator가 반환 될 것이다.   
+		if (iter == end())
+			return iter;
+
+		return erase(iter);
+	}
+
+	iterator erase(const iterator& iter)
+	{   
+        // 예외 체크
+		if (iter == m_end || iter == m_begin)
+			return iter;
+
+        // 반환할 iterator는 삭제된 바로 다음 iterator이다.
+		iterator temp = iter;
+		temp++;
+
+        // 삭제를 위해 양 옆의 노드를 가져온다.
+		pNode prev = iter.m_node->m_prev;
+		pNode next = iter.m_node->m_next;
+
+        // 양 옆의 노드를 연결해준다.
+		prev->m_next = next;
+		next->m_prev = prev;
+
+        // 지우고 크기를 줄인다.
+		delete iter.m_node;
+		m_size--;
+
+		return temp;
+	}
+
+private:
+	iterator Find(const T& data)
+	{
+		iterator iter = begin();
+		iterator iterEnd = end();
+
+		for (; iter != iterEnd; iter++)
+		{
+			if (iter.m_node->m_data == data)
+				break;
+		}
+        // 만약 찾지 못했을시에 end가 반환될 것이다.
+		return iter;
+	}
+};
+
+```
