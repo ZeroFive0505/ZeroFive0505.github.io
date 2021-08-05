@@ -9,7 +9,7 @@ categories: Programmers-Level3
 ## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/60063)
 
 # 풀이
-개인적으로 많이 어려웠던 문제였다.. 인터넷에 다른 사람들의 풀이를 보고 겨우 풀 수 있었다.. 기존 BFS에 블록이 2칸을 차지하며 회전까지도 가능한 문제였다.
+개인적으로 많이 어려웠던 문제였다.. 인터넷에 다른 사람들의 [풀이](https://yjyoon-dev.github.io/kakao/2021/01/14/kakao-moveblock/)를 보고 겨우 풀 수 있었다.. 기존 BFS에 블록이 2칸을 차지하며 회전까지도 가능한 문제였다.
 
 # 코드
 ```c++
