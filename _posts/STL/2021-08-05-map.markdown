@@ -1,0 +1,522 @@
+---
+layout: post
+title: STL map
+date: 2021-08-05 16:05:10 +0900
+categories: STL
+---
+
+# STL에서 제공하는 map 만들어보기
+STL에서 제공하는 map과 비슷한 기능을 제공하는 트리를 만들어보았다. 현제는 편향트리에 대한 대책은 일단 구현하지 않았다. 코드와 자세한 설명은 아래와 같다.
+
+# 코드
+```c++
+#pragma once
+
+template <typename KEY, typename VALUE>
+class CBinaryTreeNode
+{
+	template <typename KEY, typename VALUE>
+	friend class CBinaryTree;
+
+	template <typename KEY, typename VALUE>
+	friend class CBinaryTreeIterator;
+
+private:
+	CBinaryTreeNode()
+		: m_left(nullptr),
+		m_right(nullptr),
+		m_prev(nullptr),
+		m_next(nullptr),
+		m_parent(nullptr)
+	{
+
+	}
+
+	~CBinaryTreeNode()
+	{
+
+	}
+private:
+	// 각각 노드의 부모와 왼쪽 오른쪽 자식을 가리키기 위한 포인터다.
+	// prev와 next의 경우 연결 리스트 구현과 iterator를 위해서 사용한다.
+	CBinaryTreeNode<KEY, VALUE>* m_parent;
+	CBinaryTreeNode<KEY, VALUE>* m_left;
+	CBinaryTreeNode<KEY, VALUE>* m_right;
+	CBinaryTreeNode<KEY, VALUE>* m_prev;
+	CBinaryTreeNode<KEY, VALUE>* m_next;
+public:
+	KEY first;
+	VALUE second;
+};
+
+template <typename KEY, typename VALUE>
+class CBinaryTreeIterator
+{
+	template <typename KEY, typename VALUE>
+	friend class CBinaryTree;
+
+public:
+	CBinaryTreeIterator() :
+		m_node(nullptr)
+	{
+
+	}
+
+	~CBinaryTreeIterator()
+	{
+
+	}
+
+private:
+	CBinaryTreeNode<KEY, VALUE>* m_node;
+
+public:
+	bool operator==(const CBinaryTreeIterator<KEY, VALUE>& iter) const
+	{
+		return m_node == iter.m_node;
+	}
+
+	bool operator==(const CBinaryTreeNode<KEY, VALUE>* node) const
+	{
+		return m_node == node;
+	}
+
+	bool operator!=(const CBinaryTreeIterator<KEY, VALUE>& iter) const
+	{
+		return m_node != iter.m_node;
+	}
+
+	bool operator!=(const CBinaryTreeNode<KEY, VALUE>* node) const
+	{
+		return m_node != node;
+	}
+
+	void operator++()
+	{
+		m_node = m_node->m_next;
+	}
+
+	void operator++(int)
+	{
+		m_node = m_node->m_next;
+	}
+
+	void operator--()
+	{
+		m_node = m_node->m_prev;
+	}
+
+	void operator--(int)
+	{
+		m_node = m_node->m_prev;
+	}
+
+	CBinaryTreeNode<KEY, VALUE>* operator->()
+	{
+		return m_node;
+	}
+};
+
+template <typename KEY, typename VALUE>
+class CBinaryTree
+{
+public:
+	CBinaryTree()
+		: m_begin(nullptr),
+		m_end(nullptr),
+		m_root(nullptr),
+		m_size(0)
+	{
+		m_begin = new Node;
+		m_end = new Node;
+		m_begin->m_next = m_end;
+		m_end->m_prev = m_begin;
+	}
+
+	~CBinaryTree()
+	{
+		pNode cur = m_begin;
+
+		while (cur)
+		{
+			pNode next = cur->m_next;
+
+			delete cur;
+
+			cur = next;
+		}
+
+	}
+
+private:
+	typedef CBinaryTreeNode<KEY, VALUE>* pNode;
+	typedef CBinaryTreeNode<KEY, VALUE> Node;
+public:
+	typedef CBinaryTreeIterator<KEY, VALUE> iterator;
+
+private:
+	pNode m_begin;
+	pNode m_end;
+	pNode m_root;
+	int m_size;
+
+private:
+	// 재귀를 이용해서 키와 값을 넣는다.
+	pNode insert(pNode node, const KEY& key, const VALUE& value)
+	{
+		if (key < node->first)
+		{
+			if (node->m_left)
+				return insert(node->m_left, key, value);
+			pNode newNode = new Node;
+
+			newNode->first = key;
+			newNode->second = value;
+
+			// 왼쪽 자식으로 생기는 경우
+			newNode->m_parent = node;
+			node->m_left = newNode;
+
+			// 트리의 연결뿐만 아니라 리스트도 연결을 한다.
+			pNode prev = node->m_prev;
+			prev->m_next = newNode;
+			node->m_prev = newNode;
+
+			newNode->m_prev = prev;
+			newNode->m_next = node;
+
+			return newNode;
+		}
+		else
+		{
+			// 오른쪽에 생기는 경우
+			if (node->m_right)
+				return insert(node->m_right, key, value);
+
+			pNode newNode = new Node;
+
+			newNode->first = key;
+			newNode->second = value;
+
+			newNode->m_parent = node;
+			node->m_right = newNode;
+
+			pNode next = node->m_next;
+			node->m_next = newNode;
+			next->m_prev = newNode;
+
+			newNode->m_prev = node;
+			newNode->m_next = next;
+
+			return newNode;
+		}
+	}
+
+    // 트리가 잘 구성되었는지 확인하기 위한 순회 유틸리티 함수
+	void PostOrder(pNode node, void (*pFunc)(const KEY& key, const VALUE& value))
+	{
+		if (node)
+		{
+			PostOrder(node->m_left, pFunc);
+			PostOrder(node->m_right, pFunc);
+			pFunc(node->first, node->second);
+		}
+	}
+
+	void PreOrder(pNode node, void (*pFunc)(const KEY& key, const VALUE& value))
+	{
+		if (node)
+		{
+			pFunc(node->first, node->second);
+			PreOrder(node->m_left, pFunc);
+			PreOrder(node->m_right, pFunc);
+		}
+	}
+
+	void InOrder(pNode node, void (*pFunc)(const KEY& key, const VALUE& value))
+	{
+		if (node)
+		{
+			InOrder(node->m_left, pFunc);
+			pFunc(node->first, node->second);
+			InOrder(node->m_right, pFunc);
+		}
+	}
+
+
+	iterator Find(pNode node, const KEY& key)
+	{   
+        // 만약 현재 노드가 nullptr라면 end를 반환한다.
+		if (node == nullptr)
+			return end();
+
+		if (node->first == key)
+		{
+			iterator iter;
+			iter.m_node = node;
+			return iter;
+		}
+
+		if (key < node->first)
+			return Find(node->m_left, key);
+		else
+			return Find(node->m_right, key);
+	}
+
+
+    // 노드의 삭제시 필요한 유틸리티 함수
+	pNode FindMax(pNode node)
+	{
+		if (node->m_right)
+			return FindMax(node->m_right);
+
+		return node;
+	}
+
+	pNode FindMin(pNode node)
+	{
+		if (node->m_left)
+			return FindMin(node->m_left);
+
+		return node;
+	}
+
+public:
+	inline bool empty() const
+	{
+		return m_size == 0;
+	}
+
+	inline int size() const
+	{
+		return m_size;
+	}
+
+	iterator begin() const
+	{
+		iterator iter;
+
+		iter.m_node = m_begin->m_next;
+
+		return iter;
+	}
+
+	iterator end() const
+	{
+		iterator iter;
+
+		iter.m_node = m_end;
+
+		return iter;
+	}
+
+	iterator Find(const KEY& key)
+	{
+		return Find(m_root, key);
+	}
+
+	void insert(const KEY& key, const VALUE& value)
+	{
+        // 만약 루트가 nullptr이라면 가장 초기 상태이다.
+        // 따라서 루트를 새롭게 할당하고 리스트 기초 상태를 연결한다.
+		if (m_root == nullptr)
+		{
+			m_root = new Node;
+
+			m_root->first = key;
+			m_root->second = value;
+
+			m_root->m_prev = m_begin;
+			m_root->m_next = m_end;
+
+			m_begin->m_next = m_root;
+			m_end->m_prev = m_root;
+		}
+		else
+		{   
+            // 루트가 nullptr이 아닌 경우
+			insert(m_root, key, value);
+		}
+
+		m_size++;
+	}
+
+    // 초기화는 간단하게 리스트를 순회하면서 모든 노드를 삭제한다.
+	void clear()
+	{
+		pNode cur = m_begin->m_next;
+
+		while (cur != m_end)
+		{
+			pNode next = cur->m_next;
+
+			delete cur;
+
+			cur = next;
+		}
+
+		m_size = 0;
+        m_root = nullptr;
+		m_begin->m_next = m_end;
+		m_end->m_prev = m_begin;
+	}
+
+    // 지우고 그 다음 위치를 가리키는 iterator를 반환한다.
+	iterator erase(const KEY& key)
+	{
+		if (empty())
+			return end();
+
+		iterator iter = Find(key);
+
+        // 예외처리
+		if (iter.m_node == nullptr)
+			return end();
+		if (iter == end())
+			return end();
+		if (iter.m_node == m_begin || iter.m_node == m_end)
+			return end();
+
+        // 리프 노드의 경우
+		if (iter.m_node->m_left == nullptr && iter.m_node->m_right == nullptr)
+		{
+            // 리프 노드이면서 루트 노드인 경우
+			if (iter.m_node->m_parent == nullptr)
+			{   
+                // 초기화 하고 end를 반환
+				delete iter.m_node;
+				m_root = nullptr;
+				m_begin->m_next = m_end;
+				m_end->m_prev = m_begin;
+				m_size--;
+
+				return end();
+			}
+			else
+			{
+                // 리프 노드인 경우 부모노드의 왼쪽, 오른쪽인지 확인하고 삭제한다.
+				pNode parent = iter.m_node->m_parent;
+				pNode prev = iter.m_node->m_prev;
+				pNode next = iter.m_node->m_next;
+
+				if (parent->m_left == iter.m_node)
+					parent->m_left = nullptr;
+				else
+					parent->m_right = nullptr;
+
+				prev->m_next = next;
+				next->m_prev = prev;
+
+				iterator ret;
+
+				ret.m_node = next;
+
+				delete iter.m_node;
+
+				m_size--;
+
+				return ret;
+			}
+		}
+
+        // 만약 왼쪽에 자식이 있는 경우
+		if (iter.m_node->m_left)
+		{
+            // 왼쪽에서 가장 큰 값을 찾아온다.
+			pNode maxNode = FindMax(iter.m_node->m_left);
+			pNode leftChild = maxNode->m_left;
+
+            // 값을 교체한다.
+			iter.m_node->first = maxNode->first;
+			iter.m_node->second = maxNode->second;
+
+
+            // 부모노드를 가져온다.
+			pNode parent = maxNode->m_parent;
+
+            // 부모노드의 바로 왼쪽에 최대 값 노드가 붙은 경우
+            // 즉, 이 경우는 자식이 하나 있는 경우와 동일하다.
+            // 따라서 부모의 왼쪽에 최댓 값 노드의 왼쪽 자식을 붙인다.
+            // 왼쪽에 있는 노드를 하나씩 땡겨 온다고 생각하면 된다.
+			if (parent->m_left == maxNode)
+				parent->m_left = leftChild;
+			else
+            // 이 경우는 자식이 둘다 있는 경우면서 최댓 값 노드에 왼쪽 자식이 있는 경우를 처리한다.
+            // 없다면 nullptr이니 상관없지만 있을 경우 지워질 노드의 왼쪽 자식이 최댓 값 노드 부모 노드의 오른쪽에 붙을 것이다.
+				parent->m_right = leftChild;
+
+            // 최댓값 노드의 왼쪽 자식이 었었다면 부모 노드를 새롭게 갱신해준다.
+			if (leftChild)
+				leftChild->m_parent = parent;
+
+            // 트리가 갱신되었다면 이제 리스트 갱신을 한다.
+            // 이중 연결 리스트이므로 간단하게 전 후 노드를 가져와서 지워버린다.
+			pNode prev = maxNode->m_prev;
+			pNode next = maxNode->m_next;
+
+			prev->m_next = next;
+			next->m_prev = prev;
+
+			delete maxNode;
+
+			iterator ret;
+
+			ret.m_node = next;
+
+			m_size--;
+
+			return ret;
+		}
+        // 이 경우는 정확히 반대인 상황이다.
+		else
+		{
+			pNode minNode = FindMin(iter.m_node->m_right);
+			pNode rightChild = minNode->m_right;
+
+			iter.m_node->first = minNode->first;
+			iter.m_node->second = minNode->second;
+
+			pNode parent = minNode->m_parent;
+
+			if (parent->m_right == minNode)
+				parent->m_right = rightChild;
+			else
+				parent->m_left = rightChild;
+
+			if (rightChild)
+				rightChild->m_parent = parent;
+
+			pNode prev = minNode->m_prev;
+			pNode next = minNode->m_next;
+
+			prev->m_next = next;
+			next->m_prev = prev;
+
+			delete minNode;
+
+			iterator ret;
+
+			ret.m_node = next;
+
+			m_size--;
+
+			return ret;
+		}
+	}
+
+	void PostOrder(void (*pFunc)(const KEY& key, const VALUE& value))
+	{
+		PostOrder(m_root, pFunc);
+	}
+
+	void PreOrder(void (*pFunc)(const KEY& key, const VALUE& value))
+	{
+		PreOrder(m_root, pFunc);
+	}
+
+	void InOrder(void (*pFunc)(const KEY& key, const VALUE& value))
+	{
+		InOrder(m_root, pFunc);
+	}
+};
+```
