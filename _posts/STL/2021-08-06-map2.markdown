@@ -1,0 +1,684 @@
+---
+layout: post
+title: STL map 두번째
+date: 2021-08-06 10:19:17 +0900
+categories: STL
+---
+
+# STL에서 제공하는 map 만들어보기 2
+이번에는 AVL 트리의 알고리즘을 이용해서 자가 균형 트리로 만들었다. 매 순간 새로운 키를 넣거나 삭제할때 균형을 맞춘다. 코드는 전의 map 코드와 거의 흡사하다 균형을 맞추는 곳만 추가됬다.
+
+```c++
+#pragma once
+
+template <typename KEY, typename VALUE>
+class CAVLTreeNode
+{
+	template <typename KEY, typename VALUE>
+	friend class CAVLTree;
+
+	template <typename KEY, typename VALUE>
+	friend class CAVLTreeIterator;
+
+private:
+	CAVLTreeNode()
+		: m_Left(nullptr),
+		m_Right(nullptr),
+		m_Parent(nullptr),
+		m_Next(nullptr),
+		m_Prev(nullptr)
+	{
+
+	}
+
+	~CAVLTreeNode()
+	{
+
+	}
+
+private:
+	CAVLTreeNode<KEY, VALUE>* m_Left;
+	CAVLTreeNode<KEY, VALUE>* m_Right;
+	CAVLTreeNode<KEY, VALUE>* m_Next;
+	CAVLTreeNode<KEY, VALUE>* m_Prev;
+	CAVLTreeNode<KEY, VALUE>* m_Parent;
+
+public:
+	KEY first;
+	VALUE second;
+
+public:
+	bool IsParent() const
+	{
+		return m_Parent != nullptr;
+	}
+
+	KEY GetParentKey() const
+	{
+		return m_Parent->first;
+	}
+
+	VALUE GetParentValue() const
+	{
+		return m_Parent->second;
+	}
+
+	bool IsLeft() const
+	{
+		return m_Left != nullptr;
+	}
+
+	KEY GetLeftKey() const
+	{
+		return m_Left->first;
+	}
+
+	VALUE GetLeftValue() const
+	{
+		return m_Left->second;
+	}
+
+	bool IsRight() const
+	{
+		return m_Right != nullptr;
+	}
+
+	KEY GetRightKey() const
+	{
+		return m_Right->first;
+	}
+
+	VALUE GetRightValue() const
+	{
+		return m_Right->second;
+	}
+};
+
+template <typename KEY, typename VALUE>
+class CAVLTreeIterator
+{
+	template<typename KEY, typename VALUE>
+	friend class CAVLTree;
+
+public:
+	CAVLTreeIterator() : m_Node(nullptr)
+	{
+
+	}
+
+	~CAVLTreeIterator()
+	{
+
+	}
+private:
+	CAVLTreeNode<KEY, VALUE>* m_Node;
+
+public:
+
+	// iterator끼리 서로 가지고 있는 노드가 같을 경우 간다고 판단한다.
+	bool operator==(const CAVLTreeIterator<KEY, VALUE>& iter) const
+	{
+		return m_Node == iter.m_Node;
+	}
+
+	bool operator ==(const CAVLTreeNode<KEY, VALUE>* Node) const
+	{
+		return m_Node == Node;
+	}
+
+	bool operator!=(const CAVLTreeNode<KEY, VALUE>* Node) const
+	{
+		return m_Node != Node;
+	}
+
+
+	bool operator!=(const CAVLTreeIterator<KEY, VALUE>& iter) const
+	{
+		return m_Node != iter.m_Node;
+	}
+
+	void operator++()
+	{
+		m_Node = m_Node->m_Next;
+	}
+
+	void operator++(int)
+	{
+		m_Node = m_Node->m_Next;
+	}
+
+	void operator--()
+	{
+		m_Node = m_Node->m_Prev;
+	}
+
+	void operator--(int)
+	{
+		m_Node = m_Node->m_Prev;
+	}
+
+	CAVLTreeNode<KEY, VALUE>* operator->()
+	{
+		return m_Node;
+	}
+};
+
+template <typename KEY, typename VALUE>
+class CAVLTree
+{
+public:
+	CAVLTree()
+		: m_Root(nullptr)
+	{
+		m_Begin = new NODE;
+		m_End = new NODE;
+
+		m_Begin->m_Next = m_End;
+		m_End->m_Prev = m_Begin;
+		m_Size = 0;
+	}
+
+	~CAVLTree()
+	{
+		PNODE cur = m_Begin;
+
+		while (cur)
+		{
+			PNODE next = cur->m_Next;
+			delete cur;
+			cur = next;
+		}
+	}
+
+private:
+	typedef CAVLTreeNode<KEY, VALUE>* PNODE;
+	typedef CAVLTreeNode<KEY, VALUE> NODE;
+	
+private:
+	PNODE m_Root;
+	PNODE m_Begin;
+	PNODE m_End;
+	int m_Size;
+
+public:
+	typedef CAVLTreeIterator<KEY, VALUE> iterator;
+
+public:
+	inline bool empty() const
+	{
+		return m_Size == 0;
+	}
+
+	inline int size() const
+	{
+		return m_Size;
+	}
+
+	iterator begin() const
+	{
+		iterator iter;
+		iter.m_Node = m_Begin->m_Next;
+		return iter;
+	}
+
+	iterator end() const
+	{
+		iterator iter;
+		iter.m_Node = m_End;
+		return iter;
+	}
+
+	void insert(const KEY& key, const VALUE& value)
+	{
+		if (m_Root == nullptr)
+		{
+			m_Root = new NODE;
+			m_Root->first = key;
+			m_Root->second = value;
+			m_Begin->m_Next = m_Root;
+			m_Root->m_Prev = m_Begin;
+			m_Root->m_Next = m_End;
+			m_End->m_Prev = m_Root;
+		}
+		else
+		{
+			insert(m_Root, key, value);
+		}
+		m_Size++;
+	}
+
+	void PostOrder(void (*pFunc)(const KEY&, const VALUE&))
+	{
+		PostOrder(m_Root, pFunc);
+	}
+
+	void PreOrder(void (*pFunc)(const KEY&, const VALUE&))
+	{
+		PreOrder(m_Root, pFunc);
+	}
+
+	void InOrder(void (*pFunc)(const KEY&, const VALUE&))
+	{
+		InOrder(m_Root, pFunc);
+	}
+
+	iterator Find(const KEY& key)
+	{
+		return Find(m_Root, key);
+	}
+
+	iterator erase(const KEY& key)
+	{
+		iterator target = Find(key);
+
+		if (target == end())
+			return end();
+
+		return erase(target);
+	}
+
+	void clear()
+	{
+		PNODE cur = m_Begin->m_Next;
+
+		while (cur != m_End)
+		{
+			PNODE next = cur->m_Next;
+			delete cur;
+			cur = next;
+		}
+
+		m_Size = 0;
+		m_Root = nullptr;
+		m_Begin->m_Next = m_End;
+		m_End->m_Prev = m_Begin;
+	}
+
+private:
+	PNODE insert(PNODE node, const KEY& key, const VALUE& value)
+	{
+		if (node->first == key)
+			return nullptr;
+
+		if (key < node->first)
+		{
+			if (node->m_Left)
+				return insert(node->m_Left, key, value);
+
+			PNODE newNode = new NODE;
+
+			newNode->first = key;
+			newNode->second = value;
+			
+			node->m_Left = newNode;
+			newNode->m_Parent = node;
+
+			PNODE prev = node->m_Prev;
+			prev->m_Next = newNode;
+			newNode->m_Next = node;
+			newNode->m_Prev = prev;
+			node->m_Prev = newNode;
+
+            // 새로운 키가 들어올때 마다 균형을 다시 잡는다.
+			Rebalance(newNode);
+
+			m_Size++;
+
+			return newNode;
+		}
+		else
+		{
+			if (node->m_Right)
+				return insert(node->m_Right, key, value);
+
+			PNODE newNode = new NODE;
+
+			newNode->first = key;
+			newNode->second = value;
+
+			node->m_Right = newNode;
+			newNode->m_Parent = node;
+
+			PNODE next = node->m_Next;
+			next->m_Prev = newNode;
+			newNode->m_Next = next;
+			newNode->m_Prev = node;
+			node->m_Next = newNode;
+
+			m_Size++;
+
+            // 균형 잡기
+			Rebalance(newNode);
+
+			return newNode;
+		}
+	}
+
+	void PostOrder(PNODE node, void(*pFunc)(const KEY&, const VALUE&))
+	{
+		if (node)
+		{
+			PostOrder(node->m_Left, pFunc);
+			PostOrder(node->m_Right, pFunc);
+			pFunc(node->first, node->second);
+		}
+	}
+
+	void PreOrder(PNODE node, void(*pFunc)(const KEY&, const VALUE&))
+	{
+		if (node)
+		{
+			pFunc(node->first, node->second);
+			PreOrder(node->m_Left, pFunc);
+			PreOrder(node->m_Right, pFunc);
+		}
+	}
+
+	void InOrder(PNODE node, void(*pFunc)(const KEY&, const VALUE&))
+	{
+		if (node)
+		{
+			InOrder(node->m_Left, pFunc);
+			pFunc(node->first, node->second);
+			InOrder(node->m_Right, pFunc);
+		}
+	}
+
+	iterator Find(PNODE node, const KEY& key)
+	{
+		if (node == nullptr)
+			return end();
+
+		if (node->first == key)
+		{
+			iterator ret;
+			ret.m_Node = node;
+			return ret;
+		}
+
+		if (key < node->first)
+			return Find(node->m_Left, key);
+		else
+			return Find(node->m_Right, key);
+	}
+
+	PNODE FindMax(PNODE node)
+	{
+		if (node->m_Right)
+			return FindMax(node->m_Right);
+
+		return node;
+	}
+
+	PNODE FindMin(PNODE node)
+	{
+		if (node->m_Left)
+			return FindMin(node->m_Left);
+
+		return node;
+	}
+
+	iterator erase(const iterator& iter)
+	{
+		if (iter == m_Begin)
+			return end();
+		if (iter.m_Node == nullptr)
+			return end();
+
+		if (iter.m_Node->m_Left == nullptr && iter.m_Node->m_Right == nullptr)
+		{
+			if (iter.m_Node->m_Parent == nullptr)
+			{
+				delete iter.m_Node;
+				m_Root = nullptr;
+				m_Begin->m_Next = m_End;
+				m_End->m_Prev = m_Begin;
+				m_Size--;
+				return end();
+			}
+
+			PNODE parent = iter.m_Node->m_Parent;
+
+			if (parent->m_Left == iter.m_Node)
+				parent->m_Left = nullptr;
+			else
+				parent->m_Right = nullptr;
+
+			PNODE prev = iter.m_Node->m_Prev;
+			PNODE next = iter.m_Node->m_Next;
+
+			prev->m_Next = next;
+			next->m_Prev = prev;
+
+			delete iter.m_Node;
+
+			m_Size--;
+
+			iterator ret;
+
+			Rebalance(parent);
+
+			ret.m_Node = next;
+
+			return ret;
+		}
+
+
+		if (iter.m_Node->m_Left)
+		{
+			PNODE maxNode = FindMax(iter.m_Node->m_Left);
+			PNODE parent = maxNode->m_Parent;
+			PNODE leftChild = maxNode->m_Left;
+
+			iter.m_Node->first = maxNode->first;
+			iter.m_Node->second = maxNode->second;
+
+			if (maxNode == parent->m_Left)
+				parent->m_Left = leftChild;
+			else
+				parent->m_Right = leftChild;
+
+			if (leftChild)
+				leftChild->m_Parent = parent;
+
+			PNODE prev = maxNode->m_Prev;
+			PNODE next = maxNode->m_Next;
+
+			prev->m_Next = next;
+			next->m_Prev = prev;
+
+			m_Size--;
+
+			delete maxNode;
+
+			iterator ret;
+
+			Rebalance(parent);
+
+			ret.m_Node = next;
+
+			return ret;
+		}
+		else
+		{
+			PNODE minNode = FindMin(iter.m_Node->m_Right);
+			PNODE parent = minNode->m_Parent;
+			PNODE rightChild = minNode->m_Right;
+
+			iter.m_Node->first = minNode->first;
+			iter.m_Node->second = minNode->second;
+
+			if (parent->m_Right == minNode)
+				parent->m_Right = rightChild;
+			else
+				parent->m_Left = rightChild;
+
+			if (rightChild)
+				rightChild->m_Parent = parent;
+
+			PNODE prev = minNode->m_Prev;
+			PNODE next = minNode->m_Next;
+
+			prev->m_Next = next;
+			next->m_Prev = prev;
+
+			delete minNode;
+
+			m_Size--;
+
+			iterator ret;
+
+			Rebalance(parent);
+
+			ret.m_Node = next;
+
+			return ret;
+		}
+	}
+
+    // 트리의 왼쪽 높이와 오른쪽 높이 중 더 큰 높이를 반환한다.
+	int GetHeight(PNODE node)
+	{
+		if (node == nullptr)
+			return 0;
+
+		int left = GetHeight(node->m_Left);
+		int right = GetHeight(node->m_Right);
+
+		int height = left > right ? left : right;
+
+		return height + 1;
+	}
+
+
+    // 높이의 차를 구한다.
+	int GetHeigthDiff(PNODE node)
+	{
+		return GetHeight(node->m_Left) - GetHeight(node->m_Right);
+	}
+
+    // 왼쪽으로 회전
+	PNODE LeftRotation(PNODE node)
+	{   
+        // 먼저 회전에 필요한 3가지 노드, 부모, 오른쪽 자식, 오른쪽의 왼쪽 자식을 가져온다.
+		PNODE parent = node->m_Parent;
+		PNODE rightChild = node->m_Right;
+		PNODE rightLeftChild = rightChild->m_Left;
+
+        // 왼쪽으로 회전후에는 기준노드의 오른쪽에 rightLeftChild가 붙게된다.
+		node->m_Right = rightLeftChild;
+        // node의 부모는 rightChild가 된다. 즉, rightChild가 새로운 기준 노드가 될 것이다.
+		node->m_Parent = rightChild;
+        // rightChild의 왼쪽에 원래 기준 노드를 붙인다.
+		rightChild->m_Left = node;
+        // rightChild의 부모를 수정한다.
+		rightChild->m_Parent = parent;
+
+        // 만약 rightLeftchild가 null이 아니라면 부모노드를 수정
+		if (rightLeftChild)
+			rightLeftChild->m_Parent = node;
+
+        // 부모노드 기준으로 새로운 기준노드인 rightChild의 위치를 확인하여 붙여준다.
+		if (parent)
+		{
+			if (parent->m_Left == node)
+				parent->m_Left = rightChild;
+			else
+				parent->m_Right = rightChild;
+		}
+        // 만약 부모노드가 없을 경우 즉 루트 노드일 경우는 rightChild가 새로운 루트 노드가 된다.
+		else
+			m_Root = rightChild;
+
+        // 기준 노드를 반환.
+		return rightChild;
+	}
+
+	PNODE RightRotation(PNODE node)
+	{
+		PNODE parent = node->m_Parent;
+		PNODE leftChild = node->m_Left;
+		PNODE leftRightChild = leftChild->m_Right;
+
+        // 오른쪽 회전의 경우 노드의 왼쪽에 leftRightChild가 붙으며
+		node->m_Left = leftRightChild;
+        // 노드의 부모는 왼쪽 자식이 된다.
+		node->m_Parent = leftChild;
+        // 왼쪽 자식의 오른쪽에 노드를 붙이고
+		leftChild->m_Right = node;
+        // 왼쪽 자식의 부모를 새롭게 갱신한다.
+		leftChild->m_Parent = parent;
+
+		if (leftRightChild)
+			leftRightChild->m_Parent = node;
+
+		if (parent)
+		{
+			if (parent->m_Left == node)
+				parent->m_Left = leftChild;
+			else
+				parent->m_Right = leftChild;
+		}
+		else
+			m_Root = leftChild;
+
+		return leftChild;
+	}
+
+	void Rebalance(PNODE node)
+	{
+        // nullptr이 될때까지 계속 거슬러 올라간다.
+		if (node == nullptr)
+			return;
+
+        // 높이 차를 구한다.
+		int heightDiff = GetHeigthDiff(node);
+
+        // 만약 -2 이하라면 
+        // 오른쪽으로 기울어진 경우
+		if (heightDiff <= -2)
+		{   
+            // 다시 한번 오른쪽 자식의 높이를 계산한다.
+			int rr = GetHeigthDiff(node->m_Right);
+
+            // 만약 오른쪽 자식의 높이도 음수라면
+			if (rr <= 0)
+			{
+                // RR 상태이며 기준노드를 중심으로 왼쪽회전
+				node = LeftRotation(node);
+			}
+			else
+			{
+                // 아니라면 RL 상태이다. 먼저 오른쪽 자식을 오른쪽 회전해서 RR상태로 맞춘다.
+				RightRotation(node->m_Right);
+                // RR상태에서 왼쪽으로 회전한다.
+				node = LeftRotation(node);
+			}
+		}
+        // 이 경우는 왼쪽으로 기울어진 경우다.
+		else if (heightDiff >= 2)
+		{   
+            // 왼쪽 자식의 높이를 계산하고
+			int ll = GetHeigthDiff(node->m_Left);
+
+            // 만약 양수라면
+			if (ll >= 0)
+			{   
+                // 기준 노드를 기준으로 오른쪽으로 회전한다.
+				node = RightRotation(node);
+			}
+            // 아니라면
+			else
+			{
+                // LR 상태이다 따라서 오른쪽 회전을 해서 LL 상태로 만든다.
+				LeftRotation(node->m_Left);
+                // 기준 노드 중심으로 오른쪽으로 회전한다.
+				node = RightRotation(node);
+			}
+		}
+
+
+		Rebalance(node->m_Parent);
+	}
+};
+```
