@@ -1,0 +1,121 @@
+---
+layout: post
+title: 부분수열의 합
+date:  2021-08-09 14:04:14 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1182)
+# 부분수열의 합
+
+# 문제
+> N개의 정수로 이루어진 수열이 있을 때, 크기가 양수인 부분수열 중에서 그 수열의 원소를 다 더한 값이 S가 되는 경우의 수를 구하는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 정수의 개수를 나타내는 N과 정수 S가 주어진다. (1 ≤ N ≤ 20, |S| ≤ 1,000,000) 둘째 줄에 N개의 정수가 빈 칸을 사이에 두고 주어진다. 주어지는 정수의 절댓값은 100,000을 넘지 않는다.
+
+# 출력
+> 첫째 줄에 합이 S가 되는 부분수열의 개수를 출력한다.
+
+# 첫 시도
+> 그동안 익숙해진 백트랙킹의 코드 형태로 만들어서 제출을 해봤지만 시간 초과가 떴다.
+
+# 코드
+```c++
+#include <iostream>
+using namespace std;
+
+int N, S;
+
+const int SIZE = 21;
+
+int arr[SIZE];
+bool used[SIZE];
+
+
+int cnt = 0;
+
+void recur(int K, int i)
+{
+	if (K == S)
+	{
+		cnt++;
+		return;
+	}
+
+	for (int j = 0; j < N; j++)
+	{
+		if (!used[j])
+		{
+			used[j] = true;
+			recur(K + arr[j], i + 1);
+			used[j] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> S;
+
+	for (int i = 0; i < N; i++)
+		cin >> arr[i];
+
+	recur(0, 0);
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
+
+# 두번째 시도
+결국 다른 사람들의 풀이를 확인해본 결과 집합에 포함시키느냐 안 포함시키느냐로 나눠서 푸는 문제였다. 만약 원하는 합이 0일 경우 이는 공집합으로도 표현이 가능하니 숫자를 하나 감소시키는 것을 신경써야 한다.
+
+# 코드
+```c++
+#include <iostream>
+using namespace std;
+
+int N, S;
+
+const int SIZE = 21;
+
+int arr[SIZE];
+
+int cnt = 0;
+
+void recur(int depth, int sum)
+{
+    // 만약 현재 깊이가 N이라면
+	if (depth == N)
+	{
+        // sum이 원하는 합과 같으면 숫자를 늘린다.
+		if (sum == S)
+			cnt++;
+		return;
+	}
+
+    // 현재 원소를 넘어간다. 따라서 합은 그대로
+	recur(depth + 1, sum);
+    // 현재 원소를 포함해서 합을 넘긴다.
+	recur(depth + 1, sum + arr[depth]);
+}
+
+int main()
+{
+	cin >> N >> S;
+
+	for (int i = 0; i < N; i++)
+		cin >> arr[i];
+
+	recur(0, 0);
+
+	if (S == 0)
+		cnt--;
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
