@@ -1,0 +1,88 @@
+---
+layout: post
+title: 110 옮기기
+date: 2021-08-09 08:40:45 +0900
+categories: Programmers-Level3
+---
+
+# 110 옮기기
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/77886)
+
+# 풀이
+정확한 풀이는 [이 곳](https://yabmoons.tistory.com/668)을 많이 참조했다. 먼저 110을 기본 문자열에서 지우고 이 110의 갯수를 센다. 그 이후에는 가장 문자열 뒤에서 부터 시작해서 0의 위치를 찾는다. 만약 있다면 먼저 0을 삽입하고 그 뒤에 110이 나온 갯수만큼 110을 삽입하고 만약 0이 없다면 가장 앞자리에 110을 삽입한다. 0을 최대한 앞으로 보내는게 목표인데 0을 앞으로 보내면 보낼수록 수는 작아지게 되며 이는 사전순으로 가장 앞으로 온다는 의미가 된다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int GetLastZeroIdx(const string& s)
+{
+    for (int i = s.size() - 1; i >= 0; i--)
+    {
+        if (s[i] == '0')
+            return i;
+    }
+
+    return -1;
+}
+
+vector<string> solution(vector<string> s) 
+{
+    vector<string> answer;
+
+    for (int i = 0; i < s.size(); i++)
+    {
+        string str;
+        int cnt = 0;
+        for (int j = 0; j < s[i].size(); j++)
+        {
+            str += s[i][j];
+
+            if (str.size() >= 3)
+            {
+                if (str.substr(str.size() - 3, 3) == "110")
+                {
+                    cnt++;
+                    str.erase(str.size() - 3, 3);
+                }
+            }
+        }
+
+        int lastIdx = GetLastZeroIdx(str);
+
+        if (lastIdx == -1)
+        {
+            string result;
+
+            while (cnt--)
+                result += "110";
+
+            result += str;
+            answer.push_back(result);
+        }
+        else
+        {
+            string result;
+
+            for (int j = 0; j < str.size(); j++)
+            {
+                if (j == lastIdx)
+                {
+                    result += str[j];
+                    while (cnt--)
+                        result += "110";
+                }
+                else
+                    result += str[j];
+            }
+
+            answer.push_back(result);
+        }
+    }
+    return answer;
+}
+```
