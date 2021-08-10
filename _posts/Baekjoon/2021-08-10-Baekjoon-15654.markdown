@@ -1,0 +1,119 @@
+---
+layout: post
+title: N과 M(5)
+date:  2021-08-10 09:26:32 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15654)
+# N과 M(5)
+
+# 문제
+> N개의 자연수와 자연수 M이 주어졌을 때, 아래 조건을 만족하는 길이가 M인 수열을 모두 구하는 프로그램을 작성하시오. N개의 자연수는 모두 다른 수이다.
+> - N개의 자연수 중에서 M개를 고른 수열
+
+# 입력
+> 첫째 줄에 N과 M이 주어진다. (1 ≤ M ≤ N ≤ 8)
+둘째 줄에 N개의 수가 주어진다. 입력으로 주어지는 수는 10,000보다 작거나 같은 자연수이다.
+
+# 출력
+> 한 줄에 하나씩 문제의 조건을 만족하는 수열을 출력한다. 중복되는 수열을 여러 번 출력하면 안되며, 각 수열은 공백으로 구분해서 출력해야 한다. 수열은 사전 순으로 증가하는 순서로 출력해야 한다.
+
+# 풀이
+먼저 수를 전부 다 입력을 받는다 그 이후 정렬을 한번 하고 재귀 호출을 시작한다. 중복되는 숫자는 사용하면 안된다고 했으니 사용유무를 저장하는 배열을 선언한고 정렬된 수를 저장할 배열과 출력을 위한 배열을 이용해서 결과를 출력한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int N, M;
+
+const int SIZE = 10;
+
+int arr[SIZE];
+int output[SIZE];
+bool used[SIZE];
+
+void recur(int depth)
+{
+	if (depth == M)
+	{
+		for (int i = 0; i < M; i++)
+			cout << output[i] << " ";
+		cout << "\n";
+
+		return;
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+        // 현재 숫자가 사용되지 않았다면.
+		if (!used[i])
+		{   
+            // 사용하고
+			used[i] = true;
+            // 현재 깊이에 값을 넣는다.
+			output[depth] = arr[i];
+			recur(depth + 1);
+			used[i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	for (int i = 0; i < N; i++)
+		cin >> arr[i];
+
+	sort(arr, arr + N);
+
+	recur(0);
+
+	return 0;
+}
+```
+
+# next_permutaion을 이용한 풀이
+중복제거는 전과같이 reverse를 이용하여 해결한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int main()
+{
+	int N, M;
+
+	cin >> N >> M;
+
+	vector<int> v(N);
+
+	for (int i = 0; i < N; i++)
+		cin >> v[i];
+
+	sort(v.begin(), v.end());
+
+	while (true)
+	{
+		for (int i = 0; i < M; i++)
+			cout << v[i] << " ";
+		cout << "\n";
+
+		reverse(v.begin() + M, v.end());
+
+		if (!next_permutation(v.begin(), v.end()))
+			break;
+	}
+
+
+	return 0;
+}
+```

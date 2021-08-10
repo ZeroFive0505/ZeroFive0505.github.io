@@ -1,0 +1,121 @@
+---
+layout: post
+title: N과 M(6)
+date:  2021-08-10 09:50:11 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15655)
+# N과 M(6)
+
+# 문제
+> N개의 자연수와 자연수 M이 주어졌을 때, 아래 조건을 만족하는 길이가 M인 수열을 모두 구하는 프로그램을 작성하시오. N개의 자연수는 모두 다른 수이다.
+> - N개의 자연수 중에서 M개를 고른 수열
+> - 고른 수열은 오름차순이어야 한다.
+
+# 입력
+> 첫째 줄에 N과 M이 주어진다. (1 ≤ M ≤ N ≤ 8)
+둘째 줄에 N개의 수가 주어진다. 입력으로 주어지는 수는 10,000보다 작거나 같은 자연수이다.
+
+# 출력
+> 한 줄에 하나씩 문제의 조건을 만족하는 수열을 출력한다. 중복되는 수열을 여러 번 출력하면 안되며, 각 수열은 공백으로 구분해서 출력해야 한다. 수열은 사전 순으로 증가하는 순서로 출력해야 한다.
+
+# 풀이
+수를 입력받고 정렬후에 이번에는 인덱스를 같이 전달해준다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int N, M;
+
+const int SIZE = 10;
+
+int arr[SIZE];
+int ouput[SIZE];
+bool used[SIZE];
+
+void recur(int depth, int index)
+{
+	if (depth == M)
+	{
+		for (int i = 0; i < M; i++)
+			cout << ouput[i] << " ";
+		cout << "\n";
+		return;
+	}
+
+	for (int i = index; i < N; i++)
+	{
+		if (!used[i])
+		{
+			used[i] = true;
+			ouput[depth] = arr[i];
+			recur(depth + 1, i + 1);
+			used[i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	for (int i = 0; i < N; i++)
+		cin >> arr[i];
+
+	sort(arr, arr + N);
+
+	recur(0, 0);
+
+	return 0;
+}
+```
+
+# next_permutaion을 이용한 풀이
+순열을 기록할 벡터를 추가로 준비한다. 초기에는 모두 1로 초기화 했다가 M만큼 앞에서 숫자를 0으로 바꾼다. 왜냐면 숫자를 기록한 배열을 정렬하면 앞에 제일 작은 숫자가 오고 0의 위치에 따라 배열의 값을 출력할지를 결정한다. 또한 순열은 앞에서부터 0을 채워넣었으므로 초기에는 가장 작은 값을 출력해줄 것이다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int main()
+{
+	int N, M;
+
+	cin >> N >> M;
+
+	vector<int> v(N);
+	vector<int> perm(N, 1);
+	for (int i = 0; i < N; i++)
+		cin >> v[i];
+
+	for (int i = 0; i < M; i++)
+		perm[i] = 0;
+
+	sort(v.begin(), v.end());
+
+	do
+	{
+		for (int i = 0; i < perm.size(); i++)
+		{
+			if (perm[i] == 0)
+				cout << v[i] << " ";
+		}
+
+		cout << "\n";
+
+	} while (next_permutation(perm.begin(), perm.end()));
+
+
+
+	return 0;
+}
+```
