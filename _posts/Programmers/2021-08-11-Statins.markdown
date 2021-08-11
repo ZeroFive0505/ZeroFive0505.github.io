@@ -1,0 +1,46 @@
+---
+layout: post
+title: 기지국 설치
+date:  2021-08-11 09:19:36 +0900
+categories: Programmers-Level3
+---
+
+# 기지국 설치
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12979)
+
+# 풀이
+아파트의 갯수만큼 순회하면서 기지국의 범위내에 포함이 되어있는지 확인한다. 포함이 되어있을 경우 다음 기지국의 위치로 인덱스를 이동시키고 아파트의 인덱스또한 기지국의 범위를 더한다음 1을 더해서 이동시킨다.
+만약 범위내에 없을 경우 새롭게 설치를 해야되는 공간이 되고 아파트의 인덱스는 기지국의 범위 곱하기 2만큼 건너뛰고 1을 더한다. 왜냐하면 현재 위치에 기지국이 설치 되었고 앞으로 최소한의 기지국을 설치해야하므로 범위가 겹치지 않는 곳으로 건너뛰어야 하기 때문이다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int solution(int n, vector<int> stations, int w)
+{
+    int answer = 0;
+
+    int index = 0;
+
+    for (int i = 1; i <= n;)
+    {   
+        // 기지국의 범위 내에 포함될 경우
+        if (index < stations.size() && i >= stations[index] - w && i <= stations[index] + w)
+        {
+            i = stations[index] + w + 1;
+            index++;
+        }
+        // 기지국의 범위에 포함이 되지 않을 경우
+        else
+        {
+            i += (w * 2) + 1;
+            answer++;
+        }
+    }
+
+    return answer;
+}
+```
+

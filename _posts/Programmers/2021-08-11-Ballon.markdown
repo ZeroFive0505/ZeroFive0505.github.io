@@ -1,0 +1,59 @@
+---
+layout: post
+title: 풍선 터트리기
+date: 2021-08-11 08:41:51 +0900
+categories: Programmers-Level3
+---
+
+# 풍선 터트리기
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/68646)
+
+# 풀이
+자세한 풀이는 [이 곳](https://yabmoons.tistory.com/576)을 참조하여 풀었다. 페어로 이루어진 벡터를 풍선 값 크기 순으로 정렬하고 그 이후에 풍선의 인덱스를 가져온다. A의 경우 가장 작은 풍선의 인덱스 B의 경우 두번째로 작은 풍선의 인덱스 C는 세번째로 작은 풍선의 인덱스라고 가정하고 만약 C가 A와 B사이에 끼어있을 경우 C는 절대 살아남을 수 없게 된다. 만약 살아남을 수 있을 경우에는 범위를 새롭게 조정한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+
+int solution(vector<int> a) 
+{
+    int answer = 2;
+
+    if (a.size() <= 2)
+        return a.size();
+
+    vector<pair<int, int>> v;
+
+    for (int i = 0; i < a.size(); i++)
+    {
+        v.push_back({ a[i], i });
+    }
+
+    sort(v.begin(), v.end(), [](const pair<int, int>& a, const pair<int, int>& b) {
+        return a.first < b.first;
+    });
+
+
+    int A = min(v[0].second, v[1].second);
+    int B = max(v[0].second, v[1].second);
+
+    for (int i = 2; i < v.size(); i++)
+    {
+        int C = v[i].second;
+
+        if (A < C && C < B)
+            continue;
+
+        answer++;
+        A = min(A, C);
+        B = max(B, C);
+    }
+
+    return answer;
+}
+```
