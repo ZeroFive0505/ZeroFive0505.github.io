@@ -1,0 +1,85 @@
+---
+layout: post
+title: N과 M(9)
+date:  2021-08-10 10:18:01 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15663)
+# N과 M(9)
+
+# 문제
+> N개의 자연수와 자연수 M이 주어졌을 때, 아래 조건을 만족하는 길이가 M인 수열을 모두 구하는 프로그램을 작성하시오.
+> - N개의 자연수 중에서 M개를 고른 수열
+
+# 입력
+> 첫째 줄에 N과 M이 주어진다. (1 ≤ M ≤ N ≤ 8) 둘째 줄에 N개의 수가 주어진다. 입력으로 주어지는 수는 10,000보다 작거나 같은 자연수이다.
+
+# 출력
+> 한 줄에 하나씩 문제의 조건을 만족하는 수열을 출력한다. 중복되는 수열을 여러 번 출력하면 안되며, 각 수열은 공백으로 구분해서 출력해야 한다. 수열은 사전 순으로 증가하는 순서로 출력해야 한다.
+
+# 풀이
+첫 시도는 먼저 입력받은 수를 정렬하고 unique를 써서 중복을 없애서 해볼려 했는데 예제 출력과 다른 결과가 나왔다. 좀 처럼 쉽게 생각이 안 떠올라서 인터넷을 참조해본 결과 마지막에 출력했던 값을 기록하고 다를 경우만 재귀 호출을 하면 해결이 가능했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int N, M;
+
+vector<int> arr;
+vector<int> output;
+vector<bool> used;
+
+void recur(int depth)
+{
+	if (depth == M)
+	{
+		for (int i = 0; i < M; i++)
+			cout << output[i] << " ";
+		cout << "\n";
+		return;
+	}
+
+	int last = -1;
+
+	for (int i = 0; i < arr.size(); i++)
+	{
+		if (!used[i] && (i == 0 || last != arr[i]))
+		{
+			last = arr[i];
+			used[i] = true;
+			output[depth] = arr[i];
+			recur(depth + 1);
+			used[i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	arr.resize(N, 0);
+
+	for (int i = 0; i < arr.size(); i++)
+	{
+		cin >> arr[i];
+	}
+
+	sort(arr.begin(), arr.end());
+
+	used.resize(arr.size(), false);
+
+	output.resize(arr.size(), 0);
+
+
+	recur(0);
+
+
+	return 0;
+}
+```
