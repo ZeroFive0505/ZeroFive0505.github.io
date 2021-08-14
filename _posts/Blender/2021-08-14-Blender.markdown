@@ -1,0 +1,39 @@
+---
+layout: post
+title:  포켓몬스터 7세대 배지
+date:   2021-08-14 11:08:09 +0900
+categories: Blender
+---
+
+# 포켓몬스터 마지막 배지
+그동안 만들었던 배지들 전부 렌더링을 끝냈다.. 이제 새로운 거 만들어봐야겠다.
+
+# 풀 배지
+![Imgur](https://imgur.com/DZaE2Ez.gif)
+
+# 물 배지
+![Imgur](https://imgur.com/2oBZmym.gif)
+
+# 불꽃 배지
+![Imgur](https://imgur.com/upHhHKs.gif)
+
+# 격투 배지
+![Imgur](https://imgur.com/EKtVBQv.gif)
+
+# 고스트 배지
+![Imgur](https://imgur.com/VD0VekG.gif)
+
+# 페어리 배지
+![Imgur](https://imgur.com/BsYbP7O.gif)
+
+# 바위 배지
+![Imgur](https://imgur.com/eub3hwY.gif)
+
+# 얼음 배지
+![Imgur](https://imgur.com/zJqomwB.gif)
+
+# 악 배지
+![Imgur](https://imgur.com/Jj9rbGK.gif)
+
+# 드래곤 배지
+![Imgur](https://imgur.com/abfJZ3j.gif)
