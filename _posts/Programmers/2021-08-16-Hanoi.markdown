@@ -1,0 +1,41 @@
+---
+layout: post
+title: 하노이의 탑
+date:  2021-08-16 08:13:39 +0900
+categories: Programmers-Level3
+---
+
+# 하노이의 탑
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12946)
+
+# 풀이
+가장 먼저 기저 케이스를 고려한다. n이 1개 즉 원판이 1개일 때는 간단하게 src에 있는 원판을 dest로 옮길 수 있다. 옮기고 반환한다. 만약 아니라면 src에 있는 n - 1개의 원판을 dest를 이용해서 temp로 옮긴다. 그 이후에는 src에 있는 원판을 dest로 옮길 수 있다. 그 이후에는 다시 temp에 있는 n - 1개의 원판을 src를 이용해서 dest로 옮긴다. 이를 반복하면 최소 횟수 순서를 구할 수 있다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int>> answer;
+
+void Hanoi(int n, int src, int temp, int dest)
+{
+    if (n == 1)
+    {
+        answer.push_back({ src, dest });
+        return;
+    }
+
+    Hanoi(n - 1, src, dest, temp);
+    answer.push_back({ src, dest });
+    Hanoi(n - 1, temp, src, dest);
+}
+
+vector<vector<int>> solution(int n) 
+{
+    Hanoi(n, 1, 2, 3);
+    return answer;
+}
+```

@@ -1,0 +1,59 @@
+---
+layout: post
+title: N Queen
+date:  2021-08-16 08:57:15 +0900
+categories: Programmers-Level3
+---
+
+# N Queen
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12952)
+
+# 풀이
+백트랙킹 문제 열 또는 행 기준으로 퀸을 놓았는지와 대각선 두 방향으로 퀸을 놓았는지 체크하기 위한 배열을 선언하고 조건에 만족할 경우 재귀호출을 통해 가능한 갯수를 구한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+const int SIZE = 13;
+
+bool Check1[SIZE];
+bool Check2[SIZE * 2];
+bool Check3[SIZE * 2];
+int N;
+int answer = 0;
+
+
+void Place(int i)
+{
+	int j;
+
+
+	for (j = 0; j < N; j++)
+	{
+		if (!Check1[j] && !Check2[i + j] && !Check3[i - j + (N - 1)])
+		{
+			if (i == N - 1)
+				answer++;
+			else
+			{
+				Check1[j] = Check2[i + j] = Check3[i - j + (N - 1)] = true;
+				Place(i + 1);
+				Check1[j] = Check2[i + j] = Check3[i - j + (N - 1)] = false;
+			}
+		}
+	}
+
+}
+
+int solution(int n)
+{
+	N = n;
+	Place(0);
+	return answer;
+}
+```
