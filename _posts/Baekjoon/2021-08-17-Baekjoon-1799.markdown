@@ -1,0 +1,127 @@
+---
+layout: post
+title: 비숍
+date:  2021-08-17 09:52:42 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1799)
+# 비숍
+
+# 문제
+> 서양 장기인 체스에는 대각선 방향으로 움직일 수 있는 비숍(bishop)이 있다. < 그림 1 >과 같은 정사각형 체스판 위에 B라고 표시된 곳에 비숍이 있을 때 비숍은 대각선 방향으로 움직여 O로 표시된 칸에 있는 다른 말을 잡을 수 있다.
+![Img](https://upload.acmicpc.net/c3f4ac55-3e37-4bed-a381-7d407b2f9b4f/-/preview/)
+그런데 체스판 위에는 비숍이 놓일 수 없는 곳이 있다. < 그림 2 >에서 체스판에 색칠된 부분은 비숍이 놓일 수 없다고 하자. 이와 같은 체스판에 서로가 서로를 잡을 수 없도록 하면서 비숍을 놓는다면 < 그림 3 >과 같이 최대 7개의 비숍을 놓을 수 있다.  색칠된 부분에는 비숍이 놓일 수 없지만 지나갈 수는 있다.
+![Img](https://upload.acmicpc.net/3d44f5a2-bd28-41bd-9959-0f8f8bfbff3f/-/preview/)
+![Img](https://upload.acmicpc.net/49405f78-09c9-4220-8687-ec3269dd6c1b/-/preview/)
+정사각형 체스판의 한 변에 놓인 칸의 개수를 체스판의 크기라고 한다. 체스판의 크기와 체스판 각 칸에 비숍을 놓을 수 있는지 없는지에 대한 정보가 주어질 때, 서로가 서로를 잡을 수 없는 위치에 놓을 수 있는 비숍의 최대 개수를 구하는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 체스판의 크기가 주어진다. 체스판의 크기는 10이하의 자연수이다. 둘째 줄부터 아래의 예와 같이 체스판의 각 칸에 비숍을 놓을 수 있는지 없는지에 대한 정보가 체스판 한 줄 단위로 한 줄씩 주어진다. 비숍을 놓을 수 있는 곳에는 1, 비숍을 놓을 수 없는 곳에는 0이 빈칸을 사이에 두고 주어진다.
+
+# 출력
+> 첫째 줄에 주어진 체스판 위에 놓을 수 있는 비숍의 최대 개수를 출력한다.
+
+# 풀이
+처음에는 N-Queen과 유사한 방법으로 풀어보려고 했다. 먼저 대각선 두개를 배열로 잡고 이 공간에 놓을 수 있는지 아닌지를 확인해보려 했지만 잘 되지 않았다. 결국 인터넷을 검색해서 [이 곳](https://yabmoons.tistory.com/95)의 풀이를 참조하여 풀었다. 대각선을 따질게 아니라 체스판의 색깔을 따져서 이 공간에 둘 수 있는지를 체크하여 흑색공간에 몇개를 둘 수 있는지 그리고 하얀색 공간에 몇개를 둘 수 있는지를 합쳐서 결과를 출력한다.
+
+# 코드
+```c++
+#include <iostream>
+
+using namespace std;
+
+const int SIZE = 10;
+
+int board[SIZE][SIZE];
+int boardColor[SIZE][SIZE];
+bool used[SIZE][SIZE];
+int boardSize;
+
+int answer[2];
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{-1, -1},
+	{-1, 1}
+};
+
+bool CanPlace(int x, int y)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		int nx = x;
+		int ny = y;
+		while (true)
+		{
+			if (nx < 0 || ny < 0 || nx >= boardSize || ny >= boardSize)
+				break;
+
+			if (used[nx][ny])
+				return false;
+
+			nx = nx + Delta[i].x;
+			ny = ny + Delta[i].y;
+		}
+	}
+
+	return true;
+}
+
+void DFS(int idx, int cnt, int color)
+{
+	answer[color] = max(answer[color], cnt);
+
+    // 전체 보드 크기만큼 반복한다.
+	for (int i = idx; i < boardSize * boardSize; i++)
+	{
+        // 좌표를 구한다.
+		int x = i / boardSize;
+		int y = i % boardSize;
+
+        // 만약 색깔이 같지 않거나 둘 수 없는 공간이거나 동선이 겹치는 비숍이 있다면 건너뛴다.
+		if (boardColor[x][y] != color || board[x][y] == 0 || !CanPlace(x, y))
+			continue;
+
+        // 해당 좌표는 사용했다고 체크
+		used[x][y] = true;
+		DFS(i, cnt + 1, color);
+		used[x][y] = false;
+	}
+}
+
+
+int main()
+{
+
+	cin >> boardSize;
+
+	for (int i = 0; i < boardSize; i++)
+	{
+		for (int j = 0; j < boardSize; j++)
+		{
+			cin >> board[i][j];
+			if (i % 2 == 0)
+			{
+				if (j % 2 == 0)
+					boardColor[i][j] = 1;
+			}
+			else
+			{
+				if (j % 2 == 1)
+					boardColor[i][j] = 1;
+			}
+		}
+	}
+
+	DFS(0, 0, 0);
+	DFS(0, 0, 1);
+
+	cout << answer[0] + answer[1] << "\n";
+
+	return 0;
+}
+```
