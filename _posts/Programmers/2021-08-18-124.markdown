@@ -1,0 +1,39 @@
+---
+layout: post
+title: 124 나라의 숫자
+date:  2021-08-18 09:17:57 +0900
+categories: Programmers-Level2
+---
+
+# 124 나라의 숫자
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12899)
+
+# 풀이
+먼저 십진법으로 들어온 수를 삼진법(0, 1, 2, 10...)으로 바꿔줘야 하기에 항상 n에서 1을 뺀다. 그리고 나머지를 구해 1, 2, 4, 중에 인덱스를 정해 앞에다 계속 붙여나가면 된다. 이를 몫이 0이 나올때까지 즉 n이 0이 될때까지 반복한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+const int SIZE = 3;
+
+const char convert[SIZE] = { '1', '2', '4' };
+
+string solution(int n) 
+{
+    string answer = "";
+
+    while (n)
+    {
+        n--;
+        int index = n % SIZE;
+        answer = convert[index] + answer;
+        n /= SIZE;
+    }
+
+    return answer;
+}
+```
