@@ -1,0 +1,158 @@
+---
+layout: post
+title: 소문난 칠공주
+date:  2021-08-20 10:20:36 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1941)
+# 소문난 칠공주
+
+# 문제
+> 총 25명의 여학생들로 이루어진 여학생반은 5*5의 정사각형 격자 형태로 자리가 배치되었고, 얼마 지나지 않아 이다솜과 임도연이라는 두 학생이 두각을 나타내며 다른 학생들을 휘어잡기 시작했다. 곧 모든 여학생이 ‘이다솜파’와 ‘임도연파’의 두 파로 갈라지게 되었으며, 얼마 지나지 않아 ‘임도연파’가 세력을 확장시키며 ‘이다솜파’를 위협하기 시작했다. 위기의식을 느낀 ‘이다솜파’의 학생들은 과감히 현재의 체제를 포기하고, ‘소문난 칠공주’를 결성하는 것이 유일한 생존 수단임을 깨달았다. ‘소문난 칠공주’는 다음과 같은 규칙을 만족해야 한다.
+> - 이름이 이름인 만큼, 7명의 여학생들로 구성되어야 한다.
+> - 강한 결속력을 위해, 7명의 자리는 서로 가로나 세로로 반드시 인접해 있어야 한다.
+> - 화합과 번영을 위해, 반드시 ‘이다솜파’의 학생들로만 구성될 필요는 없다.
+> - 그러나 생존을 위해, ‘이다솜파’가 반드시 우위를 점해야 한다. 따라서 7명의 학생 중 ‘이다솜파’의 학생이 적어도 4명 이상은 반드시 포함되어 있어야 한다.
+> 여학생반의 자리 배치도가 주어졌을 때, ‘소문난 칠공주’를 결성할 수 있는 모든 경우의 수를 구하는 프로그램을 작성하시오.
+
+# 입력
+> 'S'(이다‘솜’파의 학생을 나타냄) 또는 'Y'(임도‘연’파의 학생을 나타냄)을 값으로 갖는 5*5 행렬이 공백 없이 첫째 줄부터 다섯 줄에 걸쳐 주어진다.
+
+# 출력
+> 첫째 줄에 ‘소문난 칠공주’를 결성할 수 있는 모든 경우의 수를 출력한다.
+
+# 풀이
+[이 곳](https://jaimemin.tistory.com/1471)의 코드를 참조하여 풀 수 있었던 문제였다.
+
+# 코드
+```c++
+#include <iostream>
+#include <cstring>
+#include <string>
+
+using namespace std;
+
+const int SIZE = 5;
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{1, 0},
+	{-1, 0},
+	{0, 1},
+	{0, -1}
+};
+
+char arr[SIZE][SIZE];
+bool visited[SIZE][SIZE];
+bool colored[SIZE][SIZE];
+
+int answer = 0;
+
+// 붙은 공간들을 4방향으로 탐색한다.
+void color(int y, int x)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		int nx = x + Delta[i].x;
+		int ny = y + Delta[i].y;
+
+		if (nx < 0 || ny < 0 || nx >= SIZE || ny >= SIZE)
+			continue;
+
+        // 만약 방문되지 않은 공간이거나 이미 색이 칠해진 공간이면 건너뛴다.
+		if (!visited[ny][nx] || colored[ny][nx])
+			continue;
+
+		colored[ny][nx] = true;
+		color(ny, nx);
+	}
+}
+
+void recur(int y, int x, int S, int Y, int cnt)
+{   
+    // 기저케이스 1.
+	if (Y >= 4)
+		return;
+
+    // 만약 7명이 모였고 4명 이상이라면
+	if (cnt == 7 && S >= 4)
+	{
+        // 색깔의 수를 센다. (영역의 수를 센다고 봐도 괜찮다.)
+		int colorCnt = 0;
+
+        // 전 배열을 순회한다.
+		for (int i = 0; i < SIZE; i++)
+		{
+			for (int j = 0; j < SIZE; j++)
+			{   
+
+                // 만약 방문되지 않았거나 색칠됬다면 건너뛴다.
+				if (!visited[i][j] || colored[i][j])
+					continue;
+
+                // 색을 칠한다.
+				colored[i][j] = true;
+                // 카운트를 하나 늘려준다.
+				colorCnt++;
+
+                // 4방향으로 뻗어가면서 색을 칠한다.
+				color(i, j);
+			}
+		}
+
+        // 색깔을 초기화한다.
+		memset(colored, false, sizeof(colored));
+
+        // 만약 색깔이 1보다 크다면 즉 연결요소 또는 영역의 수가 2 이상이라는 뜻이다.
+        // 즉 하나로 연결되어 있지 않고 따로따로 떨어져있는 경우다 따라서 1일 경우만 정답을 늘려준다.
+		if (colorCnt == 1)
+			answer++;
+
+		return;
+	}
+
+    // 전체 배열을 순회한다.
+	for (int i = y; i < SIZE; i++)
+	{   
+        // 위에서부터 아래로 순회한다 따라서 x의 값은 i의 값이 현재 y라면 전달받은 x축에서 시작한다. 
+        // 하지만 아니라면 x는 맨 왼쪽 끝부터 다시 시작한다.
+		for (int j = (i == y ? x : 0); j < SIZE; j++)
+		{
+            // 방문된 곳은 건너뛴다.
+			if (visited[i][j])
+				continue;
+
+			visited[i][j] = true;
+
+			recur(i, j, arr[i][j] == 'S' ? S + 1 : S, 
+				arr[i][j] == 'Y' ? Y + 1 : Y, cnt + 1);
+
+			visited[i][j] = false;
+		}
+	}
+}
+
+int main()
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		string s;
+		cin >> s;
+		for (int j = 0; j < SIZE; j++)
+		{
+			arr[i][j] = s[j];
+		}
+	}
+
+	recur(0, 0, 0, 0, 0);
+
+
+	cout << answer << "\n";
+
+	return 0;
+}
+```
