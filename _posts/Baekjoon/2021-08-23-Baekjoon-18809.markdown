@@ -1,0 +1,247 @@
+---
+layout: post
+title: Gaaaaaaaaaarden
+date:  2021-08-23 10:05:00 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/18809)
+# Gaaaaaaaaaarden
+
+# 문제
+> 길고 길었던 겨울이 끝나고 BOJ 마을에도 봄이 찾아왔다. BOJ 마을에서는 꽃을 마을 소유의 정원에 피우려고 한다. 정원은 땅과 호수로 이루어져 있고 2차원 격자판 모양이다. 인건비 절감을 위해 BOJ 마을에서는 직접 사람이 씨앗을 심는 대신 초록색 배양액과 빨간색 배양액을 땅에 적절하게 뿌려서 꽃을 피울 것이다. 이 때 배양액을 뿌릴 수 있는 땅은 미리 정해져있다. 배양액은 매 초마다 이전에 배양액이 도달한 적이 없는 인접한 땅으로 퍼져간다. 아래는 초록색 배양액 2개를 뿌렸을 때의 예시이다. 하얀색 칸은 배양액을 뿌릴 수 없는 땅을, 황토색 칸은 배양액을 뿌릴 수 있는 땅을, 하늘색 칸은 호수를 의미한다.
+
+> ![Img](https://upload.acmicpc.net/6c58580b-a750-4824-a9a0-2dd79eab545b/-/preview/)
+
+> 초록색 배양액과 빨간색 배양액이 동일한 시간에 도달한 땅에서는 두 배양액이 합쳐져서 꽃이 피어난다. 꽃이 피어난 땅에서는 배양액이 사라지기 때문에 더 이상 인접한 땅으로 배양액을 퍼트리지 않는다. 아래는 초록색 배양액 2개와 빨간색 배양액 2개를 뿌렸을 때의 예시이다.
+
+> ![Img](https://upload.acmicpc.net/f396d82b-ce1d-42f6-a43b-49ddff720d64/-/preview/)
+
+> 배양액은 봄이 지나면 사용할 수 없게 되므로 주어진 모든 배양액을 남김없이 사용해야 한다. 예를 들어 초록색 배양액 2개와 빨간색 배양액 2개가 주어졌는데 초록색 배양액 1개를 땅에 뿌리지 않고, 초록색 배양액 1개와 빨간색 배양액 2개만을 사용하는 것은 불가능하다. 또한 모든 배양액은 서로 다른 곳에 뿌려져야 한다.정원과 두 배양액의 개수가 주어져있을 때 피울 수 있는 꽃의 최대 개수를 구해보자.
+
+# 입력
+> 첫째 줄에 정원의 행의 개수와 열의 개수를 나타내는 N(2 ≤ N ≤ 50)과 M(2 ≤ M ≤ 50), 그리고 초록색 배양액의 개수 G(1 ≤ G ≤ 5)와 빨간색 배양액의 개수 R(1 ≤ R ≤ 5)이 한 칸의 빈칸을 사이에 두고 주어진다. 그 다음 N개의 줄에는 각 줄마다 정원의 각 행을 나타내는 M개의 정수가 한 개의 빈 칸을 사이에 두고 주어진다. 각 칸에 들어가는 값은 0, 1, 2이다. 0은 호수, 1은 배양액을 뿌릴 수 없는 땅, 2는 배양액을 뿌릴 수 있는 땅을 의미한다. 배양액을 뿌릴 수 있는 땅의 수는 R+G개 이상이고 10개 이하이다.
+
+# 출력
+> 첫째 줄에 피울 수 있는 꽃의 최대 개수를 출력한다.
+
+# 풀이
+BFS + 백트랙킹을 이용한 문제였다. 풀이는 [이 곳](https://regularmember.tistory.com/189)을 참조하여 풀었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+const int SIZE = 50;
+
+int maxCnt = 0;
+int N, M, G, R;
+int brownSoilSize;
+int field[SIZE][SIZE];
+int gTime[SIZE][SIZE];
+int rTime[SIZE][SIZE];
+bool flower[SIZE][SIZE];
+
+struct Delta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+vector<pair<int, int>> brownSoil;
+
+vector<pair<int, int>> green;
+vector<pair<int, int>> red;
+
+void BFS()
+{
+	queue<pair<int, int>> gq;
+	queue<pair<int, int>> rq;
+
+    // BFS를 할때마다 초기화한다.
+	memset(gTime, -1, sizeof(gTime));
+	memset(rTime, -1, sizeof(rTime));
+
+	memset(flower, false, sizeof(flower));
+
+    // 먼저 초록색 배양액들의 위치를 큐에 넣고 시간을 초기화
+	for (const auto& kv : green)
+	{
+		gq.push({ kv.first, kv.second });
+		gTime[kv.first][kv.second] = 0;
+	}
+
+    // 빨간색 배양액도 마찬가지로 큐에 넣고 초기화
+	for (const auto& kv : red)
+	{
+		rq.push({ kv.first, kv.second });
+		rTime[kv.first][kv.second] = 0;
+	}
+
+	int flowerCnt = 0;
+	int x, y, nx, ny;
+	int gqSize;
+	int rqSize;
+    // 두개의 큐가 모두 빌때까지 반복한다.
+	while (!gq.empty() || !rq.empty())
+	{
+		gqSize = gq.size();
+		rqSize = rq.size();
+        // 먼저 초록색 배양액의 크기만 큼 큐에서 빼고 퍼트린다.
+		while (gqSize--)
+		{
+			x = gq.front().first;
+			y = gq.front().second;
+			gq.pop();
+
+            // 만약 이미 꽃이 핀곳이라면 넘긴다.
+			if (flower[x][y])
+				continue;
+
+			for (int i = 0; i < 4; i++)
+			{
+				nx = x + Delta[i].x;
+				ny = y + Delta[i].y;
+
+				if (nx < 0 || ny < 0 || nx >= N || ny >= M)
+					continue;
+
+                // 이미 초록색 배양액이 퍼진곳이라면 넘긴다.
+				if (gTime[nx][ny] != -1)
+					continue;
+                // 호수라면 넘긴다.
+				if (field[nx][ny] == 0)
+					continue;
+                // 만약 빨간색 배양액이 위치해 있다면 넘긴다.
+				if (rTime[nx][ny] != -1)
+					continue;
+
+                // 초록색 배양액의 퍼진 시간을 기록하고 큐에 추가
+				gTime[nx][ny] = gTime[x][y] + 1;
+				gq.push({ nx, ny });
+			}
+		}
+
+		while (rqSize--)
+		{
+			x = rq.front().first;
+			y = rq.front().second;
+			rq.pop();
+
+			for (int i = 0; i < 4; i++)
+			{
+				nx = x + Delta[i].x;
+				ny = y + Delta[i].y;
+
+				if (nx < 0 || ny < 0 || nx >= N || ny >= M)
+					continue;
+
+				if (rTime[nx][ny] != -1)
+					continue;
+
+				if (field[nx][ny] == 0)
+					continue;
+
+                // 초록색 배양액이 없는 곳이라면 추가한다.
+				if (gTime[nx][ny] == -1)
+				{
+					rTime[nx][ny] = rTime[x][y] + 1;
+					rq.push({ nx, ny });
+				}
+                // 만약 초록색 배양액의 퍼진시간과 지금 빨간색 배양액이 퍼진시간이 같아진다면
+                // 꽃이 피는 조건이다.
+				else if (gTime[nx][ny] == rTime[x][y] + 1)
+				{
+                    // 꽃을 피운다.
+					flower[nx][ny] = true;
+					rTime[nx][ny] = rTime[x][y] + 1;
+
+					flowerCnt++;
+				}
+			}
+		}
+	}
+
+
+    // 최댓값을 취한다.
+	maxCnt = max(maxCnt, flowerCnt);
+}
+
+void select(int depth, int gCnt, int rCnt)
+{
+    // 만약 남은 초록, 빨간색 배양액이 현재 배양액이 퍼질 수 있는 땅의 수보다 크다면
+    // 반환한다. 항상 배양액은 남김없이 다 써야 한다.
+	if (gCnt + rCnt > (brownSoilSize - depth))
+		return;
+
+    // 만약 배양액을 남김없이 다 썼다면
+    // BFS를 돌려서 확인한다.
+	if (gCnt == 0 && rCnt == 0)
+	{
+		BFS();
+		return;
+	}
+    
+    // 만약 남은 토양이 없다면 반환
+	if (depth == brownSoilSize)
+		return;
+
+
+    // 배양액이 퍼질 수 있는 곳의 위치를 기록한다.
+	int x = brownSoil[depth].first;
+	int y = brownSoil[depth].second;
+
+    // 이 땅을 건너뛴다.
+	select(depth + 1, gCnt, rCnt);
+
+    // 이 땅에 초록색 배양액을 뿌린다.
+	if (gCnt > 0)
+	{
+		green.push_back({ x, y });
+		select(depth + 1, gCnt - 1, rCnt);
+		green.pop_back();
+	}
+
+    // 이 땅에 빨간색 배양액을 뿌린다.
+	if (rCnt > 0)
+	{
+		red.push_back({ x, y });
+		select(depth + 1, gCnt, rCnt - 1);
+		red.pop_back();
+	}
+}
+
+int main()
+{
+	cin >> N >> M >> G >> R;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < M; j++)
+		{
+			cin >> field[i][j];
+
+			if (field[i][j] == 2)
+				brownSoil.push_back({ i, j });
+		}
+	}
+
+	brownSoilSize = brownSoil.size();
+	select(0, G, R);
+
+	cout << maxCnt << "\n";
+
+	return 0;
+}
+```
