@@ -1,0 +1,142 @@
+---
+layout: post
+title: 감시
+date:  2021-08-24 10:24:59 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15683)
+# 감시
+
+# 풀이
+백트랙킹으로 모든 경우의 수를 구해서 풀어보려고 했지만 잘 풀리지 않아서 [이 곳](https://www.youtube.com/watch?v=jZwf4OPlhtk&t=988s)의 풀이를 참조했다. 진법을 이용해서 방향을 정하는 방법이 정말 참신했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{0, -1},
+	{1, 0},
+	{0, 1},
+	{-1, 0}
+};
+
+int N, M;
+
+const int SIZE = 10;
+
+int arr[SIZE][SIZE];
+int arr2[SIZE][SIZE];
+
+vector<pair<int, int>> cctvs;
+
+void Check(int x, int y, int dir)
+{
+	dir %= 4;
+
+	while (true)
+	{
+		x += Delta[dir].x;
+		y += Delta[dir].y;
+
+		if (x < 0 || y < 0 || x >= M || y >= N)
+			break;
+		if (arr2[y][x] == 6)
+			break;
+
+		if (arr2[y][x] != 0)
+			continue;
+
+		arr2[y][x] = 7;
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+	int minCnt = 0;
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < M; j++)
+		{
+			cin >> arr[i][j];
+			if (arr[i][j] != 0 && arr[i][j] != 6)
+				cctvs.push_back({ i, j });
+			else if (arr[i][j] == 0)
+				minCnt++;
+		}
+	}
+
+	for (int comb = 0; comb < (1 << (2 * cctvs.size())); comb++)
+	{
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < M; j++)
+			{
+				arr2[i][j] = arr[i][j];
+			}
+		}
+
+		int temp = comb;
+
+		for (int i = 0; i < cctvs.size(); i++)
+		{
+			int dir = temp % 4;
+			temp /= 4;
+			int x = cctvs[i].second;
+			int y = cctvs[i].first;
+
+			switch (arr2[y][x])
+			{
+			case 1:
+				Check(x, y, dir);
+				break;
+			case 2:
+				Check(x, y, dir);
+				Check(x, y, dir + 2);
+				break;
+			case 3:
+				Check(x, y, dir);
+				Check(x, y, dir + 1);
+				break;
+			case 4:
+				Check(x, y, dir);
+				Check(x, y, dir + 1);
+				Check(x, y, dir + 2);
+				break;
+			case 5:
+				Check(x, y, dir);
+				Check(x, y, dir + 1);
+				Check(x, y, dir + 2);
+				Check(x, y, dir + 3);
+				break;
+			}
+		}
+
+		int cnt = 0;
+
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < M; j++)
+			{
+				if (arr2[i][j] == 0)
+					cnt++;
+			}
+		}
+
+		minCnt = min(minCnt, cnt);
+	}
+
+	cout << minCnt << "\n";
+
+	return 0;
+}
+```
