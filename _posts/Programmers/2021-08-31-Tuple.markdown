@@ -1,0 +1,97 @@
+---
+layout: post
+title: 튜플
+date: 2021-08-31 08:12:48 +0900
+categories: Programmers-Level2
+---
+
+# 튜플
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/64065)
+
+# 풀이
+먼저 주어진 입력의 괄호안의 값들만 넣는다. 넣을때는 쉼표도 포함해서 같이 넣어서 나중에 분리를 쉽게 하게 한다. 모든 값들을 넣었으면 길이순으로 정렬한다. 그리고 set을 써서 중복 숫자를 제외하고 정답 배열에 넣는다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <set>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(string s) 
+{
+    vector<int> answer;
+    set<int> st;
+    vector<string> v;
+    bool num = false;
+    string temp;
+    for (int i = 0; i < s.length(); i++)
+    {
+        if (!num && isdigit(s[i]))
+        {
+            temp.clear();
+            num = true;
+        }
+        else if (s[i] == '}')
+        {
+            if (!temp.empty())
+            {
+                v.push_back(temp);
+                temp.clear();
+            }
+            num = false;
+        }
+
+        if (num)
+        {
+            temp.push_back(s[i]);
+        }
+    }
+
+    sort(v.begin(), v.end(), [](const string& a, const string& b) {
+        return a.length() < b.length();
+    });
+
+    size_t pos;
+
+    for (int i = 0; i < v.size(); i++)
+    {
+        string e = v[i];
+        if (e.find(",") != string::npos)
+        {
+            while ((pos = e.find(",")) != string::npos)
+            {
+                string token = e.substr(0, pos);
+                e.erase(0, pos + 1);
+
+                if (st.count(stoi(token)) == 0)
+                {
+                    st.insert(stoi(token));
+                    answer.push_back(stoi(token));
+                }
+
+            }
+            if (st.count(stoi(e)) == 0)
+            {
+                st.insert(stoi(e));
+                answer.push_back(stoi(e));
+            }
+
+        }
+        else
+        {
+            if (st.count(stoi(e)) == 0)
+            {
+                st.insert(stoi(e));
+                answer.push_back(stoi(e));
+            }
+        }
+    }
+
+
+    return answer;
+}
+```

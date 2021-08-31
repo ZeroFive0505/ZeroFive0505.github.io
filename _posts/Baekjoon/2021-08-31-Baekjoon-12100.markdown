@@ -1,0 +1,129 @@
+---
+layout: post
+title: 2048(Easy)
+date:  2021-08-31 09:28:33 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/12100)
+# 2048(Easy)
+
+# 문제
+> [Baekjoon](https://www.acmicpc.net/problem/12100) 참조
+
+# 풀이
+[이 곳](https://blog.encrypted.gg/948?category=773649)의 해설을 참조해서 풀 수 있었다. 먼저 한 방향으로 기울이는 코드만 작성하고 배열자체를 90도로 회전하면 한쪽 방향으로 기울이는 코드를 4방향으로 다 적용할 수 있었다. 4방향으로 기울이는것을 총 5번 반복할 수 있으니 1024번 반복하면서 가장 큰 수를 찾는다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int SIZE = 21;
+
+int board1[SIZE][SIZE];
+int board2[SIZE][SIZE];
+
+int N;
+
+void Rotate()
+{
+	int temp[SIZE][SIZE] = {};
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			temp[i][j] = board2[i][j];
+		}
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			board2[i][j] = temp[N - j - 1][i];
+		}
+	}
+}
+
+void tilt(int cnt)
+{
+	while (cnt--)
+		Rotate();
+
+	for (int i = 0; i < N; i++)
+	{
+		int tilted[SIZE] = {};
+		int idx = 0;
+
+		for (int j = 0; j < N; j++)
+		{
+			if (board2[i][j] == 0)
+				continue;
+
+			if (tilted[idx] == 0)
+				tilted[idx] = board2[i][j];
+			else if (tilted[idx] == board2[i][j])
+				tilted[idx++] *= 2;
+			else
+				tilted[++idx] = board2[i][j];
+		}
+
+		for (int j = 0; j < N; j++)
+			board2[i][j] = tilted[j];
+	}
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> board1[i][j];
+		}
+	}
+
+
+	int maxNum = 0;
+
+	for (int temp = 0; temp < 1024; temp++)
+	{
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				board2[i][j] = board1[i][j];
+			}
+		}
+
+
+		int nRotation = temp;
+
+		for (int i = 0; i < 5; i++)
+		{
+			int n = nRotation % 4;
+			tilt(n);
+			nRotation /= 4;
+		}
+
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				maxNum = max(maxNum, board2[i][j]);
+			}
+		}
+	}
+
+
+	cout << maxNum << "\n";
+
+	return 0;
+}
+```
