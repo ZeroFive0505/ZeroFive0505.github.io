@@ -1,0 +1,210 @@
+---
+layout: post
+title: 주사위 굴리기
+date: 2021-09-02 08:35:40 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14499)
+# 주사위 굴리기
+
+# 문제
+> 크기가 N×M인 지도가 존재한다. 지도의 오른쪽은 동쪽, 위쪽은 북쪽이다. 이 지도의 위에 주사위가 하나 놓여져 있으며, 주사위의 전개도는 아래와 같다. 지도의 좌표는 (r, c)로 나타내며, r는 북쪽으로부터 떨어진 칸의 개수, c는 서쪽으로부터 떨어진 칸의 개수이다. 
+ 
+ 
+      2    
+    4 1 3  
+      5  
+      6
+
+> 주사위는 지도 위에 윗 면이 1이고, 동쪽을 바라보는 방향이 3인 상태로 놓여져 있으며, 놓여져 있는 곳의 좌표는 (x, y) 이다. 가장 처음에 주사위에는 모든 면에 0이 적혀져 있다.지도의 각 칸에는 정수가 하나씩 쓰여져 있다. 주사위를 굴렸을 때, 이동한 칸에 쓰여 있는 수가 0이면, 주사위의 바닥면에 쓰여 있는 수가 칸에 복사된다. 0이 아닌 경우에는 칸에 쓰여 있는 수가 주사위의 바닥면으로 복사되며, 칸에 쓰여 있는 수는 0이 된다. 주사위를 놓은 곳의 좌표와 이동시키는 명령이 주어졌을 때, 주사위가 이동했을 때 마다 상단에 쓰여 있는 값을 구하는 프로그램을 작성하시오. 주사위는 지도의 바깥으로 이동시킬 수 없다. 만약 바깥으로 이동시키려고 하는 경우에는 해당 명령을 무시해야 하며, 출력도 하면 안 된다.
+
+# 입력
+> 첫째 줄에 지도의 세로 크기 N, 가로 크기 M (1 ≤ N, M ≤ 20), 주사위를 놓은 곳의 좌표 x y(0 ≤ x ≤ N-1, 0 ≤ y ≤ M-1), 그리고 명령의 개수 K (1 ≤ K ≤ 1,000)가 주어진다. 둘째 줄부터 N개의 줄에 지도에 쓰여 있는 수가 북쪽부터 남쪽으로, 각 줄은 서쪽부터 동쪽 순서대로 주어진다. 주사위를 놓은 칸에 쓰여 있는 수는 항상 0이다. 지도의 각 칸에 쓰여 있는 수는 10 미만의 자연수 또는 0이다. 마지막 줄에는 이동하는 명령이 순서대로 주어진다. 동쪽은 1, 서쪽은 2, 북쪽은 3, 남쪽은 4로 주어진다.
+
+# 출력
+> 이동할 때마다 주사위의 윗 면에 쓰여 있는 수를 출력한다. 만약 바깥으로 이동시키려고 하는 경우에는 해당 명령을 무시해야 하며, 출력도 하면 안 된다.
+
+# 풀이
+처음에는 너무 어렵게 풀려고 했다. 배열을 두개 사용하고 포인터를 하나 사용해서 좌우로 굴릴때 포인터를 바꿔서 배열을 다른 배열을 가리키게 하고 위아래로 굴릴때만 배열을 회전시켜가며 값을 기록하는 방법으로 했는데 예제 입력 몇개는 정답으로 나왔지만 나머지는 틀리게 나왔다. 결국에는 인터넷을 참조했는데 해결법은 생각보다 간단했다. 주사위의 6개의면에 숫자를 넣어 회전시킬때마다 적절한 값으로 바꿔가면 해결이 되는 문제였다. 또한 주의할점은 처음 입력받는 지도의 좌표가 (r,c)인데 이를 x, y에 입력을 받을때는 (y, x)순으로 입력을 받아야한다. 가로 세로가 크기가 같은 예제에서는 문제가 없었지만 제출했을시 순서가 바뀌어있으면 바로 오답처리가 된다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const int SIZE = 21;
+
+int N, M;
+
+int arr[SIZE][SIZE];
+
+int K;
+
+// 0 : 주사위 윗면
+// 1 : 주사위 뒷면
+// 2 : 주사위 오른쪽면
+// 3 : 주사위 왼쪽면
+// 4 : 주사위 앞면
+// 5 : 주사위 아랫면
+int Dice[6] = {};
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{1, 0},
+	{-1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+int main()
+{
+
+	int x, y;
+
+	cin >> N >> M >> y >> x >> K;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < M; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+
+	vector<int> v;
+
+	for (int i = 0; i < K; i++)
+	{
+		int dir;
+		cin >> dir;
+		v.push_back(dir - 1);
+	}
+
+
+	for (int i = 0; i < v.size(); i++)
+	{
+		int nx = x + Delta[v[i]].x;
+		int ny = y + Delta[v[i]].y;
+
+		if (nx < 0 || ny < 0 || ny >= N || nx >= M)
+			continue;
+
+		switch (v[i])
+		{
+		case 0:
+		{
+			int temp[6] = {};
+			for (int i = 0; i < 6; i++)
+			{
+				temp[i] = Dice[i];
+			}
+
+			Dice[0] = temp[3];
+			Dice[2] = temp[0];
+			Dice[5] = temp[2];
+			Dice[3] = temp[5];
+		}
+
+		if (arr[ny][nx] == 0)
+			arr[ny][nx] = Dice[5];
+		else
+		{
+			Dice[5] = arr[ny][nx];
+			arr[ny][nx] = 0;
+		}
+
+		cout << Dice[0] << "\n";
+			break;
+		case 1:
+		{
+			int temp[6] = {};
+
+			for (int i = 0; i < 6; i++)
+			{
+				temp[i] = Dice[i];
+			}
+
+			Dice[0] = temp[2];
+			Dice[3] = temp[0];
+			Dice[5] = temp[3];
+			Dice[2] = temp[5];
+		}
+
+		if (arr[ny][nx] == 0)
+			arr[ny][nx] = Dice[5];
+		else
+		{
+			Dice[5] = arr[ny][nx];
+			arr[ny][nx] = 0;
+		}
+
+		cout << Dice[0] << "\n";
+
+			break;
+		case 2:
+		{
+			int temp[6] = {};
+
+			for (int i = 0; i < 6; i++)
+			{
+				temp[i] = Dice[i];
+			}
+
+			Dice[0] = temp[4];
+			Dice[1] = temp[0];
+			Dice[5] = temp[1];
+			Dice[4] = temp[5];
+		}
+
+		if (arr[ny][nx] == 0)
+			arr[ny][nx] = Dice[5];
+		else
+		{
+			Dice[5] = arr[ny][nx];
+			arr[ny][nx] = 0;
+		}
+
+		cout << Dice[0] << "\n";
+
+			break;
+		case 3:
+		{
+			int temp[6] = {};
+
+			for (int i = 0; i < 6; i++)
+			{
+				temp[i] = Dice[i];
+			}
+
+			Dice[0] = temp[1];
+			Dice[4] = temp[0];
+			Dice[5] = temp[4];
+			Dice[1] = temp[5];
+		}
+
+		if (arr[ny][nx] == 0)
+			arr[ny][nx] = Dice[5];
+		else
+		{
+			Dice[5] = arr[ny][nx];
+			arr[ny][nx] = 0;
+		}
+
+		cout << Dice[0] << "\n";
+			break;
+		}
+
+		x = nx;
+		y = ny;
+	}
+
+	return 0;
+}
+```
