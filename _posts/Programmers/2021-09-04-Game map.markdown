@@ -1,0 +1,79 @@
+---
+layout: post
+title: 게임 맵 최단거리
+date: 2021-09-04 07:18:04 +0900
+categories: Programmers-Level2
+---
+
+# 게임 맵 최단거리
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/1844)
+
+# 풀이
+BFS를 이용해서 최단 거리를 구할 수 있는 문제였다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+struct sCoordinates
+{
+	int x;
+	int y;
+	int dist;
+};
+
+int solution(vector<vector<int>> maps)
+{
+	queue<sCoordinates> q;
+	vector<vector<bool>> visited(maps.size(), vector<bool>(maps[0].size(), false));
+
+	int deltaY[4] = { -1, 0, 1, 0 };
+	int deltaX[4] = { 0, 1, 0, -1 };
+
+	int n = maps.size();
+	int m = maps[0].size();
+
+	visited[0][0] = true;
+
+	q.push({ 0, 0, 1 });
+	while (!q.empty())
+	{
+
+		sCoordinates current = q.front();
+		q.pop();
+
+		int curX = current.x;
+		int curY = current.y;
+		int curDist = current.dist;
+
+        // 끝에 도달하면 바로 반환
+		if (current.y == maps.size() - 1 && current.x == maps[0].size() - 1)
+			return curDist;
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nx = current.x + deltaX[i];
+			int ny = current.y + deltaY[i];
+
+			if (ny < 0 || nx < 0 || ny >= maps.size() || nx >= maps[0].size())
+				continue;
+			
+			if (maps[ny][nx] == 0)
+				continue;
+
+			if (visited[ny][nx])
+				continue;
+
+			q.push({ nx, ny, curDist + 1 });
+			visited[ny][nx] = true;
+		}
+	}
+
+    // 만약 도달하지 못하면 -1 반환
+	return -1;
+}
+```

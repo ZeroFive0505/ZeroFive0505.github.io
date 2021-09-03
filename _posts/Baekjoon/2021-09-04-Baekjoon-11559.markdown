@@ -1,0 +1,159 @@
+---
+layout: post
+title: Puyo Puyo
+date: 2021-09-04 08:23:18 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/11559)
+# Puyo Puyo
+
+# 문제
+> 뿌요뿌요의 룰은 다음과 같다.
+>> - 필드에 여러 가지 색깔의 뿌요를 놓는다. 
+뿌요는 중력의 영향을 받아 아래에 바닥이나 다른 뿌요가 나올 때까지 아래로 떨어진다.
+>> - 뿌요를 놓고 난 후, 같은 색 뿌요가 4개 이상 상하좌우로 연결되어 있으면 연결된 같은 색 뿌요들이 한꺼번에 없어진다. 이때 1연쇄가 시작된다.
+>> - 뿌요들이 없어지고 나서 위에 다른 뿌요들이 있다면, 역시 중력의 영향을 받아 차례대로 아래로 떨어지게 된다.
+>> - 아래로 떨어지고 나서 다시 같은 색의 뿌요들이 4개 이상 모이게 되면 또 터지게 되는데, 터진 후 뿌요들이 내려오고 다시 터짐을 반복할 때마다 1연쇄씩 늘어난다.
+>> - 터질 수 있는 뿌요가 여러 그룹이 있다면 동시에 터져야 하고 여러 그룹이 터지더라도 한번의 연쇄가 추가된다.
+
+> 남규는 최근 뿌요뿌요 게임에 푹 빠졌다. 이 게임은 1:1로 붙는 대전게임이라 잘 쌓는 것도 중요하지만, 상대방이 터뜨린다면 연쇄가 몇 번이 될지 바로 파악할 수 있는 능력도 필요하다. 하지만 아직 실력이 부족하여 남규는 자기 필드에만 신경 쓰기 바쁘다. 상대방의 필드가 주어졌을 때, 연쇄가 몇 번 연속으로 일어날지 계산하여 남규를 도와주자!
+
+# 입력
+> 현재 주어진 상황에서 몇연쇄가 되는지 출력한다. 하나도 터지지 않는다면 0을 출력한다.
+
+# 풀이
+계속된 시도에서도 25퍼센트에서 자꾸 틀려서 결국에는 [이 곳](https://jaimemin.tistory.com/722)을 참조하여 풀었다. 터트릴 수 있는것을 한번에 다 터트리고 그리고나서 아래로 내리고 체인 카운트를 하나 늘려준다. 만약 터트릴 수 있는게 없다면 무한 반복문을 빠져나온다. 터트릴때 x축을 기준으로 정렬해야하며 정렬을 하지 않을시에는 오답으로 처리된다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <cstring>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+const int COL = 6;
+const int ROW = 12;
+
+char arr[ROW][COL];
+bool visited[ROW][COL];
+
+struct sDelta
+{
+	int x;
+	int y;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+int BFS()
+{
+	queue<pair<int, int>> q;
+
+	int cnt = 0;
+
+	while (1)
+	{
+		vector<pair<int, int>> v;
+		memset(visited, false, sizeof(visited));
+
+		for (int y = ROW - 1; y >= 0; y--)
+		{
+			for (int x = 0; x < COL; x++)
+			{
+				if (arr[y][x] == '.')
+					continue;
+				else
+				{
+					queue<pair<int, int>> popped;
+					char color = arr[y][x];
+					q.push({ y, x });
+					
+					while (!q.empty())
+					{
+						pair<int, int> current = q.front();
+						int cx = current.second;
+						int cy = current.first;
+						popped.push(current);
+						visited[cy][cx] = true;
+						q.pop();
+
+						for (int i = 0; i < 4; i++)
+						{
+							int nx = cx + Delta[i].x;
+							int ny = cy + Delta[i].y;
+
+							if (nx < 0 || ny < 0 || ny >= ROW || nx >= COL)
+								continue;
+
+							if (visited[ny][nx] || color != arr[ny][nx])
+								continue;
+
+							visited[ny][nx] = true;
+							q.push({ ny, nx });
+						}
+					}
+
+					if (popped.size() >= 4)
+					{
+						while (!popped.empty())
+						{
+							v.push_back(popped.front());
+							popped.pop();
+						}
+					}
+				}
+			}
+		}
+
+		if (v.size() >= 4)
+		{
+			sort(v.begin(), v.end(), [](const pair<int, int>& a, const pair<int, int>& b) {
+				if (a.second != b.second)
+					return a.second < b.second;
+				else
+					return a.first < b.first;
+			});
+
+
+			for (const auto& kv : v)
+			{
+				for (int y = kv.first; y > 0; y--)
+				{
+					arr[y][kv.second] = arr[y - 1][kv.second];
+				}
+
+				arr[0][kv.second] = '.';
+			}
+
+			cnt++;
+		}
+		else
+			break;
+	}
+
+	return cnt;
+}
+
+int main()
+{
+	for (int i = 0; i < ROW; i++)
+	{
+		string s;
+		cin >> s;
+		for (int j = 0; j < COL; j++)
+		{
+			arr[i][j] = s[j];
+		}
+	}
+
+	cout << BFS() << "\n";
+
+	return 0;
+}
+```
