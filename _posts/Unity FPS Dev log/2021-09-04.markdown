@@ -1,0 +1,33 @@
+---
+layout: post
+title: FPS 개발일지
+date: 2021-09-04 14:11:33 +0900
+categories: Unity FPS
+---
+
+# Unity FPS
+유튜버 Dani의 Karlson에 많은 영감을 받아 비슷한 게임을 만들어보기 시작했다. 현재 무기 교환, 픽업 기본적인 플레이어의 움직임은 전부 다 완성했으며 적 캐릭터를 만드는 작업을 시작했다.
+
+
+각 무기별로 간단하게 아래와 같이 애니메이션도 만들었다.
+
+![Imgur](https://imgur.com/1Ems5ka.gif)
+
+![Imgur](https://imgur.com/JFnaPNo.gif)
+
+![Imgur](https://imgur.com/c7HIltk.gif)
+
+
+다음으로는 짧은 플레이 영상이다.
+
+![Imgur](https://imgur.com/zCBhF2j.gif)
+
+플레이어가 어느정도 완성이 되고 테스트로 간단한 적 캐릭터를 만든 후 IK까지 성공적으로 추가했다.
+
+![Imgur](https://imgur.com/NZk2aYO.gif)
+
+
+
+이제 기본적인 플레이어 움직임은 다 완성이 되었고 약간의 조정만 더 하면 될 것 같다.. 아직도 갈 길이 정말 멀다.
+
+
