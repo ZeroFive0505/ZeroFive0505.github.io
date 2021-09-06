@@ -1,0 +1,235 @@
+---
+layout: post
+title: 톱니바퀴
+date: 2021-09-06 09:00:00 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14891)
+# 톱니바퀴
+
+# 문제
+문제 링크 참조
+
+# 풀이
+회전시키기전에 다음이나 이전 톱니바퀴가 같이 회전할 수 있는지를 먼저 체크하고 회전을 시켜야했다. 이것을 빼먹어서 좀 애를 먹었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+const int SIZE = 4;
+const int GEARS = 8;
+
+int arr[SIZE][GEARS];
+
+int K;
+
+void Rotation(int select, bool clockWise)
+{
+	int temp[GEARS] = {};
+
+	for (int i = 0; i < GEARS; i++)
+	{
+		temp[i] = arr[select][i];
+	}
+
+	if (clockWise)
+	{
+		int last = arr[select][GEARS - 1];
+
+		for (int i = 0; i < GEARS - 1; i++)
+		{
+			arr[select][i + 1] = temp[i];
+		}
+
+		arr[select][0] = last;
+	}
+	else
+	{
+		int first = arr[select][0];
+
+		for (int i = 0; i < GEARS - 1; i++)
+		{
+			arr[select][i] = temp[i + 1];
+		}
+
+		arr[select][GEARS - 1] = first;
+	}
+}
+
+void RotationForward(int select, bool clockWise)
+{
+	if (select == SIZE)
+		return;
+
+	bool next = false;
+	if (arr[select][2] != arr[select + 1][6])
+		next = true;
+
+	Rotation(select, clockWise);
+	if(next)
+		RotationForward(select + 1, !clockWise);
+}
+
+void RotationBackward(int select, bool clockWise)
+{
+	if (select < 0)
+		return;
+
+	bool prev = false;
+	if (arr[select][6] != arr[select - 1][2])
+		prev = true;
+
+	Rotation(select, clockWise);
+	if(prev)
+		RotationBackward(select - 1, !clockWise);
+}
+
+int main()
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		string s;
+		cin >> s;
+		for (int j = 0; j < GEARS; j++)
+		{
+			arr[i][j] = s[j] - '0';
+		}
+	}
+
+
+	cin >> K;
+
+	while (K--)
+	{
+		int select;
+		int dir;
+		cin >> select;
+
+		select--;
+
+		cin >> dir;
+
+		switch (dir)
+		{
+		case 1:
+			if (select == 0)
+			{
+				bool next = false;
+				if (arr[select][2] != arr[select + 1][6])
+					next = true;
+
+				Rotation(select, true);
+				if(next)
+					RotationForward(select + 1, false);
+			}
+			else if (select == SIZE - 1)
+			{
+				bool prev = false;
+				if (arr[select][6] != arr[select - 1][2])
+					prev = true;
+
+				Rotation(select, true);
+				if(prev)
+					RotationBackward(select - 1, false);
+			}
+			else
+			{
+				bool next = false;
+				bool prev = false;
+
+				if (arr[select][2] != arr[select + 1][6])
+					next = true;
+
+				if (arr[select][6] != arr[select - 1][2])
+					prev = true;
+
+				Rotation(select, true);
+				if (next)
+					RotationForward(select + 1, false);
+
+				if(prev)
+					RotationBackward(select - 1, false);
+			}
+			break;
+		case -1:
+			if (select == 0)
+			{
+				bool next = false;
+				if (arr[select][2] != arr[select + 1][6])
+					next = true;
+
+				Rotation(select, false);
+				if (next)
+					RotationForward(select + 1, true);
+			}
+			else if (select == SIZE - 1)
+			{
+				bool prev = false;
+				if (arr[select][6] != arr[select - 1][2])
+					prev = true;
+
+				Rotation(select, false);
+				if (prev)
+					RotationBackward(select - 1, true);
+			}
+			else
+			{
+				bool next = false;
+				bool prev = false;
+
+				if (arr[select][2] != arr[select + 1][6])
+					next = true;
+
+				if (arr[select][6] != arr[select - 1][2])
+					prev = true;
+
+				Rotation(select, false);
+
+				if (next)
+					RotationForward(select + 1, true);
+
+				if (prev)
+					RotationBackward(select - 1, true);
+			}
+			break;
+		}
+	}
+
+	int score = 0;
+
+	for (int i = 0; i < SIZE; i++)
+	{
+		switch (i)
+		{
+		case 0:
+			if (arr[i][0] == 1)
+				score += 1;
+			break;
+		case 1:
+			if (arr[i][0] == 1)
+				score += 2;
+			break;
+		case 2:
+			if (arr[i][0] == 1)
+				score += 4;
+			break;
+		case 3:
+			if (arr[i][0] == 1)
+				score += 8;
+			break;
+		}
+	}
+
+
+	cout << score << "\n";
+
+
+	return 0;
+}
+```
