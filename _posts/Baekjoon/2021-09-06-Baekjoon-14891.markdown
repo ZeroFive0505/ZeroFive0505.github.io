@@ -67,11 +67,13 @@ void RotationForward(int select, bool clockWise)
 	if (select == SIZE)
 		return;
 
+    // 회전시키기전에 먼저 다음 톱니바퀴가 돌 수 있는지를 확인한다.
 	bool next = false;
 	if (arr[select][2] != arr[select + 1][6])
 		next = true;
 
 	Rotation(select, clockWise);
+    // 만약 다음 톱니바퀴가 같이 돌아야할 경우에는 반대방향으로 돌린다.
 	if(next)
 		RotationForward(select + 1, !clockWise);
 }
@@ -85,6 +87,7 @@ void RotationBackward(int select, bool clockWise)
 	if (arr[select][6] != arr[select - 1][2])
 		prev = true;
 
+    // 마찬가지
 	Rotation(select, clockWise);
 	if(prev)
 		RotationBackward(select - 1, !clockWise);
