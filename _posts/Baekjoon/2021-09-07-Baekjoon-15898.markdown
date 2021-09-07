@@ -1,0 +1,261 @@
+---
+layout: post
+title: 피아의 아틀리에 ~신비한 대회의 연금술사~
+date: 2021-09-07 09:21:27 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15898)
+# 피아의 아틀리에 ~신비한 대회의 연금술사~
+
+# 문제
+> "피아의 아틀리에 ~신비한 대회의 연금술사~"는 가난한 연금술사 피아의 성장스토리를 담은 게임이다. 이 게임의 가장 중요한 부분은 "대회"인데, 연금술로 높은 품질의 물건을 만들어 상금을 타야만 피아가 먹고 살 수 있기 때문이다. 스토리는 매우 길지만 여백이 없어 생략하기로 하고, 여러분은 이 게임의 대회 기능을 확인해달라는 요청을 받았다. 여러분이 확인해야 하는 대회는 다음과 같다.  
+여러분은 5×5 격자 모양 가마에 서로 다른 재료 3개를 순서대로 넣어 최고 품질의 폭탄을 만들어야 한다. 재료는 대회에서 준비해주며, 넣을 수 있는 재료의 후보는 10개 이하이다. 주어진 재료 중 3개를 고른 뒤, 순서를 정해 가마에 잘 넣어야 한다.  
+가마의 각 칸에는 품질을 나타내는 숫자와 원소를 나타내는 색이 칠해져 있다. 초기에는 모든 칸의 품질은 0, 원소는 흰색이다. 재료는 4×4 모양으로 생겼으며, 재료의 i행 j열에는 2가지 정보가 있다.  
+> 1. 효능: 가마 한 칸의 품질을 바꾸는 -9 이상 9 이하의 정수 xi,j  
+> 2. 원소: 가마 한 칸의 원소를 바꿀 수 있는 색 ci,j (빨강 'R', 파랑 'B', 초록 'G', 노랑 'Y', 흰색 'W' 중 하나이다)
+
+
+> 재료를 가마에 넣을 때는 5×5 격자를 벗어날 수 없다. 회전은 가능하나, 격자에 맞지 않게 기울여 넣을 수는 없다. 재료를 가마에 넣을 때, 가마의 상태는 다음과 같이 바뀐다.  
+> 1. 재료가 위치하지 않는 가마의 격자칸은 아무런 변화가 생기지 않는다.
+> 2. 재료가 위치한 가마의 격자칸에 있는 품질과 원소값은 바뀔 수 있다.
+>> - 격자의 품질은 재료의 효능이 더해진다. 더한 뒤의 값이 음수인 경우 0으로, 9 초과인 경우 9로 바뀐다.  
+>> - 격자의 색은 재료의 원소가 흰색인 경우 그대로, 아닌 경우 재료의 원소와 같은 색으로 칠해진다.
+
+> 재료 3개를 모두 넣어야만 폭탄이 만들어지며, 폭탄의 품질은 다음과 같이 계산된다. 가마의 최종 상태에서 빨강, 파랑, 초록, 노랑으로 칠해진 부분의 품질 합을 각각 R, B, G, Y라고 했을 때,  
+> `(폭탄의 품질) = 7R + 5B + 3G + 2Y`
+
+> 폭탄을 만들기 위한 재료의 후보가 주어졌을 때, 재료를 적절히 선택하고 배치하여 만들 수 있는 폭탄의 최대 품질을 구하자.
+
+# 입력
+> 첫 번째 줄에 재료의 개수를 나타내는 자연수 n이 주어진다. (3 ≤ n ≤ 10)  
+두 번째 줄부터 n개의 재료 정보가 순서대로 주어진다. 각 재료의 정보는 다음과 같다. 먼저 4개의 줄에 효능을 나타내는 수 4개가 공백을 사이에 두고 주어진다. 다음 4개의 줄에 원소를 나타내는 글자 4개가 공백을 사이에 두고 주어진다. 이 글자는 R, B, G, Y, W 중 하나임이 보장된다.
+
+# 출력
+> 첫 번째 줄에 품질의 최댓값을 출력한다.
+
+# 풀이
+인터넷에 [다른분의](https://geniusjo-story.tistory.com/399) 풀이를 참조하여 풀었다. 고른 재료의 넣는 순서까지는 혼자 풀때 고려하지 못했으며 어떻게 가마의 상태를 원래의 상태로 돌려야할지를 배울 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int INF = 987654321;
+
+int n;
+
+pair<int, char> kiln[5][5];
+pair<int, char> ingredient[10][4][4];
+
+int answer = -INF;
+
+void Place(pair<int, int> currentPos, int number)
+{
+	for (int i = currentPos.first; i < currentPos.first + 4; i++)
+	{
+		for (int j = currentPos.second; j < currentPos.second + 4; j++)
+		{
+			pair<int, char> current = kiln[i][j];
+
+			current.first += ingredient[number][i - currentPos.first][j - currentPos.second].first;
+
+			if (current.first < 0)
+				current.first = 0;
+			else if (current.first > 9)
+				current.first = 9;
+
+			if (ingredient[number][i - currentPos.first][j - currentPos.second].second != 'W')
+				current.second = ingredient[number][i - currentPos.first][j - currentPos.second].second;
+
+			kiln[i][j] = current;
+		}
+	}
+}
+
+
+void Reset()
+{
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			kiln[i][j].first = 0;
+			kiln[i][j].second = 'W';
+		}
+	}
+}
+
+void ResetKiln(pair<int, char> original[][5])
+{
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			kiln[i][j] = original[i][j];
+		}
+	}
+}
+
+void Rotate(int number)
+{
+	pair<int, char> temp[4][4];
+
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			temp[i][j] = ingredient[number][i][j];
+		}
+	}
+
+
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			ingredient[number][i][j] = temp[4 - j - 1][i];
+		}
+	}
+}
+
+void DFS(vector<int>& select, int depth)
+{
+	if (depth == 3)
+	{
+		int rSum = 0;
+		int gSum = 0;
+		int bSum = 0;
+		int ySum = 0;
+
+		for (int i = 0; i < 5; i++)
+		{
+			for (int j = 0; j < 5; j++)
+			{
+				switch (kiln[i][j].second)
+				{
+				case 'R':
+					rSum += kiln[i][j].first;
+					break;
+				case 'G':
+					gSum += kiln[i][j].first;
+					break;
+				case 'B':
+					bSum += kiln[i][j].first;
+					break;
+				case 'Y':
+					ySum += kiln[i][j].first;
+					break;
+				}
+			}
+		}
+
+		answer = max(answer, 7 * rSum + 5 * bSum + 3 * gSum + 2 * ySum);
+
+		return;
+	}
+
+    // 가마에 배치하기전 이전 상태를 저장해둔다.
+	pair<int, char> backUp[5][5];
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			backUp[i][j] = kiln[i][j];
+		}
+	}
+
+    // 가마의 크기는 5 x 5 재료의 크기는 4 x 4이니
+    // 넣을 수 있는 곳은 (0, 0), (0, 1), (1, 0), (1, 1)으로
+    // 한정되어있다.
+
+    // 백트랙킹 시작
+	for (int i = 0; i < 4; i++)
+	{   
+		Place({ 0, 0 }, select[depth]);
+		DFS(select, depth + 1);
+		ResetKiln(backUp);
+
+		Place({ 0, 1 }, select[depth]);
+		DFS(select, depth + 1);
+		ResetKiln(backUp);
+
+		Place({ 1, 0 }, select[depth]);
+		DFS(select, depth + 1);
+		ResetKiln(backUp);
+
+		Place({ 1, 1 }, select[depth]);
+		DFS(select, depth + 1);
+		ResetKiln(backUp);
+
+        // 재료 회전
+		Rotate(select[depth]);
+	}
+}
+
+int main()
+{
+
+	Reset();
+
+	cin >> n;
+
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				cin >> ingredient[i][j][k].first;
+			}
+		}
+
+		for (int j = 0; j < 4; j++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				cin >> ingredient[i][j][k].second;
+			}
+		}
+	}
+
+	vector<int> perm(n, 0);
+
+	for (int i = 0; i < 3; i++)
+		perm[i] = 1;
+
+	sort(perm.begin(), perm.end());
+
+	do
+	{
+		vector<int> select;
+
+		for (int i = 0; i < perm.size(); i++)
+		{
+			if (perm[i] == 1)
+			{
+				select.push_back(i);
+			}
+		}
+
+		sort(select.begin(), select.end());
+
+        // 고른 재료의 넣는 순서를 모두 고려한다.
+		do
+		{
+			DFS(select, 0);
+		} while (next_permutation(select.begin(), select.end()));
+
+	} while (next_permutation(perm.begin(), perm.end()));
+
+
+	cout << answer << "\n";
+
+	return 0;
+}
+```
