@@ -1,0 +1,86 @@
+---
+layout: post
+title: 배달
+date: 2021-09-13 10:30:00 +0900
+categories: Programmers-Level2
+---
+
+# 배달
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/12978)
+
+# 풀이
+다익스트라를 이용해서 풀 수 있었다. 다익스트라를 통해 최단거리를 구하고 문제에서 주어진 거리내에 있는 마을의 수를 세면된다.
+
+# 코드
+```c++
+#include <iostream>
+#include <limits.h>
+#include <queue>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int SIZE = 51;
+
+vector<pair<int, int>> graph[SIZE];
+int DIST[SIZE];
+
+void Dijkstra(int start)
+{
+    DIST[start] = 0;
+
+    priority_queue<pair<int, int>> pq;
+
+    pq.push({ 0, start });
+
+    while (!pq.empty())
+    {
+        int d = -pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+
+
+        if (d < DIST[u])
+            continue;
+
+        for (int i = 0; i < graph[u].size(); i++)
+        {
+            int v = graph[u][i].first;
+
+            if (DIST[u] + graph[u][i].second < DIST[v])
+            {
+                DIST[v] = DIST[u] + graph[u][i].second;
+                pq.push({ -DIST[v], v });
+            }
+        }
+    }
+}
+
+int solution(int N, vector<vector<int>> road, int K) 
+{
+    int answer = 0;
+
+    fill(DIST, DIST + SIZE, INT_MAX);
+
+    for (int i = 0; i < road.size(); i++)
+    {
+        int a = road[i][0];
+        int b = road[i][1];
+        int d = road[i][2];
+
+        graph[a].push_back({ b, d });
+        graph[b].push_back({ a, d });
+    }
+
+    Dijkstra(1);
+
+    for (int i = 1; i <= N; i++)
+    {
+        if (DIST[i] <= K)
+            answer++;
+    }
+
+    return answer;
+}
+```
