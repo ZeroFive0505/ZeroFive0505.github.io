@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  마리오카트 도전
+title:  마리오카트 #1
 date:   2021-09-27 11:05:48 +0900
 categories: WIN API
 ---
