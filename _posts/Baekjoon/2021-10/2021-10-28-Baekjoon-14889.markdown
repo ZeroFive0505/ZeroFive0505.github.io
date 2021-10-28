@@ -1,0 +1,183 @@
+---
+layout: post
+title: 스타트와 링크
+date: 2021-10-28 11:07:39 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14889)
+# 스타트와 링크
+
+# 첫 시도
+간단하게 생각나는대로 c++의 next_permutation으로 모든 순열을 구하고 그걸 반으로 쪼개서
+팀을 나눠서 점수를 계산해서 최소치를 구하는 방식으로 해봤지만 역시나 N의 값이 너무 커서 그런지 시간이 초과가 됬다...
+
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = 987654321;
+
+const int MAX = 21;
+
+int ans = INF;
+
+vector<int> candidates;
+
+int N;
+
+int arr[MAX][MAX] = {};
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 1; i <= N; i++)
+	{
+		candidates.push_back(i);
+	}
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	do
+	{
+		vector<int> start;
+		vector<int> link;
+
+		for (int i = 0; i < N / 2; i++)
+			start.push_back(candidates[i]);
+
+		for (int i = N / 2; i < N; i++)
+			link.push_back(candidates[i]);
+
+		int startSum = 0;
+		int linkSum = 0;
+
+		for (int i = 0; i < start.size(); i++)
+		{
+			for (int j = i + 1; j < start.size(); j++)
+			{
+				startSum += arr[start[i]][start[j]];
+				startSum += arr[start[j]][start[i]];
+			}
+		}
+
+		for (int i = 0; i < link.size(); i++)
+		{
+			for (int j = i + 1; j < link.size(); j++)
+			{
+				linkSum += arr[link[i]][link[j]];
+				linkSum += arr[link[j]][link[i]];
+			}
+		}
+
+
+		int diff = abs(startSum - linkSum);
+
+		ans = min(ans, diff);
+
+	} while (next_permutation(candidates.begin(), candidates.end()));
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
+
+# 두번째 시도
+인터넷을 참조하여 다른 분들의 풀이를 참조하여 풀 수 있었다. 그냥 순열을 이용하면 속도가 나오질 않으니 백트랙킹을 이용하여 깊이는 선수의 번호 만약 모든 선수가 쓰였다면 스타트와 링크 팀의 크기가 정확히 N / 2인지를 비교하고 둘다 N / 2라면 순회하면서 점수를 구한다.
+
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = 987654321;
+
+const int MAX = 21;
+
+int ans = INF;
+
+int N;
+
+vector<int> start;
+vector<int> link;
+
+int arr[MAX][MAX] = {};
+
+void DFS(int depth, int n)
+{
+	if(depth == n + 1)
+	{
+		if (start.size() == N / 2 && link.size() == N / 2)
+		{
+			int startSum = 0;
+			int linkSum = 0;
+
+			for (int i = 0; i < N / 2; i++)
+			{
+				for (int j = i + 1; j < N / 2; j++)
+				{
+					int s1, s2, l1, l2;
+
+					s1 = start[i];
+					s2 = start[j];
+
+					l1 = link[i];
+					l2 = link[j];
+
+					startSum += arr[s1][s2];
+					startSum += arr[s2][s1];
+
+					linkSum += arr[l1][l2];
+					linkSum += arr[l2][l1];
+				}
+			}
+
+
+			ans = min(ans, abs(startSum - linkSum));
+		}
+
+		return;
+	}
+
+	start.push_back(depth);
+	DFS(depth + 1, n);
+	start.pop_back();
+
+	link.push_back(depth);
+	DFS(depth + 1, n);
+	link.pop_back();
+}
+
+int main()
+{
+	cin >> N;
+
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	DFS(1, N);
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
