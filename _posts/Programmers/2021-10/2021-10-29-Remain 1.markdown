@@ -1,0 +1,42 @@
+---
+layout: post
+title: 나머지가 1이 되는 수 찾기
+date: 2021-10-29 11:40:36 +0900
+categories: Programmers-Level1
+---
+
+# 나머지가 1이 되는 수 찾기
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/87389)
+
+# 풀이
+간단하게 반복문으로 풀 수 있는 문제였다.
+
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+const int INF = 987654321;
+
+using namespace std;
+
+int solution(int n) 
+{
+    int answer = 0;
+    
+    answer = INF;
+
+    for (int i = 1; i < n; i++)
+    {
+        if (n % i == 1)
+        {
+            answer = min(answer, i);
+        }
+    }
+
+    return answer;
+}
+```

@@ -1,0 +1,441 @@
+---
+layout: post
+title: 경사로
+date: 2021-10-29 09:30:56 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14890)
+# 경사로
+
+# 첫 시도
+예제 입력은 모두 통과하길래 혹시나 하는 마음에 제출해봤지만 약 72퍼에서 오답 판정이 나왔다.
+
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 100;
+
+int cnt = 0;
+
+int arr[MAX][MAX] = {};
+bool ramp[MAX][MAX] = {};
+
+int N, L;
+
+void ResetRamp()
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			ramp[i][j] = false;
+		}
+	}
+}
+
+
+void Row(int r)
+{
+	int num = arr[r][0];
+	int i;
+
+	for (i = 1; i < N;)
+	{
+		// 왼쪽에서 오른쪽으로 가는도중 더 높은 경사로를 만났다면
+		if (arr[r][i] > num)
+		{
+			bool possible = true;
+			// 최소 경사로의 너비만큼 반복한다.
+			for (int j = 1; j <= L; j++)
+			{
+				// 만약 더 이상 왼쪽에 경사로를 둘 수 없다면
+				if (i - j < 0)
+				{
+					possible = false;
+					break;
+				}
+				// 이미 왼쪽에 경사로가 존재한다면
+				else if (i - j > 0 && ramp[r][i - j])
+				{
+					possible = false;
+					break;
+				}
+				else
+					// 아니라면 설치
+					ramp[r][i - j] = true;
+			}
+
+			// 가능하다면
+			if (possible)
+			{
+				// 숫자는 갱신한다.
+				num = arr[r][i];
+			}
+			else
+				break;
+		}
+		// 만약 더 낮은 숫자를 만났다면
+		else if (arr[r][i] < num)
+		{
+			bool possible = true;
+			// 경사로를 설치하고자 하는 곳의 높이
+			int bound = arr[r][i];
+			// 오른쪽에 경사로를 설치한다.
+			for (int j = 0; j < L; j++)
+			{
+				// 범위를 넘어갔을 경우
+				if (i + j >= N)
+				{
+					possible = false;
+					break;
+				}
+				// 오른쪽 땅이 평평한지를 검사한다. 즉 높이가 다 동일한지를 검사
+				else if (i + j < N && arr[r][i + j] != bound)
+				{
+					possible = false;
+					break;
+				}
+				else
+					// 경사로 설치
+					ramp[r][i + j] = true;
+			}
+
+			if (possible)
+			{
+				num = arr[r][i];
+			}
+			else
+				break;
+		}
+		else
+		{
+			num = arr[r][i];
+			i++;
+		}
+	}
+
+	if (i == N)
+		cnt++;
+}
+
+void Col(int c)
+{
+	int num = arr[0][c];
+	int i;
+
+	for (i = 1; i < N;)
+	{
+		// 더 낮은 경사로를 만났을 경우
+		if (arr[i][c] < num)
+		{
+			bool possible = true;
+			int bound = arr[i][c];
+			for (int j = 0; j < L; j++)
+			{
+				if (i + j >= N)
+				{
+					possible = false;
+					break;
+				}
+				else if (i + j < N && arr[i + j][c] != bound)
+				{
+					possible = false;
+					break;
+				}
+				else
+					ramp[i + j][c] = true;
+			}
+
+			if (possible)
+			{
+				num = arr[i][c];
+			}
+			else
+				break;
+
+		}
+		// 더 높은 경사로를 만났을 경우
+		else if (arr[i][c] > num)
+		{
+			bool possible = true;
+			for (int j = 1; j <= L; j++)
+			{
+				if (i - j < 0)
+				{
+					possible = false;
+					break;
+				}
+				else if (i - j > 0 && ramp[i - j][c])
+				{
+					possible = false;
+					break;
+				}
+				else
+					ramp[i - j][c] = true;
+			}
+
+			if (possible)
+			{
+				num = arr[i][c];
+			}
+			else
+				break;
+		}
+		else
+		{
+			num = arr[i][c];
+			i++;
+		}
+	}
+
+	if (i == N)
+		cnt++;
+}
+
+int main()
+{
+	cin >> N >> L;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		Row(i);
+		ResetRamp();
+		Col(i);
+		ResetRamp();
+	}
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
+
+# 두번째 시도
+질문 검색을 해보다가 높이차가 2 이상일때는 경사로가 설치가 안된다는 조건을 깜빡하신 분을 발견했는데 생각해보니 나도 그걸 놓친거 같아서 그 부분을 추가했더니 정답 판정을 받았다.
+
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 100;
+
+int cnt = 0;
+
+int arr[MAX][MAX] = {};
+bool ramp[MAX][MAX] = {};
+
+int N, L;
+
+void ResetRamp()
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			ramp[i][j] = false;
+		}
+	}
+}
+
+
+void Row(int r)
+{
+	int num = arr[r][0];
+	int i;
+
+	for (i = 1; i < N;)
+	{
+		// 왼쪽에서 오른쪽으로 가는도중 더 높은 경사로를 만났다면
+		if (arr[r][i] > num && abs(num - arr[r][i]) == 1)
+		{
+			bool possible = true;
+			// 최소 경사로의 너비만큼 반복한다.
+			for (int j = 1; j <= L; j++)
+			{
+				// 만약 더 이상 왼쪽에 경사로를 둘 수 없다면
+				if (i - j < 0)
+				{
+					possible = false;
+					break;
+				}
+				// 이미 왼쪽에 경사로가 존재한다면
+				else if (i - j > 0 && ramp[r][i - j])
+				{
+					possible = false;
+					break;
+				}
+				else
+					// 아니라면 설치
+					ramp[r][i - j] = true;
+			}
+
+			// 가능하다면
+			if (possible)
+			{
+				// 숫자는 갱신한다.
+				num = arr[r][i];
+			}
+			else
+				break;
+		}
+		// 만약 더 낮은 숫자를 만났다면
+		else if (arr[r][i] < num && abs(num - arr[r][i]) == 1)
+		{
+			bool possible = true;
+			// 경사로를 설치하고자 하는 곳의 높이
+			int bound = arr[r][i];
+			// 오른쪽에 경사로를 설치한다.
+			for (int j = 0; j < L; j++)
+			{
+				// 범위를 넘어갔을 경우
+				if (i + j >= N)
+				{
+					possible = false;
+					break;
+				}
+				// 오른쪽 땅이 평평한지를 검사한다. 즉 높이가 다 동일한지를 검사
+				else if (i + j < N && arr[r][i + j] != bound)
+				{
+					possible = false;
+					break;
+				}
+				else
+					// 경사로 설치
+					ramp[r][i + j] = true;
+			}
+
+			if (possible)
+			{
+				num = arr[r][i];
+			}
+			else
+				break;
+		}
+		else if (abs(arr[r][i] - num) >= 2)
+			break;
+		else
+		{
+			num = arr[r][i];
+			i++;
+		}
+	}
+
+	if (i == N)
+		cnt++;
+}
+
+void Col(int c)
+{
+	int num = arr[0][c];
+	int i;
+
+	for (i = 1; i < N;)
+	{
+		// 더 낮은 경사로를 만났을 경우
+		if (arr[i][c] < num && abs(arr[i][c] - num) == 1)
+		{
+			bool possible = true;
+			int bound = arr[i][c];
+			for (int j = 0; j < L; j++)
+			{
+				if (i + j >= N)
+				{
+					possible = false;
+					break;
+				}
+				else if (i + j < N && arr[i + j][c] != bound)
+				{
+					possible = false;
+					break;
+				}
+				else
+					ramp[i + j][c] = true;
+			}
+
+			if (possible)
+			{
+				num = arr[i][c];
+			}
+			else
+				break;
+
+		}
+		// 더 높은 경사로를 만났을 경우
+		else if (arr[i][c] > num && abs(arr[i][c] - num) == 1)
+		{
+			bool possible = true;
+			for (int j = 1; j <= L; j++)
+			{
+				if (i - j < 0)
+				{
+					possible = false;
+					break;
+				}
+				else if (i - j > 0 && ramp[i - j][c])
+				{
+					possible = false;
+					break;
+				}
+				else
+					ramp[i - j][c] = true;
+			}
+
+			if (possible)
+			{
+				num = arr[i][c];
+			}
+			else
+				break;
+		}
+		else if (abs(arr[i][c] - num) >= 2)
+			break;
+		else
+		{
+			num = arr[i][c];
+			i++;
+		}
+	}
+
+	if (i == N)
+		cnt++;
+}
+
+int main()
+{
+	cin >> N >> L;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		Row(i);
+		ResetRamp();
+		Col(i);
+		ResetRamp();
+	}
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```

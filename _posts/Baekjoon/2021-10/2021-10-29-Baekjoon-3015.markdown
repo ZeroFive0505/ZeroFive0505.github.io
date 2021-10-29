@@ -1,0 +1,96 @@
+---
+layout: post
+title: 오아시스 재결합
+date: 2021-10-29 10:35:46 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/3015)
+# 오아시스 재결합
+
+# 문제
+> 오아시스의 재결합 공연에 N명이 한 줄로 서서 기다리고 있다.
+이 역사적인 순간을 맞이하기 위해 줄에서서 기다리고 있던 백준이는 갑자기 자기가 볼 수 있는 사람의 수가 궁금해 졌다.
+두 사람 A와 B가 서로 볼 수 있으려면, 두 사람 사이에 A 또는 B보다 키가 큰 사람이 없어야 한다.
+줄에 서있는 사람의 키가 주어졌을 때, 서로 볼 수 있는 쌍의 수를 구하는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 줄에서 기다리고 있는 사람의 수 N이 주어진다. (1 ≤ N ≤ 500,000)
+둘째 줄부터 N개의 줄에는 각 사람의 키가 나노미터 단위로 주어진다. 모든 사람의 키는 231 나노미터 보다 작다.
+사람들이 서 있는 순서대로 입력이 주어진다.
+
+# 출력
+> 서로 볼 수 있는 쌍의 수를 출력한다.
+
+# 풀이
+마땅한 해결책이 떠오르질 않아 결국 인터넷의 다른 분들의 [풀이](https://jaimemin.tistory.com/831)를 보고 참조하여 푼 문제이다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <stack>
+
+using namespace std;
+
+int N;
+
+int main()
+{
+	cin >> N;
+
+	long long cnt = 0;
+
+    // 키, 볼 수 있는 사람의 수
+	stack<pair<int, int>> st;
+
+	for (int i = 0; i < N; i++)
+	{
+		int height;
+
+		cin >> height;
+
+        // 만약 현재 스택의 최상단의 있는 사람보다 키가 크다면
+        // 계속해서 스택에서 빼내고 볼 수 있던 사람의 수는 누적한다.
+		while (!st.empty() && st.top().first < height)
+		{
+			cnt += st.top().second;
+			st.pop();
+		}
+
+        // 만약 스택이 비어있다면 일단 추가
+		if (st.empty())
+			st.push({ height, 1 });
+		else
+		{
+            // 같은 키를 가진 사람이 들어왔다면
+			if (st.top().first == height)
+			{
+				pair<int, int> top = st.top();
+				st.pop();
+
+                // 현재까지 볼 수 있었던 사람은 그대로 누적시킨다.
+				cnt += top.second;
+
+                // 만약 스택이 비어있지 않다면 제일 큰 사람 한명과 쌍을 이룬다.
+				if (!st.empty())
+					cnt++;
+
+                // 같은 키이므로 하나 증가
+				top.second++;
+				st.push(top);
+			}
+            // 더 작은 사람이 왔을 경우
+			else
+			{  
+				st.push({ height, 1 });
+				cnt++;
+			}
+		}
+	}
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
