@@ -1,0 +1,91 @@
+---
+layout: post
+title: 교점에 별 만들기
+date: 2021-10-31 08:44:56 +0900
+categories: Programmers-Leve2
+---
+
+# 교점에 별 만들기
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/87377)
+
+# 풀이
+데이터의 범위에 주의해야하는 문제였다. 범위는 어떻게 구했는데 계속 오답이 나오길래 [이 곳](https://jaimemin.tistory.com/1995)에서 해답을 얻어서 풀 수 있었던 문제 y축의 경우 상하가 반대로 되어야 하는 것을 주의한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <climits>
+#include <vector>
+
+using namespace std;
+
+vector<string> solution(vector<vector<int>> line) 
+{
+    vector<string> answer;
+
+    // Ax + By + E = 0
+    // Cx + Dy + F = 0
+
+    // x = (BF - ED) / (AD - BC)
+    // y = (EC - AF) / (AD - BC)
+    // (AD - BC) != 0
+
+    vector<pair<long long, long long>> points;
+
+    long long rowMax = LLONG_MIN;
+    long long colMax = LLONG_MIN;
+    long long rowMin = LLONG_MAX;
+    long long colMin = LLONG_MAX;
+
+    for (int i = 0; i < line.size(); i++)
+    {
+        for (int j = i + 1; j < line.size(); j++)
+        {
+            long long a = line[i][0];
+            long long b = line[i][1];
+            long long e = line[i][2];
+
+            long long c = line[j][0];
+            long long d = line[j][1];
+            long long f = line[j][2];
+
+
+            long long adbc = a * d * 1LL - b * c * 1LL;
+
+            if (adbc != 0)
+            {
+                long long bfed = b * f * 1LL - e * d * 1LL;
+                long long ecaf = e * c * 1LL - a * f * 1LL;
+
+                if (bfed % adbc == 0 && ecaf % adbc == 0)
+                {
+                    long long x = bfed / adbc;
+                    long long y = ecaf / adbc;
+
+                    rowMax = max(rowMax, y);
+                    rowMin = min(rowMin, y);
+                    colMax = max(colMax, x);
+                    colMin = min(colMin, x);
+
+                    points.push_back({ x, y });
+                }
+            }
+        }
+    }
+
+    for (long long i = 0; i < rowMax - rowMin + 1; i++)
+    {
+        string s(colMax - colMin + 1, '.');
+        answer.push_back(s);
+    }
+
+    for (const auto& kv : points)
+    {
+        answer[abs(kv.second - rowMax)][abs(kv.first - colMin)] = '*';
+    }
+
+    return answer;
+}
+```
