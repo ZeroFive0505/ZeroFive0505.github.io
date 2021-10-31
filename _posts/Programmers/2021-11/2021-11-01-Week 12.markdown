@@ -1,0 +1,57 @@
+---
+layout: post
+title: 12주차
+date: 2021-11-01 07:37:54 +0900
+categories: Programmers-Leve2
+---
+
+# 12주차
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/87946)
+
+# 풀이
+모든 경우의 수를 구하고 최대치를 구해야하는 문제, 던전의 개수는 1이상 8이하이기에 간단하게 순열로 모든 조합을 구할 수 있다고 생각했다. 순열로 모든 조합을 구한다음에 최대치가 되는 값을 반환하면 된다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int k, vector<vector<int>> dungeons) 
+{
+    int answer = -1;
+
+    vector<int> perm;
+
+    for (int i = 0; i < dungeons.size(); i++)
+    {
+        perm.push_back(i);
+    }
+
+
+    do
+    {
+        int tempK = k;
+        int cnt = 0;
+        for (int i = 0; i < perm.size(); i++)
+        {
+            int minRequire = dungeons[perm[i]][0];
+            int require = dungeons[perm[i]][1];
+
+            if (tempK >= minRequire)
+            {
+                tempK -= require;
+                cnt++;
+            }
+        }
+
+        answer = max(answer, cnt);
+
+    } while (next_permutation(perm.begin(), perm.end()));
+
+    return answer;
+}
+```
