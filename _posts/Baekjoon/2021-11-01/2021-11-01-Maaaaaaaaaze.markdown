@@ -1,0 +1,193 @@
+---
+layout: post
+title: Maaaaaaaaaze
+date: 2021-10-29 09:30:56 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/16985)
+# Maaaaaaaaaze
+
+# 풀이
+회전을 어떻게 해야할지를 많이 고민했던 문제였다. 총 판은 5개이며 회전의 경우의수는 4 따라서 4^5 1024번을 반복하면서 4진법을 이용해서 회전 배열을 초기화 시킨다. 그 이후에는 원본 배열에서 값을 가져오고 회전과 쌓는 순서를 순열로 반복해가면서 가장 작은 값을 찾는다. 최단 거리는 12이므로 12가 나온다면 바로 반복문을 종료하도록 했다. 이렇게 하지 않으면 1로 가득찬 미로에서는 너무 많은 경우의 수가 나와 시간이 오래걸려 시간초과가 뜰 것 같았다.
+
+# 코드
+```c++
+#include <iostream>
+#include <map>
+#include <queue>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+struct sPos
+{
+	int x;
+	int y;
+	int z;
+
+	sPos(int _x, int _y, int _z) : x(_x), y(_y), z(_z) {}
+
+}Delta[] = {
+	{-1, 0, 0},
+	{1, 0, 0},
+	{0, -1, 0},
+	{0, 1, 0},
+	{0, 0, 1},
+	{0, 0, -1}
+};
+
+int maze[5][5][5];
+int tempMaze[5][5][5];
+
+const int INF = 987654321;
+
+void Rotate(int idx)
+{
+	int temp[5][5] = {};
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			temp[i][j] = tempMaze[idx][i][j];
+		}
+	}
+
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			tempMaze[idx][i][j] = temp[5 - j - 1][i];
+		}
+	}
+}
+
+int BFS()
+{
+	bool visited[5][5][5] = {};
+
+	queue<pair<sPos, int>> q;
+
+	if (tempMaze[0][0][0] == 1)
+		q.push({ sPos(0, 0, 0), 0 });
+
+	while (!q.empty())
+	{
+		pair<sPos, int> cur = q.front();
+		q.pop();
+
+		visited[cur.first.x][cur.first.y][cur.first.z] = true;
+
+		if (cur.first.x == 4 && cur.first.y == 4 && cur.first.z == 4)
+		{
+			return cur.second;
+		}
+
+
+		for (int i = 0; i < 6; i++)
+		{
+			sPos temp = cur.first;
+			temp.x += Delta[i].x;
+			temp.y += Delta[i].y;
+			temp.z += Delta[i].z;
+
+			if (temp.x < 0 || temp.y < 0 || temp.z < 0 ||
+				temp.x > 4 || temp.y > 4 || temp.z > 4)
+				continue;
+
+			if (tempMaze[temp.x][temp.y][temp.z] != 1)
+				continue;
+
+			if (visited[temp.x][temp.y][temp.z])
+				continue;
+
+			q.push({ temp, cur.second + 1 });
+
+		}
+	}
+
+
+	return INF;
+}
+
+int main()
+{
+	int answer = INF;
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			for (int k = 0; k < 5; k++)
+			{
+				cin >> maze[i][j][k];
+			}
+
+		}
+	}
+
+	vector<int> perm;
+
+	for (int i = 0; i < 5; i++)
+	{
+		perm.push_back(i);
+	}
+
+	do
+	{
+		for (int r = 0; r < 1024; r++)
+		{
+			int tempR = r;
+
+			vector<int> numRot(5, 0);
+
+			int index = 0;
+			while (tempR)
+			{
+				int n = tempR % 4;
+				tempR /= 4;
+				numRot[index++] = n;
+			}
+
+
+			for (int i = 0; i < 5; i++)
+			{
+				for (int j = 0; j < 5; j++)
+				{
+					for (int k = 0; k < 5; k++)
+					{
+						tempMaze[i][j][k] = maze[perm[i]][j][k];
+					}
+				}
+			}
+
+			for (int i = 0; i < numRot.size(); i++)
+			{
+				for (int j = 0; j < numRot[i]; j++)
+				{
+					Rotate(i);
+				}
+			}
+
+			answer = min(answer, BFS());
+
+			if (answer == 12)
+				break;
+		}
+
+		if (answer == 12)
+			break;
+
+	} while (next_permutation(perm.begin(), perm.end()));
+
+
+	if (answer == INF)
+		cout << -1 << "\n";
+	else
+		cout << answer << "\n";
+
+	return 0;
+}
+```
