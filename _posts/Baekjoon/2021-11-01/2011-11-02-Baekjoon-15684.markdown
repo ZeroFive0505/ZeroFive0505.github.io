@@ -1,0 +1,126 @@
+---
+layout: post
+title: 사다리 조작
+date: 2021-11-02 09:17:43 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15684)
+# 사다리 조작
+
+# 풀이
+고민해봐도 어떻게 풀어나가야 할 지 감이 오질 않아서 인터넷을 [참고](https://yabmoons.tistory.com/47)하여 푼 문제다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = 987654321;
+
+int N, M, H;
+
+bool lines[11][31];
+
+	
+int answer = INF;
+
+// 사다리 게임을 실시한다.
+bool LadderGame()
+{
+    // 1번 세로선 부터 시작
+	for (int i = 1; i <= N; i++)
+	{
+        // 사다리를 타고 내려갈 번호의 변수
+		int current = i;
+
+        // 가로선을 놓을 수 있는 갯수만큼 반복하면서
+		for (int j = 1; j <= H; j++)
+		{
+            // 만약 오른쪽으로 연결됬다면 숫자 증가
+			if (lines[current][j])
+				current++;
+            // 왼쪽으로 연결됬다면 숫자감소
+			else if (lines[current - 1][j])
+				current--;
+		}
+
+        // 만약 가로선의 갯수만큼 반복했는데 현재 번호가 다르다면 거짓
+		if (current != i)
+			return false;
+	}
+
+	return true;
+}
+
+void LineSelect(int idx, int cnt)
+{
+    // 사다리의 최대 갯수는 3개를 넘지 않는다.
+	if (cnt >= 4)
+		return;
+
+    // 사다리 게임을 실행
+	if (LadderGame())
+	{
+        // 최소값 갱신
+		answer = min(answer, cnt);
+		return;
+	}
+
+    // 가로선을 놓을 수 있는 갯수만큼 반복한다.
+	for (int i = idx; i <= H; i++)
+	{
+        // 세로선의 갯수만큼 반복한다.
+		for (int j = 1; j < N; j++)
+		{   
+            // 가로선을 설치할때 만약 옆이나 현재
+            // 위치에 이미 가로선이 설치되어있으면 설치는 불가능하다.
+			if (lines[j][i])
+				continue;
+			
+			if (lines[j - 1][i])
+				continue;
+
+			if (lines[j + 1][i])
+				continue;
+
+            // 가로선을 설치해본다.
+			lines[j][i] = true;
+            // 백트랙킹 실시
+			LineSelect(i, cnt + 1);
+            // 가로선 제거
+			lines[j][i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M >> H;
+
+    // 이미 설치되어있는 가로선을 정보를 설정
+	for (int i = 0; i < M; i++)
+	{
+		int a, b;
+
+		cin >> a >> b;
+
+		lines[b][a] = true;
+	}
+
+    // 1번 세로선부터 시작한다.
+	LineSelect(1, 0);
+
+	if (answer == INF)
+		cout << -1 << "\n";
+	else
+		cout << answer << "\n";
+
+
+	return 0;
+}
+```

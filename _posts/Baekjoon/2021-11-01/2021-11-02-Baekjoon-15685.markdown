@@ -1,0 +1,97 @@
+---
+layout: post
+title: 드래곤 커브
+date: 2021-11-02 10:29:15 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15685)
+# 드래곤 커브
+
+# 풀이
+재귀를 써야하나 한참을 고민하다 마땅한 아이디어가 떠오르지 않아서 인터넷을 참조하였고 [이 곳](https://yabmoons.tistory.com/60)에서 드래곤 커브가 현재 순서에서 역순으로 증가하고 있다는 것을 알게됬다.. 따라서 간단한 반복문으로 모든 경로를 돌면서 체크를 할 수 있고 체크가 끝난 뒤에는 간단하게 꼭지점만 체크를 해서 정사각형일 경우에만 숫자를 늘려준다. 
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int MAX = 101;
+
+int arr[MAX][MAX] = {};
+
+struct sPos
+{
+	int x;
+	int y;
+}Delta[] = {
+	{1, 0},
+	{0, -1},
+	{-1, 0},
+	{0, 1},
+};
+
+int N;
+
+int x, y, d, g;
+
+void Curve(vector<int>& dirs)
+{
+	int size = dirs.size();
+
+	for (int i = size - 1; i >= 0; i--)
+	{
+		int d = (dirs[i] + 1) % 4;
+
+		x += Delta[d].x;
+		y += Delta[d].y;
+
+		arr[y][x] = 1;
+
+		dirs.push_back(d);
+	}
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 0; i < N; i++)
+	{
+		cin >> x >> y >> d >> g;
+
+		vector<int> dirs;
+
+		arr[y][x] = 1;
+		x += Delta[d].x;
+		y += Delta[d].y;
+		arr[y][x] = 1;
+
+		dirs.push_back(d);
+
+		for (int j = 0; j < g; j++)
+		{
+			Curve(dirs);
+		}
+	}
+
+	int cnt = 0;
+
+	for (int i = 0; i < MAX; i++)
+	{
+		for (int j = 0; j < MAX; j++)
+		{
+			if (arr[i][j] == 1 && arr[i + 1][j] == 1 &&
+				arr[i][j + 1] == 1 && arr[i + 1][j + 1] == 1)
+				cnt++;
+		}
+	}
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```

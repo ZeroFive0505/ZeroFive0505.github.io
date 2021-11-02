@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Maaaaaaaaaze
-date: 2021-10-29 09:30:56 +0900
+date: 2021-11-02 09:17:21 +0900
 categories: Baekjoon
 ---
 
