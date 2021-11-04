@@ -1,0 +1,194 @@
+---
+layout: post
+title: 야구
+date: 2021-11-03 09:47:27 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17281)
+# 야구
+
+# 풀이
+순열을 구할때 1번 타자는 항상 4번으로 고정이 되어있는 순열을 구해야 한다. 이 조건을 잘 생각을 안 해서 제대로 된 정답이 나오질 않아 [이 곳](https://yabmoons.tistory.com/284)을 참조하여 코드를 작성했다. 1루 2루 3루 진루의 경우는 리스트를 이용하여 순회하면서 숫자를 늘리고 만약 숫자가 일정 수치 이상이라면 홈으로 돌아왔다고 판단하여 점수를 늘리고 이 동작이 끝나면 주자를 추가하는 식의 방법을 이용했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <list>
+#include <algorithm>
+
+using namespace std;
+
+int N;
+
+int answer = -1;
+
+const int MAX = 51;
+
+const int MAX_PLAYER = 10;
+
+int order[MAX_PLAYER];
+int game[MAX][MAX_PLAYER];
+bool selected[MAX_PLAYER];
+
+
+void Play()
+{
+	int scores = 0;
+	int start = 1;
+
+	for (int i = 1; i <= N; i++)
+	{
+		int outCnt = 0;
+		bool next = false;
+		list<int> basesInfo;
+
+		while (1)
+		{
+			for (int j = start; j < MAX_PLAYER; j++)
+			{
+				int result = game[i][order[j]];
+
+				switch (result)
+				{
+				case 0:
+					outCnt++;
+					break;
+				case 1:
+				{
+
+					auto iter = basesInfo.begin();
+					auto iterEnd = basesInfo.end();
+
+					for (; iter != iterEnd;)
+					{
+						*iter = *iter + 1;
+
+						if (*iter >= 3)
+						{
+							iter = basesInfo.erase(iter);
+							scores++;
+						}
+						else
+							iter++;
+					}
+
+					basesInfo.push_back(0);
+				}
+				break;
+				case 2:
+				{
+					auto iter = basesInfo.begin();
+					auto iterEnd = basesInfo.end();
+
+					for (; iter != iterEnd;)
+					{
+						*iter = *iter + 2;
+
+						if (*iter >= 3)
+						{
+							iter = basesInfo.erase(iter);
+							scores++;
+						}
+						else
+							iter++;
+					}
+
+					basesInfo.push_back(1);
+				}
+				break;
+				case 3:
+				{
+					auto iter = basesInfo.begin();
+					auto iterEnd = basesInfo.end();
+
+					for (; iter != iterEnd;)
+					{
+						*iter = *iter + 3;
+
+						if (*iter >= 3)
+						{
+							iter = basesInfo.erase(iter);
+							scores++;
+						}
+						else
+							iter++;
+					}
+
+					basesInfo.push_back(2);
+				}
+				break;
+				case 4:
+				{
+					scores += basesInfo.size();
+					scores++;
+					basesInfo.clear();
+				}
+				break;
+				}
+
+				if (outCnt == 3)
+				{
+					start = j + 1;
+					if (start == MAX_PLAYER)
+						start = 1;
+
+					next = true;
+					break;
+				}
+			}
+
+			if (next)
+				break;
+
+			start = 1;
+
+		}
+	}
+
+	answer = max(answer, scores);
+}
+
+void DFS(int depth)
+{
+	if (depth == MAX_PLAYER)
+	{
+		Play();
+		return;
+	}
+
+	for (int i = 1; i < MAX_PLAYER; i++)
+	{
+		if (!selected[i])
+		{
+			selected[i] = true;
+			order[i] = depth;
+			DFS(depth + 1);
+			selected[i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j < MAX_PLAYER; j++)
+		{
+			cin >> game[i][j];
+		}
+	}
+
+	selected[4] = true;
+	order[4] = 1;
+
+	DFS(2);
+
+	cout << answer << "\n";
+
+	return 0;
+}
+```
