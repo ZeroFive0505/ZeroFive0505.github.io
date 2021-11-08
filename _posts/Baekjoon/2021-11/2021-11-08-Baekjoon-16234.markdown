@@ -1,0 +1,330 @@
+---
+layout: post
+title: 인구 이동
+date: 2021-11-08 11:45:03 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/16234)
+# 인구 이동
+
+# 문제
+> N×N크기의 땅이 있고, 땅은 1×1개의 칸으로 나누어져 있다. 각각의 땅에는 나라가 하나씩 존재하며, r행 c열에 있는 나라에는 A[r][c]명이 살고 있다. 인접한 나라 사이에는 국경선이 존재한다. 모든 나라는 1×1 크기이기 때문에, 모든 국경선은 정사각형 형태이다. 오늘부터 인구 이동이 시작되는 날이다.
+인구 이동은 하루 동안 다음과 같이 진행되고, 더 이상 아래 방법에 의해 인구 이동이 없을 때까지 지속된다.
+> - 국경선을 공유하는 두 나라의 인구 차이가 L명 이상, R명 이하라면, 두 나라가 공유하는 국경선을 오늘 하루 동안 연다.
+> - 위의 조건에 의해 열어야하는 국경선이 모두 열렸다면, 인구 이동을 시작한다.
+> - 국경선이 열려있어 인접한 칸만을 이용해 이동할 수 있으면, 그 나라를 오늘 하루 동안은 연합이라고 한다.
+> - 연합을 이루고 있는 각 칸의 인구수는 (연합의 인구수) / (연합을 이루고 있는 칸의 개수)가 된다. 편의상 소수점은 버린다.
+> - 연합을 해체하고, 모든 국경선을 닫는다.
+
+# 입력
+> 첫째 줄에 N, L, R이 주어진다. (1 ≤ N ≤ 50, 1 ≤ L ≤ R ≤ 100)
+둘째 줄부터 N개의 줄에 각 나라의 인구수가 주어진다. r행 c열에 주어지는 정수는 A[r][c]의 값이다. (0 ≤ A[r][c] ≤ 100)
+인구 이동이 발생하는 일수가 2,000번 보다 작거나 같은 입력만 주어진다.
+
+# 출력
+> 인구 이동이 며칠 동안 발생하는지 첫째 줄에 출력한다.
+
+
+# 첫 시도
+간단하게 인구 이동이 더 이상 발생하지 않을 때까지 반복하면서 인구를 이동 시켰지만 시간 초과가 떴다.
+
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 101;
+
+struct sPos
+{
+	int x;
+	int y;
+
+	sPos(int _x, int _y) : x(_x), y(_y) {}
+
+}Delta[] = {
+	{-1, 0},
+	{0, -1},
+	{1, 0},
+	{0, 1}
+};
+
+int populations[MAX][MAX];
+
+int areaNum[MAX][MAX];
+
+int N;
+
+int L, R;
+
+int days = 0;
+
+int main()
+{
+	cin >> N >> L >> R;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> populations[i][j];
+		}
+	}
+
+	while (1)
+	{
+		for (int i = 0; i < MAX; i++)
+		{
+			for (int j = 0; j < MAX; j++)
+			{
+				areaNum[i][j] = -1;
+			}
+		}
+
+
+		queue<sPos> q;
+
+		int num = 0;
+		vector<pair<int, int>> v;
+		bool finish = true;
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (areaNum[i][j] == -1)
+				{
+					q.push(sPos(i, j));
+					int cnt = 0;
+					int sum = 0;
+					while (!q.empty())
+					{
+						sPos cur = q.front();
+						q.pop();
+
+						if (areaNum[cur.x][cur.y] == -1)
+						{
+							areaNum[cur.x][cur.y] = num;
+							sum += populations[cur.x][cur.y];
+							cnt++;
+						}
+
+						for(int i = 0; i < 4; i++)
+						{
+							sPos temp = cur;
+
+							temp.x += Delta[i].x;
+							temp.y += Delta[i].y;
+
+							if (temp.x < 0 || temp.y < 0 || temp.x >= N || temp.y >= N)
+								continue;
+
+							if (areaNum[temp.x][temp.y] != -1)
+								continue;
+
+							if ((L <= abs(populations[cur.x][cur.y] - populations[temp.x][temp.y])) &&
+								(abs(populations[cur.x][cur.y] - populations[temp.x][temp.y]) <= R))
+							{
+								q.push(sPos(temp.x, temp.y));
+								finish = false;
+							}
+						}
+					}
+					v.push_back({ sum, cnt });
+					num++;
+				}
+			}
+		}
+
+		if (finish)
+			break;
+		else
+			days++;
+
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (areaNum[i][j] != -1)
+				{
+					populations[i][j] = v[areaNum[i][j]].first / v[areaNum[i][j]].second;
+				}
+			}
+		}
+	}
+
+
+	cout << days << "\n";
+
+	return 0;
+}
+```
+
+# 풀이
+[이 곳](https://yabmoons.tistory.com/77)의 풀이를 참조하여 작성 했다. 나의 풀이와 크게 차이는 안 나는 거 같은데.. 왜 시간 초과가 뜬건지는 잘 모르겠다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 101;
+
+struct sPos
+{
+	int x;
+	int y;
+
+	sPos(int _x, int _y) : x(_x), y(_y) {}
+
+}Delta[] = {
+	{-1, 0},
+	{0, -1},
+	{1, 0},
+	{0, 1}
+};
+
+int populations[MAX][MAX];
+
+bool visited[MAX][MAX];
+
+int N;
+
+int L, R;
+
+int days = 0;
+
+bool Check(int x, int y)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		int nx = x + Delta[i].x;
+		int ny = y + Delta[i].y;
+
+		if (nx < 0 || ny < 0 || nx >= N || ny >= N)
+			continue;
+
+		if (L <= abs(populations[x][y] - populations[nx][ny]) &&
+			abs(populations[x][y] - populations[nx][ny]) <= R)
+			return true;
+	}
+
+	return false;
+}
+
+bool Check(int x, int y, int xx, int yy)
+{
+	if(L <= abs(populations[x][y] - populations[xx][yy]) && abs(populations[x][y] - populations[xx][yy]) <= R)
+		return true;
+
+	return false;
+}
+
+void BFS(int x, int y)
+{
+	queue<sPos> q;
+	queue<sPos> nq;
+
+	q.push(sPos(x, y));
+	nq.push(sPos(x, y));
+
+	visited[x][y] = true;
+
+	int sum = 0;
+	int cnt = 0;
+
+	while (!q.empty())
+	{
+		sPos cur = q.front();
+		q.pop();
+
+		sum += populations[cur.x][cur.y];
+		cnt++;
+
+		for (int i = 0; i < 4; i++)
+		{
+			sPos temp = cur;
+
+			temp.x += Delta[i].x;
+			temp.y += Delta[i].y;
+
+			if (temp.x < 0 || temp.y < 0 || temp.x >= N || temp.y >= N)
+				continue;
+			if (visited[temp.x][temp.y])
+				continue;
+
+			if (Check(cur.x, cur.y, temp.x, temp.y))
+			{
+				visited[temp.x][temp.y] = true;
+				q.push(sPos(temp.x, temp.y));
+				nq.push(sPos(temp.x, temp.y));
+			}
+		}
+	}
+
+	int avg = sum / cnt;
+
+	while (!nq.empty())
+	{
+		sPos temp = nq.front();
+
+		nq.pop();
+
+		populations[temp.x][temp.y] = avg;
+	}
+}
+
+int main()
+{
+	cin >> N >> L >> R;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> populations[i][j];
+		}
+	}
+
+	bool loop = true;
+
+	while (loop)
+	{
+		loop = false;
+
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (!visited[i][j] && Check(i, j))
+				{
+					BFS(i, j);
+					loop = true;
+				}
+			}
+		}
+
+		if (loop)
+			days++;
+
+		for (int i = 0; i < MAX; i++)
+		{
+			for (int j = 0; j < MAX; j++)
+			{
+				visited[i][j] = false;
+			}
+		}
+
+	}
+
+
+	cout << days << "\n";
+
+	return 0;
+}
+```
