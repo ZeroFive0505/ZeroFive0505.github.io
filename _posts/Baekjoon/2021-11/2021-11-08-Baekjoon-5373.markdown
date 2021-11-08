@@ -1,0 +1,395 @@
+---
+layout: post
+title: 큐빙
+date: 2021-11-08 08:49:21 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/5373)
+# 큐빙
+
+# 문제
+> 루빅스 큐브는 삼차원 퍼즐이다. 보통 루빅스 큐브는 3×3×3개의 작은 정육면체로 이루어져 있다. 퍼즐을 풀려면 각 면에 있는 아홉 개의 작은 정육면체의 색이 동일해야 한다.
+큐브는 각 면을 양방향으로 90도 만큼 돌릴 수 있도록 만들어져 있다. 회전이 마친 이후에는, 다른 면을 돌릴 수 있다. 이렇게 큐브의 서로 다른 면을 돌리다 보면, 색을 섞을 수 있다.
+이 문제에서는 루빅스 큐브가 모두 풀린 상태에서 시작한다. 윗 면은 흰색, 아랫 면은 노란색, 앞 면은 빨간색, 뒷 면은 오렌지색, 왼쪽 면은 초록색, 오른쪽 면은 파란색이다.
+루빅스 큐브를 돌린 방법이 순서대로 주어진다. 이때, 모두 돌린 다음에 가장 윗 면의 색상을 구하는 프로그램을 작성하시오.
+![img](https://www.acmicpc.net/upload/images/cube.png)
+> 위의 그림은 루빅스 큐브를 푼 그림이다. 왼쪽 면은 시계방향으로 조금 돌려져 있는 상태이다.
+
+# 입력
+> 첫째 줄에 테스트 케이스의 개수가 주어진다. 테스트 케이스는 최대 100개이다. 각 테스트 케이스는 다음과 같이 구성되어져 있다.
+> - 첫째 줄에 큐브를 돌린 횟수 n이 주어진다. (1 ≤ n ≤ 1000)
+> - 둘째 줄에는 큐브를 돌린 방법이 주어진다. 각 방법은 공백으로 구분되어져 있으며, 첫 번째 문자는 돌린 면이다. U: 윗 면, D: 아랫 면, F: 앞 면, B: 뒷 면, L: 왼쪽 면, R: 오른쪽 면이다. 두 번째 문자는 돌린 방향이다. +인 경우에는 시계 방향 (그 면을 바라봤을 때가 기준), -인 경우에는 반시계 방향이다.
+
+# 출력
+> 각 테스트 케이스에 대해서 큐브를 모두 돌린 후의 윗 면의 색상을 출력한다. 첫 번째 줄에는 뒷 면과 접하는 칸의 색을 출력하고, 두 번째, 세 번째 줄은 순서대로 출력하면 된다. 흰색은 w, 노란색은 y, 빨간색은 r, 오렌지색은 o, 초록색은 g, 파란색은 b.
+
+# 풀이
+모든 경우의 수에 대해서 나름 작성을 했다고 생각하고 테스트 케이스를 돌려봤지만 제대로된 정답이 나오질 않았다. 그래서 결국에는 인터넷으로 [이 곳](https://jaimemin.tistory.com/1191)의 풀이를 참조했다.
+
+
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 3;
+
+int N;
+
+string color = "wyrogb";
+string flip;
+
+enum class EFace
+{
+	UP,
+	DOWN,
+	FRONT,
+	BACK,
+	LEFT,
+	RIGHT,
+	END
+};
+
+char cube[(int)EFace::END][3][3]; // Up, Down, Front, Back, Left, Right
+char temp[3][3];
+
+void Rotate90(int num, bool ccw)
+{
+	if (ccw)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				temp[i][j] = cube[num][i][j];
+			}
+		}
+
+		for (int i = 0; i < 3; i++)
+			cube[num][0][i] = temp[i][2];
+
+		cube[num][1][0] = temp[0][1];
+		cube[num][1][2] = temp[2][1];
+
+		for (int i = 0; i < 3; i++)
+		{
+			cube[num][2][i] = temp[i][0];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				temp[i][j] = cube[num][i][j];
+			}
+		}
+
+		for (int i = 0; i < 3; i++)
+			cube[num][0][i] = temp[2 - i][0];
+
+		cube[num][1][0] = temp[2][1];
+		cube[num][1][2] = temp[0][1];
+
+		for (int i = 0; i < 3; i++)
+		{
+			cube[num][2][i] = temp[2 - i][2];
+		}
+	}
+}
+
+void Up(int num)
+{
+	char temp[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		temp[i] = cube[(int)EFace::LEFT][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::LEFT][num][i] = cube[(int)EFace::FRONT][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::FRONT][num][i] = cube[(int)EFace::RIGHT][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::RIGHT][num][i] = cube[(int)EFace::BACK][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::BACK][num][i] = temp[i];
+	}
+}
+
+void Down(int num)
+{
+	char temp[3];
+
+	for (int i = 0; i < 3; i++)
+	{
+		temp[i] = cube[(int)EFace::LEFT][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::LEFT][num][i] = cube[(int)EFace::BACK][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::BACK][num][i] = cube[(int)EFace::RIGHT][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::RIGHT][num][i] = cube[(int)EFace::FRONT][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::FRONT][num][i] = temp[i];
+	}
+}
+
+void Front(int num)
+{
+	char temp[3];
+
+	int idx = (num == 0 ? 2 : 0);
+
+	for (int i = 0; i < 3; i++)
+	{
+		temp[i] = cube[(int)EFace::UP][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::UP][num][i] = cube[(int)EFace::LEFT][2 - i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::LEFT][i][num] = cube[1][idx][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::DOWN][idx][i] = cube[(int)EFace::RIGHT][2 - i][idx];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::RIGHT][i][idx] = temp[i];
+	}
+}
+
+void Back(int num)
+{
+	char temp[3];
+
+	int idx = (num == 0) ? 2 : 0;
+
+	for (int i = 0; i < 3; i++)
+	{
+		temp[i] = cube[(int)EFace::UP][num][i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::UP][num][i] = cube[(int)EFace::RIGHT][i][idx];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::RIGHT][i][idx] = cube[(int)EFace::DOWN][idx][2 - i];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::DOWN][idx][i] = cube[(int)EFace::LEFT][i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::LEFT][i][num] = temp[2 - i];
+	}
+}
+
+void Left(int num)
+{
+	char temp[3];
+
+	int idx = (num == 0 ? 2 : 0);
+
+	for (int i = 0; i < 3; i++)
+	{
+		temp[i] = cube[(int)EFace::UP][i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::UP][i][num] = cube[(int)EFace::BACK][2 - i][idx];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::BACK][i][idx] = cube[(int)EFace::DOWN][2 - i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::DOWN][i][num] = cube[(int)EFace::FRONT][i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::FRONT][i][num] = temp[i];
+	}
+}
+
+void Right(int num)
+{
+	char temp[3];
+
+	int idx = (num == 0 ? 2 : 0);
+
+	for (int i = 0; i < 3; i++)
+	{
+		temp[i] = cube[(int)EFace::UP][i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::UP][i][num] = cube[(int)EFace::FRONT][i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::FRONT][i][num] = cube[(int)EFace::DOWN][i][num];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::DOWN][i][num] = cube[(int)EFace::BACK][2 - i][idx];
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		cube[(int)EFace::BACK][i][idx] = temp[2 - i];
+	}
+}
+
+int main()
+{
+	int t;
+
+	cin >> t;
+
+	while (t--)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				for (int k = 0; k < 3; k++)
+				{
+					cube[i][j][k] = color[i];
+				}
+			}
+		}
+
+
+		cin >> N;
+
+		for (int i = 0; i < N; i++)
+		{
+			cin >> flip;
+
+			if (flip == "U+")
+			{
+				Rotate90(0, false);
+				Up(0);
+			}
+			else if (flip == "U-")
+			{
+				Rotate90(0, true);
+				Down(0);
+			}
+			else if (flip == "D+")
+			{
+				Rotate90(1, false);
+				Down(2);
+			}
+			else if (flip == "D-")
+			{
+				Rotate90(1, true);
+				Up(2);
+			}
+			else if (flip == "F+")
+			{
+				Rotate90(2, false);
+				Front(2);
+			}
+			else if (flip == "F-")
+			{
+				Rotate90(2, true);
+				Back(2);
+			}
+			else if (flip == "B+")
+			{
+				Rotate90(3, false);
+				Back(0);
+			}
+			else if (flip == "B-")
+			{
+				Rotate90(3, true);
+				Front(0);
+			}
+			else if (flip == "L+")
+			{
+				Rotate90(4, false);
+				Left(0);
+			}
+			else if (flip == "L-")
+			{
+				Rotate90(4, true);
+				Right(0);
+			}
+			else if (flip == "R+")
+			{
+				Rotate90(5, false);
+				Right(2);
+			}
+			else if (flip == "R-")
+			{
+				Rotate90(5, true);
+				Left(2);
+			}
+		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				cout << cube[0][i][j];
+			}
+			cout << "\n";
+		}
+	}
+
+
+	return 0;
+}
+```

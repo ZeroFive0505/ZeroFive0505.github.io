@@ -2,7 +2,7 @@
 layout: post
 title: 아이템 줍기
 date: 2021-11-03 10:57:56 +0900
-categories: Programmers-Leve2
+categories: Programmers-Leve3
 ---
 
 # 아이템 줍기
