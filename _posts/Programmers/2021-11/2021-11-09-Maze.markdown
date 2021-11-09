@@ -1,0 +1,250 @@
+---
+layout: post
+title: 미로 탈출
+date: 2021-11-09 10:49:01 +0900
+categories: Programmers-Leve3
+---
+
+# 미로 탈출
+## 문제 링크 -> [Programmers](https://programmers.co.kr/learn/courses/30/lessons/81304p)
+
+# 풀이
+[이 곳](https://yabmoons.tistory.com/683)의 풀이를 참조하여 풀 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+const int MAX = 1001;
+const int MAXTRAPS = 10;
+const int INF = 987654321;
+
+using namespace std;
+
+// 해당 노드가 함정인지 아닌지
+bool IsTrap[MAX];
+// 함정 노드의 인덱스
+int TrapIndex[MAX];
+
+// 최대 함정의 갯수는 10개 
+// 함정의 조합의 경우의 수 2^10
+// 따라서 함정의 각 조합의 경우의 수에 따른 거리를 나타낸다.
+int Dist[MAX][1 << MAXTRAPS];
+
+// 출발지, 목적지, 함정이 작동한 후에 이동가능한 간선인지
+vector<pair<pair<int, int>, bool>> MAP[MAX];
+
+
+int FindCase(int cur, int next, int state)
+{
+    // 현재 위치와 다음 위치 둘다 함정이 아닐 경우
+    if (IsTrap[cur] == false && IsTrap[next] == false)
+        return 1;
+
+    // 현재 위치는 함정이 아니지만 다음 위치가 함정일 경우
+    if (IsTrap[cur] == false && IsTrap[next] == true)
+        return 2;
+
+    // 지금 위치가 함정이고 다음 위치가 함정이 아닐 경우
+    if (IsTrap[cur] == true && IsTrap[next] == false)
+        return 3;
+
+    // 둘다 함정일 경우
+    if (IsTrap[cur] == true && IsTrap[next] == true)
+        return 4;
+}
+
+// 다음 위치의 상태 반환
+bool TrapState(int next, int state)
+{
+    return ((state & (1 << TrapIndex[next])));
+}
+
+// 해당 위치의 함정 활성화
+int ActivateTrap(int state, int idx)
+{
+    return state | (1 << TrapIndex[idx]);
+}
+
+// 함정 비활성화
+int DeactivateTrap(int state, int idx)
+{
+    return state ^ (1 << TrapIndex[idx]);
+}
+
+// 목적지에 도달하는 경우의 수를 모두 순회하면서 최저값을 찾는다.
+int FindMinCost(int end)
+{
+    int result = INF;
+
+    for (int i = 0; i < (1 << MAXTRAPS); i++)
+    {
+        result = min(result, Dist[end][i]);
+    }
+
+    return result;
+}
+
+int Dijkstra(int n, int start, int end)
+{
+    // 거리, 정점, 상태
+    priority_queue<pair<int, pair<int, int>>> pq;
+    pq.push({ 0, {start,  0}});
+    // 거리를 초기화하고 현재의 상태는 0 즉 아무 함정도 작동하지 않은 상태
+    Dist[start][0] = 0;
+
+    while (!pq.empty())
+    {
+        int cur = pq.top().second.first;
+        int cost = -pq.top().first;
+        int state = pq.top().second.second;
+        pq.pop();
+
+        for (size_t i = 0; i < MAP[cur].size(); i++)
+        {
+            int next = MAP[cur][i].first.first;
+            int nextCost = MAP[cur][i].first.second + cost;
+            int nextState = state;
+            bool edgeState = MAP[cur][i].second;
+
+
+            switch (FindCase(cur, next, state))
+            {
+            // 현재 정점과 다음 정점 둘다 함정이 아닐 경우
+            case 1:
+            {
+                // 간선의 상태가 정상이다면
+                if (edgeState)
+                {   
+                    // 거리 갱신
+                    if (Dist[next][nextState] > nextCost)
+                    {
+                        Dist[next][nextState] = nextCost;
+                        pq.push({ -nextCost, {next, nextState} });
+                    }
+                }
+            }
+                break;
+            // 현재 위치는 함정이 아니지만 다음 위치가 함정일 경우
+            case 2:
+            {
+                // 함정의 상태를 구한다.
+                bool nextTrapState = TrapState(next, state);
+
+                // 갈 수 있는 경우라면
+                // 즉 현재 간선의 상태는 올바른 간선이고
+                // 함정은 활성화되어 있지 않거나
+                // 현재 간선의 상태는 올바르지 않은 간선이고
+                // 함정이 활성화 되어있을 경우
+                if (edgeState != nextTrapState)
+                {
+                    // 만약 활성화되어있는 함정이라면 비활성화
+                    if (nextTrapState)
+                        nextState = DeactivateTrap(nextState, next);
+                    // 반대의 경우는 반대로
+                    else
+                        nextState = ActivateTrap(nextState, next);
+                    // 거리를 갱신한다.
+                    if (Dist[next][nextState] > nextCost)
+                    {
+                        Dist[next][nextState] = nextCost;
+                        pq.push({ -nextCost, {next, nextState} });
+                    }
+                }
+            }
+                break;
+            // 현재 함정의 위치에서 일반 노드로
+            case 3:
+            {
+                // 현재 함정의 상태
+                bool curTrapState = TrapState(cur, state);
+
+                // 2번과 같다.
+                if (edgeState != curTrapState)
+                {
+                    // 거리를 갱신한다.
+                    if (Dist[next][nextState] > nextCost)
+                    {
+                        Dist[next][nextState] = nextCost;
+                        pq.push({ -nextCost, {next, nextState} });
+                    }
+                }
+            }
+                break;
+            case 4:
+            {
+                bool curTrapState = TrapState(cur, state);
+                bool nextTrapState = TrapState(next, state);
+
+                // 현재 함정의 상태와 다암 위치의 함정 상태가 활성화되어 있고
+                // 정방향의 경로라면 함정이 두번 활성화 되어있다는 뜻으로
+                // 올바른 간선이라면 이동이 가능
+                if ((curTrapState == nextTrapState) && edgeState)
+                {  
+                    if (nextTrapState)
+                        nextState = DeactivateTrap(nextState, next);
+                    else
+                        nextState = ActivateTrap(nextState, next);
+
+                    if (Dist[next][nextState] > nextCost)
+                    {
+                        Dist[next][nextState] = nextCost;
+                        pq.push({ -nextCost, {next, nextState} });
+                    }
+                }
+                // 홀수번 함정이 활성화 되어있다는 뜻
+                else if ((curTrapState != nextTrapState) && !edgeState)
+                {
+                    if (nextTrapState)
+                        nextState = DeactivateTrap(nextState, next);
+                    else
+                        nextState = ActivateTrap(nextState, next);
+
+                    if (Dist[next][nextState] > nextCost)
+                    {
+                        Dist[next][nextState] = nextCost;
+                        pq.push({ -nextCost, {next, nextState} });
+                    }
+                }
+            }
+                break;
+            }
+        }
+    }
+
+    return FindMinCost(end);
+}
+
+int solution(int n, int start, int end, vector<vector<int>> roads, vector<int> traps) 
+{
+    int answer = 0;
+
+    for (int i = 1; i <= n; i++)
+        fill(Dist[i], Dist[i] + 1024, INF);
+
+    for (int i = 0; i < roads.size(); i++)
+    {
+        int u = roads[i][0];
+        int v = roads[i][1];
+        int cost = roads[i][2];
+
+        MAP[u].push_back({ {v, cost}, true });
+        MAP[v].push_back({ {u, cost}, false });
+
+    }
+
+    for (int i = 0; i < traps.size(); i++)
+    {
+        IsTrap[traps[i]] = true;
+        TrapIndex[traps[i]] = i;
+    }
+
+    answer = Dijkstra(n, start, end);
+
+    return answer;
+}
+```
