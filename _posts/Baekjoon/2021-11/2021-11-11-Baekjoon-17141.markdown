@@ -1,0 +1,172 @@
+---
+layout: post
+title: 연구소 2
+date: 2021-11-11 08:51:56 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17141)
+# 연구소 2
+
+# 풀이
+[연구소](https://www.acmicpc.net/problem/14502)와 유사한 문제였다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 51;
+
+const int INF = 987654321;
+
+int arr[MAX][MAX];
+
+bool used[10];
+
+int N, M;
+
+int ans = INF;
+
+struct sPos
+{
+	int x;
+	int y;
+
+	sPos(int _x = 0, int _y = 0) : x(_x), y(_y) {}
+
+}Delta[] = {
+	{-1, 0},
+	{0, 1},
+	{1, 0},
+	{0, -1}
+};
+
+void DFS(int y, int x, int depth)
+{
+	if (depth == M)
+	{
+		int cnt = 0;
+
+		queue<pair<sPos, int>> q;
+
+		bool visited[MAX][MAX] = {};
+		int copyArr[MAX][MAX];
+
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (arr[i][j] == 3)
+				{
+					q.push({ sPos(j, i), 0 });
+					copyArr[i][j] = 0;
+				}
+				else
+				{
+					if (arr[i][j] != 1)
+						copyArr[i][j] = -1;
+					else
+						copyArr[i][j] = arr[i][j];
+				}
+			}
+		}
+
+
+		while (!q.empty())
+		{
+			pair<sPos, int> cur = q.front();
+			int cx = cur.first.x;
+			int cy = cur.first.y;
+			q.pop();
+
+			visited[cy][cx] = true;
+
+			cnt = max(cnt, cur.second);
+
+			for (int i = 0; i < 4; i++)
+			{
+				int nx = cx + Delta[i].x;
+				int ny = cy + Delta[i].y;
+
+				if (nx < 0 || ny < 0 || nx >= N || ny >= N)
+					continue;
+
+				if (copyArr[ny][nx] == 1)
+					continue;
+
+				if (visited[ny][nx])
+					continue;
+
+				if (copyArr[ny][nx] == -1)
+				{
+					copyArr[ny][nx] = cur.second + 1;
+					q.push({ sPos(nx, ny), cur.second + 1 });
+				}
+			}
+		}
+
+
+		bool check = true;
+
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (copyArr[i][j] == -1)
+				{
+					check = false;
+					break;
+				}
+			}
+
+			if (!check)
+				break;
+		}
+
+		if(check)
+			ans = min(ans, cnt);
+	}
+
+	for (int i = y; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			if (arr[i][j] == 2 && !used[depth])
+			{
+				arr[i][j] = 3;
+				used[depth] = true;
+				DFS(i, j, depth + 1);
+				used[depth] = false;
+				arr[i][j] = 2;
+			}
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	DFS(0, 0, 0);
+
+
+	if (ans == INF)
+		cout << -1 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```
