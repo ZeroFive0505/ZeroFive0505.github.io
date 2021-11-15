@@ -1,0 +1,159 @@
+---
+layout: post
+title: 연구소 3
+date: 2021-11-15 09:59:48 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17142)
+# 연구소 3
+
+# 풀이
+> 연구소 1, 2, 문제와 많이 유사했다. 하지만 활성화 비활성화 바이러스가 있어 활성화 바이러스가 퍼지면서 비활성화 바이러스를 만날경우 시간을 재는 방법이 달라야 해서 이것 때문에 계속 테스트 케이스의 몇 예제가 원래 나와야 할 답보다 하나가 적게 나오거나 더 나와서 결국에는 인터넷을 [참조](https://yabmoons.tistory.com/254)해서 다른 사람들의 풀이법을 좀 참고해서 풀었다. 퍼진 시간을 기록할 배열을 따로 만들고 처음에는 활성화된 바이러스들만 0으로 시간을 초기화 시킨다. 그 이후에는 BFS를 통해서 퍼트리며 빈 곳에 퍼졌을 경우에만 시간을 갱신하고 비활성화 바이러스를 만날경우에는 시간을 갱신하지 않는다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <cstring>
+
+using namespace std;
+
+const int INF = 987654321;
+
+const int MAX = 51;
+
+int arr[MAX][MAX];
+
+int N, M;
+
+struct sPos
+{
+	int x;
+	int y;
+
+	sPos(int _x = 0, int _y = 0) : x(_x), y(_y) {}
+
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+int empties = 0;
+
+int ans = INF;
+
+void DFS(int y, int x, int depth)
+{
+	if (depth == M)
+	{
+		int timeArr[MAX][MAX];
+
+		memset(timeArr, -1, sizeof(timeArr));
+
+		queue<sPos> q;
+		
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+                // 바이러스 초기화
+				if (arr[i][j] == -2)
+				{
+					q.push(sPos(j, i));
+					timeArr[i][j] = 0;
+				}
+			}
+		}
+
+		int cnt = 0;
+
+		int num = 0;
+
+		while (!q.empty())
+		{
+			sPos cur = q.front();
+			int cx = cur.x;
+			int cy = cur.y;
+			q.pop();
+
+
+			for (int i = 0; i < 4; i++)
+			{
+				int nx = cx + Delta[i].x;
+				int ny = cy + Delta[i].y;
+
+				if (nx < 0 || nx >= N || ny < 0 || ny >= N)
+					continue;
+
+                // 만약 벽이아니고 시간이 갱신된곳이 아니면
+				if (arr[ny][nx] != 1 && timeArr[ny][nx] == -1)
+				{
+                    // 시간을 늘려준다.
+					timeArr[ny][nx] = timeArr[cy][cx] + 1;
+
+                    // 만약 빈 곳에 퍼졌을 경우에만
+					if (arr[ny][nx] == 0)
+					{   
+                        // 시간과 갯수를 갱신한다.
+						num++;
+						cnt = timeArr[ny][nx];
+					}
+
+					q.push(sPos(nx, ny));
+				}
+			}
+
+		}
+
+
+        // 만약 모든 빈칸에 퍼졌다면 답 갱신.
+		if (num == empties)
+			ans = min(ans, cnt);
+
+
+		return;
+	}
+
+	for (int i = y; i < N; i++)
+	{
+		for (int j = (i == y) ? x : 0; j < N; j++)
+		{
+			if (arr[i][j] == 2)
+			{
+				arr[i][j] = -2;
+				DFS(i, j, depth + 1);
+				arr[i][j] = 2;
+			}
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+
+			if (arr[i][j] == 0)
+				empties++;
+		}
+	}
+
+	DFS(0, 0, 0);
+
+	if (ans == INF)
+		cout << -1 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```

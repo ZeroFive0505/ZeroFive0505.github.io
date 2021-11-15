@@ -1,0 +1,237 @@
+---
+layout: post
+title: 낚시왕
+date: 2021-11-15 09:59:42 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17143)
+# 낚시왕
+
+# 풀이
+[이 곳](https://yabmoons.tistory.com/288)의 풀이를 참조했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int MAX = 101;
+
+struct sShark
+{
+	int r;
+	int c;
+	int s;
+	int d;
+	int z;
+	int index;
+
+	sShark() : r(0), c(0), s(0), d(0), z(0), index(0) {}
+	sShark(int _r, int _c, int _s, int _d, int _z, int _index) : r(_r), c(_c), s(_s), d(_d), z(_z), index(_index) {}
+};
+
+struct sDelta
+{
+	int r;
+	int c;
+}Delta[] = {
+	{0, 0},
+	{-1, 0},
+	{1, 0},
+	{0, 1},
+	{0, -1}
+};
+
+
+int R, C;
+int M;
+
+vector<int> arr[MAX][MAX];
+vector<sShark> vecSharks;
+
+int ans = 0;
+
+// pos위치에서 낚시를 시작한다.
+void Fishing(int pos)
+{
+	for (int i = 1; i <= R; i++)
+	{   
+        // 만약 상어가 존재한다면
+		if (arr[i][pos].size() != 0)
+		{   
+            // 크기만큼 더한다.
+			ans += vecSharks[arr[i][pos][0]].z;
+            // 상어 벡터에서 해당 상어의 크기를 0으로 만든다
+			vecSharks[arr[i][pos][0]].z = 0;
+            // 상어를 건졌으니 초기화한다.
+			arr[i][pos].clear();
+			break;
+		}
+	}
+}
+
+void Move()
+{   
+	for (int i = 0; i < vecSharks.size(); i++)
+	{
+        // 만약 상어의 크기가 0이라면 없는 상어다.
+		if (vecSharks[i].z == 0)
+			continue;
+
+		int r = vecSharks[i].r;
+		int c = vecSharks[i].c;
+        // 상어들이 이제 움직이므로 먼저 비운다.
+		arr[r][c].clear();
+	}
+
+	for (int i = 0; i < vecSharks.size(); i++)
+	{
+		if (vecSharks[i].z == 0)
+			continue;
+
+		int r = vecSharks[i].r;
+		int c = vecSharks[i].c;
+
+		int dir = vecSharks[i].d;
+		int speed = vecSharks[i].s;
+
+		if (dir == 1 || dir == 2)
+		{   
+            // 상하로 (R - 1) * 2 만큼 움직인다면
+            // 다시 원위치로 돌아오게된다.
+			int rotate = (R - 1) * 2;
+
+            // 만약 현재 속도가 회전수보다 높거나 같다면
+            // 나머지 연산을한다.
+			if (speed >= rotate)
+				speed = speed % rotate;
+
+			for (int j = 0; j < speed; j++)
+			{
+				int nr = r + Delta[dir].r;
+				int nc = c + Delta[dir].c;
+
+                // 0이됬다는 말은 다시 방향을 반대로 바꿔야한다
+                // 2만큼 아래로 내려간다.
+				if (nr < 1)
+				{
+					dir = 2;
+					nr = nr + 2;
+				}
+
+                // 이 경우는 반대
+				if (nr > R)
+				{
+					dir = 1;
+					nr = nr - 2;
+				}
+
+				r = nr;
+				c = nc;
+			}
+		}
+		else
+		{
+            // 좌우로 (C - 1) * 2 만큼 움직였다면
+            // 다시 상어는 원위치로 돌아온다.
+			int rotate = (C - 1) * 2;
+
+			if (speed >= rotate)
+				speed = speed % rotate;
+
+			for (int j = 0; j < speed; j++)
+			{
+				int nr = r + Delta[dir].r;
+				int nc = c + Delta[dir].c;
+
+				if (nc < 1)
+				{
+					dir = 3;
+					nc = nc + 2;
+				}
+
+				if (nc > C)
+				{
+					dir = 4;
+					nc = nc - 2;
+				}
+
+				r = nr;
+				c = nc;
+			}
+		}
+
+
+        // 현재 상어의 위치와 방향을 새롭게 갱신한다.
+		vecSharks[i].r = r;
+		vecSharks[i].c = c;
+		vecSharks[i].d = dir;
+        // 현재 배열에 해당 상어의 번호를 기록
+		arr[r][c].push_back(i);
+	}
+}
+
+void Eat()
+{
+	for (int i = 1; i <= R; i++)
+	{
+		for (int j = 1; j <= C; j++)
+		{
+            // 상어를 크기순으로 정렬한다.
+			if (arr[i][j].size() > 1)
+			{
+				sort(arr[i][j].begin(), arr[i][j].end(), [&](const int a, const int b) {
+					return vecSharks[a].z > vecSharks[b].z;
+				});
+
+                // 가장 첫 상어가 제일 큰 상어
+				int liveIndex = arr[i][j][0];
+
+                // 그 이후 상어는 모두 먹힌다.
+				for (int k = 1; k < arr[i][j].size(); k++)
+				{
+					vecSharks[arr[i][j][k]].z = 0;
+					vecSharks[arr[i][j][k]].r = -1;
+					vecSharks[arr[i][j][k]].c = -1;
+				}
+
+                // 배열을 초기화하고
+				arr[i][j].clear();
+                // 살아남은 상어를 넣는다.
+				arr[i][j].push_back(vecSharks[liveIndex].index);
+			}
+		}
+	}
+}
+
+int main()
+{
+	cin >> R >> C >> M;
+
+	for (int i = 0; i < M; i++)
+	{
+		int r, c, s, d, z;
+
+		cin >> r >> c >> s >> d >> z;
+
+		vecSharks.push_back(sShark(r, c, s, d, z, i));
+		arr[r][c].push_back(i);
+	}
+
+
+	for (int i = 1; i <= C; i++)
+	{
+		Fishing(i);
+		Move();
+		Eat();
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```

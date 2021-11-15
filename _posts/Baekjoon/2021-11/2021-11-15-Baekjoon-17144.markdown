@@ -1,0 +1,271 @@
+---
+layout: post
+title: 미세먼지 안녕!
+date: 2021-11-15 12:39:19 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17144)
+#  미세먼지 안녕!
+
+# 풀이
+테투리 순회를 while문 반복으로 처리했다. 처음에는 for문을 이용했는데 꼭지점에서 중복을 처리하는게 번거로워서 그냥 처음 x, y좌표를 가져오면 그걸로 while문을 돌려서 테투리에 있는 값들을 벡터에 넣는다. 여기서 공기청정기가 있는 좌표도 넣으며 값은 0으로 넣어서 벡터를 돌릴때 공기청정기 바로 앞에 있는 위치는 0의 값이 들어가게 한다. 먼지확산에서도 주의할 점이 있는데 따로 값을 한번 복사가고 거기에 있는 값을 기준으로 먼지를 확산시켜야 한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <stack>
+#include <queue>
+
+using namespace std;
+
+const int MAX = 51;
+
+int R, C, T;
+
+int arr[MAX][MAX];
+int temp[MAX][MAX];
+
+
+struct sPos
+{
+	int x;
+	int y;
+
+	sPos() {}
+	sPos(int _x, int _y) : x(_x), y(_y) {}
+
+}Delta[] = {
+	{-1, 0},
+	{0, 1},
+	{1, 0},
+	{0, -1}
+};
+
+vector<sPos> airCleaner;
+
+int main()
+{
+	cin >> R >> C >> T;
+
+	for (int i = 0; i < R; i++)
+	{
+		for (int j = 0; j < C; j++)
+		{
+			cin >> arr[i][j];
+
+			if (arr[i][j] == -1)
+				airCleaner.push_back(sPos(j, i));
+		}
+	}
+
+	while (T--)
+	{
+		queue<sPos> q;
+
+		for (int i = 0; i < R; i++)
+		{
+			for (int j = 0; j < C; j++)
+			{
+				if (arr[i][j] != -1 && arr[i][j] != 0)
+					q.push(sPos(j, i));
+                // 값을 미리 복사
+				temp[i][j] = arr[i][j];
+			}
+		}
+
+        // 모든 먼지를 확산시킨다.
+		while (!q.empty())
+		{
+			sPos cur = q.front();
+			int cx = cur.x;
+			int cy = cur.y;
+			q.pop();
+			int cnt = 0;
+
+			for (int i = 0; i < 4; i++)
+			{
+				int nx = cx + Delta[i].x;
+				int ny = cy + Delta[i].y;
+
+				if (nx < 0 || nx >= C || ny < 0 || ny >= R)
+					continue;
+
+				if (arr[ny][nx] == -1)
+					continue;
+
+                // 새롭게 갱신될 값은 원래 초기 배열의 값에서 가져온다.
+				arr[ny][nx] += temp[cy][cx] / 5;
+				cnt++;
+			}
+
+            // 감소시키는것도 마찬가지
+			arr[cy][cx] -= (temp[cy][cx] / 5) * cnt;
+		}
+
+
+		for (int i = 0; i < airCleaner.size(); i++)
+		{
+			switch (i)
+			{
+			case 0:
+			{
+				
+				int cx = airCleaner[i].x;
+				int cy = airCleaner[i].y;
+
+				vector<pair<sPos, int>> v;
+
+				v.push_back({ sPos(cx, cy), 0 });
+
+
+				while (1)
+				{
+					int nx = cx + 1;
+
+					if (nx >= C)
+						break;
+
+					v.push_back({ sPos(nx, cy), arr[cy][nx] });
+					arr[cy][nx] = 0;
+
+					cx = nx;
+				}
+
+
+				while (1)
+				{
+					int ny = cy - 1;
+
+					if (ny < 0)
+						break;
+
+					v.push_back({ sPos(cx, ny), arr[ny][cx] });
+					arr[ny][cx] = 0;
+
+					cy = ny;
+				}
+
+				while (1)
+				{
+					int nx = cx - 1;
+
+					if (nx < 0)
+						break;
+
+					v.push_back({ sPos(nx, cy), arr[cy][nx] });
+					arr[cy][nx] = 0;
+
+					cx = nx;
+				}
+
+				while (1)
+				{
+					int ny = cy + 1;
+
+					if (arr[ny][cx] == -1)
+						break;
+
+					v.push_back({ sPos(cx, ny), arr[ny][cx] });
+					arr[ny][cx] = 0;
+
+					cy = ny;
+				}
+
+				for (int i = 0; i < v.size() - 1; i++)
+				{
+					arr[v[i + 1].first.y][v[i + 1].first.x] = v[i].second;
+				}
+			}
+				break;
+			case 1:
+			{
+				int cx = airCleaner[i].x;
+				int cy = airCleaner[i].y;
+
+				vector<pair<sPos, int>> v;
+
+				v.push_back({ sPos(cx, cy), 0 });
+
+
+				while (1)
+				{
+					int nx = cx + 1;
+
+					if (nx >= C)
+						break;
+
+					v.push_back({ sPos(nx, cy), arr[cy][nx] });
+					arr[cy][nx] = 0;
+
+					cx = nx;
+				}
+
+
+				while (1)
+				{
+					int ny = cy + 1;
+
+					if (ny >= R)
+						break;
+
+					v.push_back({ sPos(cx, ny), arr[ny][cx] });
+					arr[ny][cx] = 0;
+
+					cy = ny;
+				}
+
+				while (1)
+				{
+					int nx = cx - 1;
+
+					if (nx < 0)
+						break;
+
+					v.push_back({ sPos(nx, cy), arr[cy][nx] });
+					arr[cy][nx] = 0;
+
+					cx = nx;
+				}
+
+				while (1)
+				{
+					int ny = cy - 1;
+
+					if (arr[ny][cx] == -1)
+						break;
+
+					v.push_back({ sPos(cx, ny), arr[ny][cx] });
+					arr[ny][cx] = 0;
+
+					cy = ny;
+				}
+
+				for (int i = 0; i < v.size() - 1; i++)
+				{
+					arr[v[i + 1].first.y][v[i + 1].first.x] = v[i].second;
+				}
+			}
+				break;
+			}
+		}
+	}
+
+
+	int sum = 0;
+
+	for (int i = 0; i < R; i++)
+	{
+		for (int j = 0; j < C; j++)
+		{
+			if (arr[i][j] != -1)
+				sum += arr[i][j];
+		}
+	}
+
+
+	cout << sum << "\n";
+
+	return 0;
+}
+```
