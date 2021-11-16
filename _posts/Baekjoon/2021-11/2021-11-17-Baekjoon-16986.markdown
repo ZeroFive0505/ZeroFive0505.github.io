@@ -1,0 +1,232 @@
+---
+layout: post
+title: 인싸들의 가위바위보
+date: 2021-11-17 08:07:45 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/16986)
+# 인싸들의 
+
+# 풀이
+풀이는 [이 곳](https://yabmoons.tistory.com/258)을 참조하였다.
+
+# 코드
+```c++
+#include <iostream>
+
+using namespace std;
+
+const int MAX = 10;
+const int JW = 1;
+const int GH = 2;
+const int MH = 3;
+
+int N, K;
+
+int A[MAX][MAX];
+
+int RSP[4][21];
+
+int winNum[4];
+
+bool selected[MAX];
+
+bool flag;
+
+bool finish;
+
+bool Play(int p1, int p2, int JW_set, int GH_set, int MH_set)
+{
+    // 만약 K번만큼 이길 수 있었다면
+    // 게임을 끝내고 참을 반환한다.
+	if (winNum[JW] >= K)
+	{
+		finish = true;
+		return true;
+	}
+
+    // 만약 경희나 민호가 먼저 K번만큼 우승했다면 불가능
+	if (winNum[GH] >= K || winNum[MH] >= K)
+		return false;
+
+    // 또는 지우의차례가 N을 초과했다면 이 또한 불가능하다.
+	if (JW_set > N)
+		return false;
+
+    // 다음 순서
+	int nextPlayer;
+
+    // 만약 현재 지우와 경의 순서라면 민호가 다음 순서
+	if ((p1 == 1 && p2 == 2) || (p1 == 2 && p2 == 1))
+		nextPlayer = MH;
+    // 만약 현재 지우와 민호 순이라면 다음은 경희 순서
+	else if ((p1 == 1 && p2 == 3) || (p1 == 3 && p2 == 1))
+		nextPlayer = GH;
+    // 그외는 지우의 순서
+	else
+		nextPlayer = JW;
+
+	switch (nextPlayer)
+	{
+    // 다음이 지우순서라면
+	case JW:
+	{
+        // 경희와 민호가 가위바위보를 할 차례다.
+        // 이때 경희는 무조건 이겨야 승리할 수 있다.
+        // 민호의 경우는 비겨도 상관없다.
+        
+        // 만약 경희가 이겼다면
+		if (A[RSP[GH][GH_set]][RSP[MH][MH_set]] == 2)
+		{
+			winNum[GH]++;
+			Play(GH, nextPlayer, JW_set, GH_set + 1, MH_set + 1);
+			if (finish)
+				return true;
+			winNum[GH]--;
+		}
+        // 그외의 경우 비겼거나 민호가 이겼거나
+		else
+		{
+			winNum[MH]++;
+			Play(MH, nextPlayer, JW_set, GH_set + 1, MH_set + 1);
+			if (finish)
+				return true;
+			winNum[MH]--;
+		}
+	}
+		break;
+    // 다음이 경희라면
+	case GH:
+	{
+        // 지우와 민호의 대결
+        // 지우는 가장 처음 순서이므로 무조건 이겨야한다.
+		if (A[RSP[JW][JW_set]][RSP[MH][MH_set]] == 2)
+		{
+			winNum[JW]++;
+			Play(JW, nextPlayer, JW_set + 1, GH_set, MH_set + 1);
+			if (finish)
+				return true;
+			winNum[JW]--;
+		}
+		else
+		{
+			winNum[MH]++;
+			Play(MH, nextPlayer, JW_set + 1, GH_set, MH_set + 1);
+			if (finish)
+				return true;
+			winNum[MH]--;
+		}
+	}
+		break;
+	case MH:
+	{
+		if (A[RSP[JW][JW_set]][RSP[GH][GH_set]] == 2)
+		{
+			winNum[JW]++;
+			Play(JW, nextPlayer, JW_set + 1, GH_set + 1, MH_set);
+			if (finish)
+				return true;
+			winNum[JW]--;
+		}
+		else
+		{
+			winNum[GH]++;
+			Play(GH, nextPlayer, JW_set + 1, GH_set + 1, MH_set);
+			if (finish)
+				return true;
+			winNum[GH]--;
+		}
+	}
+		break;
+	}
+
+	return false;
+}
+
+void DFS(int depth)
+{   
+    // 만약 지우가 이길 수 있다면 바로 빠져나간다.
+	if (flag)
+		return;
+
+    // 지우가 낼 수 있는 경우의 수가 준비가 되었다면 게임을 시작
+	if (depth == N + 1)
+	{
+        // 지우와 경희가 먼저 게임을 가위바위보를 한다.
+        // 세트 수는 1로 전부 초기화
+		flag = Play(JW, GH, 1, 1, 1);
+		return;
+	}
+
+	for (int i = 1; i <= N; i++)
+	{
+		if (flag)
+			return;
+
+        // 만약 선택하지 않은 경우의 수라면
+        // 선택한다.
+		if (!selected[i])
+		{ 
+			selected[i] = true;
+			RSP[1][depth] = i;
+			DFS(depth + 1);
+			RSP[1][depth] = 0;
+			selected[i] = false;
+		}
+	}
+}
+
+void Solve()
+{   
+    // 만약 낼 수 있는 경우의 수가 K보다 작다면 불가능하다.
+	if (N < K)
+	{
+		cout << 0 << "\n";
+		return;
+	}
+
+    // 첫번째부터 게임을 시작한다.
+	DFS(1);
+
+	if (flag)
+		cout << 1 << "\n";
+	else
+		cout << 0 << "\n";
+}
+
+int main()
+{
+	cin >> N >> K;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			cin >> A[i][j];
+		}
+	}
+
+
+    // 1번은 지우
+    // 2번은 경희
+    // 3번은 민호
+	for (int i = 2; i <= 3; i++)
+	{
+		for (int j = 1; j < 21; j++)
+		{
+			int a;
+			cin >> a;
+            // 지우의경우 -1
+			RSP[1][j] = -1;
+            // 경희나 민호의 경우는 수를 입력받아서 초기화
+			RSP[i][j] = a;
+		}
+	}
+
+
+	Solve();
+
+	return 0;
+}
+```
