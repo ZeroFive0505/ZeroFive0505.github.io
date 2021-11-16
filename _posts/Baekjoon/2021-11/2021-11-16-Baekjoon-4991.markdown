@@ -1,0 +1,408 @@
+---
+layout: post
+title: 로봇 청소기
+date: 2021-11-16 08:43:19 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/4991)
+# 로봇 청소기
+
+# 문제
+> 오늘은 직사각형 모양의 방을 로봇 청소기를 이용해 청소하려고 한다. 이 로봇 청소기는 유저가 직접 경로를 설정할 수 있다.
+방은 크기가 1×1인 정사각형 칸으로 나누어져 있으며, 로봇 청소기의 크기도 1×1이다. 칸은 깨끗한 칸과 더러운 칸으로 나누어져 있으며, 로봇 청소기는 더러운 칸을 방문해서 깨끗한 칸으로 바꿀 수 있다.
+일부 칸에는 가구가 놓여져 있고, 가구의 크기도 1×1이다. 로봇 청소기는 가구가 놓여진 칸으로 이동할 수 없다. 
+로봇은 한 번 움직일 때, 인접한 칸으로 이동할 수 있다. 또, 로봇은 같은 칸을 여러 번 방문할 수 있다.
+방의 정보가 주어졌을 때, 더러운 칸을 모두 깨끗한 칸으로 만드는데 필요한 이동 횟수의 최솟값을 구하는 프로그램을 작성하시오.
+
+# 입력
+> 입력은 여러 개의 테스트케이스로 이루어져 있다.
+각 테스트 케이스의 첫째 줄에는 방의 가로 크기 w와 세로 크기 h가 주어진다. (1 ≤ w, h ≤ 20) 둘째 줄부터 h개의 줄에는 방의 정보가 주어진다. 방의 정보는 4가지 문자로만 이루어져 있으며, 각 문자의 의미는 다음과 같다.
+
+> - .: 깨끗한 칸
+> - *: 더러운 칸
+> - x: 가구
+> - o: 로봇 청소기의 시작 위치
+
+> 더러운 칸의 개수는 10개를 넘지 않으며, 로봇 청소기의 개수는 항상 하나이다.
+입력의 마지막 줄에는 0이 두 개 주어진다.
+
+# 출력
+> 각각의 테스트 케이스마다 더러운 칸을 모두 깨끗한 칸으로 바꾸는 이동 횟수의 최솟값을 한 줄에 하나씩 출력한다. 만약, 방문할 수 없는 더러운 칸이 존재하는 경우에는 -1을 출력한다.
+
+# 첫 시도
+간단하게 BFS를 매순간 해서 가장 최단 거리의 더러운 칸을 찾는 형식으로 했는데 예제는 다 맞았지만 제출시 20%에서 오답이 됬다.
+
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+#include <string>
+
+using namespace std;
+
+const int INF = 987654321;
+
+const int MAX = 21;
+
+
+char arr[MAX][MAX];
+
+
+int w, h;
+
+struct sPos
+{
+	int x;
+	int y;
+
+	sPos() : x(0), y(0)
+	{}
+	sPos(int _x, int _y) : x(_x), y(_y) {}
+
+}Delta[] = {
+	{-1, 0},
+	{0, 1},
+	{1, 0},
+	{0, -1}
+};
+
+int main()
+{
+	while (1)
+	{
+		cin >> w >> h;
+
+		if (w == 0 && h == 0)
+			break;
+
+		sPos robot;
+		int nDirty = 0;
+		for (int i = 0; i < h; i++)
+		{
+			string s;
+
+			cin >> s;
+
+			for (int j = 0; j < s.size(); j++)
+			{
+				arr[i][j] = s[j];
+
+				if (arr[i][j] == 'o')
+				{
+					robot.x = j;
+					robot.y = i;
+				}
+				else if (arr[i][j] == '*')
+					nDirty++;
+			}
+		}
+
+		int ans = 0;
+		
+
+		bool cleaned = false;
+
+		while (nDirty)
+		{
+			queue<pair<sPos, int>> q;
+
+			q.push({ robot, 0 });
+
+			bool visited[MAX][MAX] = {};
+
+			cleaned = false;
+
+			while (!q.empty())
+			{
+				pair<sPos, int> cur = q.front();
+				int cx = cur.first.x;
+				int cy = cur.first.y;
+				visited[cy][cx] = true;
+				q.pop();
+
+				if (arr[cy][cx] == '*')
+				{
+					nDirty--;
+					arr[robot.y][robot.x] = '.';
+					ans += cur.second;
+					arr[cy][cx] = 'o';
+					robot.x = cx;
+					robot.y = cy;
+					cleaned = true;
+					break;
+				}
+
+				for (int i = 0; i < 4; i++)
+				{
+					int nx = cx + Delta[i].x;
+					int ny = cy + Delta[i].y;
+
+					if (nx < 0 || nx >= w || ny < 0 || ny >= h)
+						continue;
+
+					if (visited[ny][nx] || arr[ny][nx] == 'x')
+						continue;
+
+					visited[ny][nx] = true;
+					q.push({ sPos(nx, ny), cur.second + 1 });
+				}
+			}
+
+			if (!cleaned)
+				break;
+		}
+
+		if (nDirty != 0)
+			cout << -1 << "\n";
+		else
+			cout << ans << "\n";
+	}
+
+
+	return 0;
+}
+```
+
+# 풀이
+[이 곳](https://m.blog.naver.com/kodewithamy/221815577809)을 참조했다. 이 문제를 TSP(Traveling salesman person problem)로 접근해서 푼 풀이었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+#include <string>
+#include <cstring>
+
+using namespace std;
+
+const int INF = 987654321;
+
+const int MAX = 21;
+
+
+int w, h;
+
+char arr[MAX][MAX];
+bool bfsCheck[MAX][MAX];
+
+int order[10];
+int chk[10];
+int graph[11][11];
+bool visited[11];
+int path[11];
+
+struct sPos
+{
+	int r;
+	int c;
+	int dist;
+
+	sPos() : r(0), c(0), dist(0)
+	{}
+	sPos(int _r, int _c, int _dist) : r(_r), c(_c), dist(_dist) {}
+}Delta[] = {
+	{-1, 0, 0},
+	{1, 0, 0},
+	{0, -1, 0},
+	{0, 1, 0}
+};
+
+
+sPos robot;
+vector<sPos> vecDirty;
+
+int ans;
+
+// start 부터 dest까지의 최단 거리를 찾아 반환한다.
+int BFS(sPos start, sPos dest)
+{
+	memset(bfsCheck, false, sizeof(bfsCheck));
+	queue<sPos> q;
+	bfsCheck[start.r][start.c] = true;
+	start.dist = 0;
+
+	q.push(start);
+
+	while (!q.empty())
+	{
+		sPos cur = q.front();
+		int r = cur.r;
+		int c = cur.c;
+		q.pop();
+
+        // 도달했으면 바로 반환
+		if (cur.r == dest.r && cur.c == dest.c)
+		{
+			return cur.dist;
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = r + Delta[i].r;
+			int nc = c + Delta[i].c;
+
+			if (nr < 0 || nr >= h || nc < 0 || nc >= w)
+				continue;
+
+			if (bfsCheck[nr][nc] || arr[nr][nc] == 'x')
+				continue;
+
+			bfsCheck[nr][nc] = true;
+			q.push(sPos(nr, nc, cur.dist + 1));
+		}
+	}
+
+
+    // 만약 도달하지 못했다면 INF반환
+	return INF;
+}
+
+// cur부터 dist까지 DFS
+void DFS(int cur, int dist, int cnt)
+{
+    // 만약 현재까지 찾아온 거리가
+    // ans보다 커진다면 더 이상 DFS를 할 필요가 없다.
+	if (dist > ans)
+		return;
+
+    // 만약 모든 더러운 구역을 청소했다면
+	if (cnt == vecDirty.size())
+	{   
+        // 정답을 갱신한다.
+		ans = min(ans, dist);
+		return;
+	}
+
+
+    // 다음 후보를 찾아간다.
+	for (int next = 0; next < vecDirty.size(); next++)
+	{
+        // 같다면 건너뛴다.
+		if (cur == next)
+			continue;
+
+        // 현재위치에서 다음 위치가 도달 불가능하다면 건너뛴다.
+		if (graph[cur][next] == INF)
+			continue;
+
+        // 만약 방문하지 않았다면
+		if (!visited[next])
+		{   
+            // 방문
+			visited[next] = true;
+			path[next] = cur;
+            // next부터 시작하며 거리는 그 만큼 늘려준다.
+			DFS(next, dist + graph[cur][next], cnt + 1);
+			visited[next] = false;
+		}
+	}
+}
+
+void Solve()
+{
+    // 현재 더러운 구역의 갯수를 구한다.
+	int endPoint = vecDirty.size();
+
+    // 모든 더러운 구역까지의 최단 거리를 구한다.
+	for (int i = 0; i < vecDirty.size(); i++)
+	{
+		vecDirty[i].dist = BFS(robot, vecDirty[i]);
+		graph[endPoint][i] = vecDirty[i].dist;
+		graph[i][endPoint] = vecDirty[i].dist;
+	}
+    
+    // 거리순으로 정렬
+	sort(vecDirty.begin(), vecDirty.end(), [](const sPos& a, const sPos& b) {
+		return a.dist < b.dist;
+	});
+
+
+    // 처음부터 도달이 불가능하다면 바로 반환
+	if (vecDirty[0].dist == INF)
+	{
+		ans = INF;
+		return;
+	}
+
+
+    // 모든 더러운 구역을 순회한다.
+	for (int i = 0; i < endPoint; i++)
+	{
+		for (int j = 0; j < endPoint; j++)
+		{   
+            // 같을 경우는 건너뛴다.
+			if (i == j)
+				continue;
+
+            // 더러운 구역간의 거리를 구한다.
+			int dist = BFS(vecDirty[i], vecDirty[j]);
+            // 연결
+			graph[i][j] = graph[j][i] = dist;
+		}
+	}
+
+
+    // 모든 더러운 구역을 순회한다.
+	for (int i = 0; i < vecDirty.size(); i++)
+	{
+        // 만약 해당 더러운 구역까지 가지 못한다면 건너뛴다.
+		if (vecDirty[i].dist == INF)
+			continue;
+        // 백트랙킹 시작
+		memset(visited, false, sizeof(visited));
+        // i번째 더러운 구역부터 시작한다.
+		visited[i] = true;
+		DFS(i, vecDirty[i].dist, 1);
+		visited[i] = false;
+	}
+}
+
+int main()
+{
+	while (1)
+	{
+		ans = INF;
+		vecDirty.clear();
+
+		cin >> w >> h;
+
+		if (w == 0 && h == 0)
+			break;
+
+		for (int i = 0; i < h; i++)
+		{
+			string s; 
+
+			cin >> s;
+
+			for (int j = 0; j < s.size(); j++)
+			{
+				arr[i][j] = s[j];
+
+				if (arr[i][j] == 'o')
+				{
+					robot.r = i;
+					robot.c = j;
+					robot.dist = 0;
+				}
+				else if (arr[i][j] == '*')
+					vecDirty.push_back(sPos(i, j, 0));
+			}
+		}
+
+
+		Solve();
+
+
+		if (ans == INF)
+			cout << -1 << "\n";
+		else
+			cout << ans << "\n";
+	}
+
+
+	return 0;
+}
+```
