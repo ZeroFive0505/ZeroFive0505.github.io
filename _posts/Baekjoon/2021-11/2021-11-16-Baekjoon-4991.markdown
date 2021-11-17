@@ -187,8 +187,6 @@ int w, h;
 char arr[MAX][MAX];
 bool bfsCheck[MAX][MAX];
 
-int order[10];
-int chk[10];
 int graph[11][11];
 bool visited[11];
 int path[11];

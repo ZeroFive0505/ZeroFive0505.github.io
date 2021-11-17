@@ -1,0 +1,212 @@
+---
+layout: post
+title: 게리멘더링 2
+date: 2021-11-17 09:55:45 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17779)
+# 게리멘더링 2
+
+# 풀이
+영역을 어떻게 나눠야 할지 감이 안 와서 결국 [이 곳](https://yabmoons.tistory.com/300)의 풀이를 참조하였다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 21;
+
+struct sCoord
+{
+	int x;
+	int y;
+};
+
+const int INF = 987654321;
+
+int N;
+int ans = INF;
+
+int arr[MAX][MAX];
+int label[MAX][MAX];
+
+sCoord pos[4];
+
+bool CanMakeLine(int x, int y, int d1, int d2)
+{
+    // 만약 세로축이 범위를 넘어가거나
+    // 가로축 + 오프셋이 0아래로 가면
+    // 왼쪽 꼭지점이 생기지 못한다.
+	if (x + d1 >= N || y - d1 < 0)
+		return false;
+
+    // 세로축이 범위를 넘어가거나
+    // 가로축도 범위를 넘어가면
+    // 오른쪽 꼭지점은 생기지 못한다.
+	if (x + d2 >= N || y + d2 >= N)
+		return false;
+
+    // 세로축이 범위를 넘거나
+    // 가로축이 범위를 넘을 경우
+    // 아래쪽 꼭지점이 생기지 못한다.
+    // 아래쪽 꼭지점이 오른쪽으로 기울어질 경우
+	if (x + d1 + d2 >= N || y - d1 + d2 >= N)
+		return false;
+
+    // 아래쪽 꼭지점이 왼쪽으로 기울어질 경우
+	if (x + d2 + d1 >= N || y + d2 - d1 < 0)
+		return false;
+
+	return true;
+}
+
+void Labeling(int a, int b, int c, int d)
+{
+    // 먼저 모든 영역을 5로 정한다.
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			label[i][j] = 5;
+		}
+	}
+
+	int subArea = 0;
+    // 왼쪽 세로 꼭지점까지 반복한다.
+	for (int i = 0; i < pos[1].x; i++)
+	{
+        // 만약 세로축이 최상단 꼭지점에 도달하면
+        // 영역은 한칸씩 줄어든다.
+		if (i >= pos[0].x)
+			subArea++;
+
+		for (int j = 0; j <= pos[0].y - subArea; j++)
+		{
+			label[i][j] = 1;
+		}
+	}
+
+	int plusArea = 0;
+    // 0부터 오른쪽 세로 꼭지점까지 반복한다.
+	for (int i = 0; i <= pos[2].x; i++)
+	{   
+        // 이때는 반대로 점차 늘어난다.
+		if (i > pos[0].x)
+			plusArea++;
+
+		// j는 늘어난 만큼 오프셋을 주고 최대 N 까지 반복한다.
+		for (int j = pos[0].y + 1 + plusArea; j < N; j++)
+		{
+			label[i][j] = 2;
+		}
+	}
+
+	subArea = 0;
+	// 최하단부터 시작해서 왼쪽 꼭지점까지 반복한다.
+	for (int i = N - 1; i >= pos[1].x; i--)
+	{	
+		// 최하단보다 작아진다면 영역의 갯수는 점점 감소한다.
+		if (i < pos[3].x)
+			subArea++;
+
+		for (int j = 0; j < pos[3].y - subArea; j++)
+		{
+			label[i][j] = 3;
+		}
+	}
+
+	plusArea = 0;
+
+	// 최하단부터 시작해서 오른쪽 꼭지점보다 클때까지 반복한다.
+	for (int i = N - 1; i > pos[2].x; i--)
+	{
+		// 만약 최하단의 꼭지점보다 작아진다면 영역의 오프셋을 늘려준다.
+		if (i <= pos[3].x)
+			plusArea++;
+
+		// 늘러준 오프셋부터 시작한다.
+		for (int j = pos[3].y + plusArea; j < N; j++)
+		{
+			label[i][j] = 4;
+		}
+	}
+
+	int sum[6] = {};
+
+	// 5개의 영역의 합계를 구한다.
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			sum[label[i][j]] = sum[label[i][j]] + arr[i][j];
+		}
+	}
+
+	// 정렬한다.
+	sort(sum, sum + 6);
+
+	// 차를 구해서 반환한다.
+	int diff = sum[5] - sum[1];
+
+	ans = min(ans, diff);
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+    // i = x, 세로
+    // j = y, 가로
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 1; j < N; j++)
+		{   
+            // 왼쪽 대각선
+			for (int d1 = 1; d1 <= j; d1++)
+			{
+                // 오른쪽 대각선
+				for (int d2 = 1; d2 < N - j; d2++)
+				{
+                    // 4개의 꼭지점을 만들 수 있는지 확인
+					if (CanMakeLine(i, j, d1, d2))
+					{
+						// 최상단 꼭지점
+						pos[0].x = i;
+						pos[0].y = j;
+
+						// 왼쪽 꼭지점
+						pos[1].x = i + d1;
+						pos[1].y = j - d1;
+
+						// 오른쪽 꼭지점
+						pos[2].x = i + d2;
+						pos[2].y = j + d2;
+
+						// 최하단 꼭지점
+						pos[3].x = i + d1 + d2;
+						pos[3].y = j - d1 + d2;
+
+						Labeling(i, j, d1, d2);
+					}
+				}
+			}
+		}
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```

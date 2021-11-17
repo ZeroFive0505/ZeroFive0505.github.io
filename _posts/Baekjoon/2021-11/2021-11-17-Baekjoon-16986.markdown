@@ -6,7 +6,7 @@ categories: Baekjoon
 ---
 
 ## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/16986)
-# 인싸들의 
+# 인싸들의 가위바위보
 
 # 풀이
 풀이는 [이 곳](https://yabmoons.tistory.com/258)을 참조하였다.
