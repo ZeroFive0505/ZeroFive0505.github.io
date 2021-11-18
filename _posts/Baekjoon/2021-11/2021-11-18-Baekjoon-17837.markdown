@@ -1,0 +1,244 @@
+---
+layout: post
+title: 새로운 게임 2
+date: 2021-11-18 09:58:49 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17837)
+# 새로운 게임 2
+
+# 풀이
+4%에서 오답이 나왔다. 어떤 부분을 놓쳤는지 도저히 감이 오질 안 와서 [이 곳](https://yabmoons.tistory.com/304)의 풀이를 참조했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const int MAX = 12;
+
+const int CHESS_MAX = 10;
+
+struct sPos
+{
+	int r;
+	int c;
+	int dir;
+
+	sPos() : r(0), c(0), dir(0) {}
+
+	sPos(int _r, int _c, int _dir) : r(_r), c(_c), dir(_dir) {}
+
+}Delta[] = {
+	{0, 0, 0},
+	{0, 1, 0},
+	{0, -1, 0},
+	{-1, 0, 0},
+	{1, 0, 0}
+};
+
+int N, K;
+
+int arr[MAX][MAX];
+vector<int> arr2[MAX][MAX];
+sPos chess[CHESS_MAX];
+
+int FindPos(int r, int c, int idx)
+{
+    // 현재 r, c에서 idx의 말을 위치를 찾는다.
+	for (int i = 0; i < arr2[r][c].size(); i++)
+	{
+		if (arr2[r][c][i] == idx)
+			return i;
+	}
+
+	return -1;
+}
+
+
+bool Check()
+{
+    // 모든 체스말을 순회하면서 현재 쌓인 갯수를 확인한다.
+	for (int i = 0; i < K; i++)
+	{
+		int r = chess[i].r;
+		int c = chess[i].c;
+
+		if (arr2[r][c].size() >= 4)
+			return true;
+	}
+
+	return false;
+}
+
+int FindDeleted(int r, int c, int num)
+{
+	int cnt = 0;
+    // 최상단에서 시작한다.
+	for (int i = arr2[r][c].size() - 1; i >= 0; i--)
+	{   
+        // 만약 현재 말이 찾으려는 말이면 빠져나간다.
+		if (arr2[r][c][i] == num)
+			break;
+		cnt++;
+	}
+
+    // cnt + 1 만큼 말을 위에서 제거한다.
+	return cnt + 1;
+}
+
+int ReverseDir(int num)
+{
+	int dir = chess[num].dir;
+	
+	if (dir == 1)
+		return 2;
+	else if (dir == 2)
+		return 1;
+	else if (dir == 3)
+		return 4;
+	else if (dir == 4)
+		return 3;
+}
+
+void MoveChess(int r, int c, int nr, int nc, int num, int pos, int ms)
+{
+    // 체스를 움직인다.
+	switch (ms)
+	{
+    // 하얀색칸일 경우
+	case 0:
+	{
+        // 새로운 위치에 전부 다 쌓는다.
+		for (int i = pos; i < arr2[r][c].size(); i++)
+		{
+			arr2[nr][nc].push_back(arr2[r][c][i]);
+            // 기존위치에 있는 말의 idx로 r, c를 업데이트한다.
+			int idx = arr2[r][c][i];
+			chess[idx].r = nr;
+			chess[idx].c = nc;
+		}
+
+        // 위에서 몇번 말을 제거해하는지 구한다.
+		int deletedNum = FindDeleted(r, c, num);
+
+        // deletedNum만큼 말을 제거한다.
+		for (int i = 0; i < deletedNum; i++)
+		{
+			arr2[r][c].pop_back();
+		}
+	}
+		break;
+    // 빨간색을 밟았을 경우
+	case 1:
+	{
+        // 거꾸로 순회한다.
+		for (int i = arr2[r][c].size() - 1; i >= pos; i--)
+		{
+			arr2[nr][nc].push_back(arr2[r][c][i]);
+			int idx = arr2[r][c][i];
+			chess[idx].r = nr;
+			chess[idx].c = nc;
+		}
+
+		int deletedNum = FindDeleted(r, c, num);
+
+		for (int i = 0; i < deletedNum; i++)
+		{
+			arr2[r][c].pop_back();
+		}
+	}
+		break;
+    // 파란색을 밟았을 경우
+	case 2:
+	{
+        // 방향을 반대로 바꾼다.
+		int dir = ReverseDir(num);
+		chess[num].dir = dir;
+
+		int nnr = r + Delta[dir].r;
+		int nnc = c + Delta[dir].c;
+
+        // 만약 범위내라면
+		if (nnr >= 0 && nnc >= 0 && nnr < N && nnc < N)
+		{   
+            // 또한 다시 파란색이 아니라면 말을 움직인다.
+			if (arr[nnr][nnc] != 2)
+				MoveChess(r, c, nnr, nnc, num, pos, arr[nnr][nnc]);
+		}
+	}
+		break;
+	}
+}
+
+int main()
+{
+	cin >> N >> K;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	for (int i = 0; i < K; i++)
+	{
+		int r, c, d;
+
+		cin >> r >> c >> d;
+		r--;
+		c--;
+		chess[i] = sPos(r, c, d);
+		arr2[r][c].push_back(i);
+	}
+
+	bool finish = false;
+
+	int t;
+    // 최소 1000번 반복한다.
+	for (t = 1; t <= 1000; t++)
+	{
+		for (int i = 0; i < K; i++)
+		{
+			int r = chess[i].r;
+			int c = chess[i].c;
+			int dir = chess[i].dir;
+
+			int nr = r + Delta[dir].r;
+			int nc = c + Delta[dir].c;
+
+            // 현재 r, c에서 몇번째로 쌓여있는지를 찾아온다.
+			int pos = FindPos(r, c, i);
+
+            // 만약 범위 안이라면 움직인다.
+			if (nr >= 0 && nc >= 0 && nr < N && nc < N)
+				MoveChess(r, c, nr, nc, i, pos, arr[nr][nc]);
+            // 범위를 넘을 경우는 파란색을 밟는 경우와 동일
+			else
+				MoveChess(r, c, nr, nc, i, pos, 2);
+
+			// 매순간마다 4개가 쌓였는지 확인한다.
+			if (Check())
+			{
+				finish = true;
+				break;
+			}
+		}
+
+		if (finish)
+			break;
+	}
+
+	if (finish)
+		cout << t << "\n";
+	else
+		cout << -1 << "\n";
+
+	return 0;
+}
+```
