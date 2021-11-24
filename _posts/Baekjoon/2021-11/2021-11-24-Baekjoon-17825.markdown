@@ -1,0 +1,166 @@
+---
+layout: post
+title: 주사위 윷놀이
+date: 2021-11-24 11:33:15 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17825)
+# 주사위 윷놀이
+
+# 문제
+> 주사위 윷놀이는 다음과 같은 게임판에서 하는 게임이다.
+
+ > ![Img](https://upload.acmicpc.net/43409ac6-54bf-4a21-b542-e01a8211e59f/-/preview/)
+
+ > - 처음에는 시작 칸에 말 4개가 있다.
+ > - 말은 게임판에 그려진 화살표의 방향대로만 이동할 수 있다. 말이 파란색 칸에서 이동을 시작하면 파란색 화살표를 타야 하고, 이동하는 도중이거나 파란색이 아닌 칸에서 이동을 시작하면 빨간색 화살표를 타야 한다. 말이 도착 칸으로 이동하면 주사위에 나온 수와 관계 없이 이동을 마친다.
+ > - 게임은 10개의 턴으로 이루어진다. 매 턴마다 1부터 5까지 한 면에 하나씩 적혀있는 5면체 주사위를 굴리고, 도착 칸에 있지 않은 말을 하나 골라 주사위에 나온 수만큼 이동시킨다.
+ > - 말이 이동을 마치는 칸에 다른 말이 있으면 그 말은 고를 수 없다. 단, 이동을 마치는 칸이 도착 칸이면 고를 수 있다.
+ > - 말이 이동을 마칠 때마다 칸에 적혀있는 수가 점수에 추가된다.
+
+ > 주사위에서 나올 수 10개를 미리 알고 있을 때, 얻을 수 있는 점수의 최댓값을 구해보자.
+
+ # 입력
+> 첫째 줄에 주사위에서 나올 수 10개가 순서대로 주어진다.
+
+# 출력
+> 얻을 수 있는 점수의 최댓값을 출력한다.
+
+# 풀이
+[이 곳](https://haejun0317.tistory.com/163)의 풀이를 참조했다.
+
+# 코드 
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+// 10개의 주사위
+int dices[10];
+
+// 4개의 말
+int player[4];
+
+// 윷놀이 판
+int arr[35];
+
+// 회전 여부
+int turn[35];
+
+// 방문 여부
+bool check[35];
+
+// 점수
+int scores[35];
+
+int ans = 0;
+
+void DFS(int depth, int sum)
+{
+    // 만약 주사위를 다 굴렸으면
+    // 점수를 갱신한다.
+	if (depth >= 10)
+	{
+		ans = max(ans, sum);
+
+		return;
+	}
+
+    // 4개의 말을 시뮬레이션 한다.
+	for (int i = 0; i < 4; i++)
+	{
+        // 먼저 위치를 저장한다.
+		int prev = player[i];
+		int now = prev;
+        // 움직이는 횟수는 주사위눈 수 만큼 움직인다.
+		int move = dices[depth];
+
+        // 만약 해당 칸이 파란색 칸이라면
+		if (turn[now] > 0)
+		{   
+            // 해당 칸이랑 연결된 칸으로 이동한다.
+			now = turn[now];
+            // 이동횟수는 한번 줄인다.
+			move -= 1;
+		}
+
+        // 이동횟수를 전부 소진할때까지
+		while (move--)
+		{  
+            // 위치를 갱신한다.
+			now = arr[now];
+		}
+
+
+        // 만약 도착하지 않았고 이미 말이 있는 위치라면
+        // 건너뛴다.
+		if (now != 21 && check[now])
+			continue;
+
+        // 성공적으로 이동을 했으므로
+        // 전의 위치는 초기화해주고 새로운 위치로 기록한다.
+		check[prev] = false;
+		check[now] = true;
+		player[i] = now;
+
+		DFS(depth + 1, sum + scores[now]);
+
+        // 다시 원위치로 되돌린다.
+		player[i] = prev;
+		check[prev] = true;
+		check[now] = false;
+	}
+}
+
+int main()
+{
+	for (int i = 0; i < 21; i++)
+		arr[i] = i + 1;
+
+	arr[21] = 21;
+
+	for (int i = 22; i < 27; i++)
+		arr[i] = i + 1;
+
+	arr[28] = 29;
+	arr[29] = 30;
+	arr[30] = 25;
+	arr[31] = 32;
+	arr[32] = 25;
+	arr[27] = 20;
+
+	turn[5] = 22;
+	turn[10] = 31;
+	turn[15] = 28;
+	turn[25] = 26;
+
+	for (int i = 0; i < 21; i++)
+		scores[i] = i * 2;
+
+	scores[22] = 13;
+	scores[23] = 16;
+	scores[24] = 19;
+
+	scores[31] = 22;
+	scores[32] = 24;
+	scores[28] = 28;
+
+	scores[29] = 27;
+	scores[30] = 26;
+	scores[25] = 25;
+
+	scores[26] = 30;
+	scores[27] = 35;
+
+	for (int i = 0; i < 10; i++)
+		cin >> dices[i];
+
+	DFS(0, 0);
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
