@@ -1,0 +1,357 @@
+---
+layout: post
+title: 모노미노도미노
+date: 2021-11-25 09:39:25 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/19235)
+# 모노미노도미노
+
+# 풀이
+재귀와 반복문을 이용해서 해결을 해봤지만 시간 초과가 떴다.. 혹시나해서 예제입력말고 다른 반례들로 테스트 해봤는데 정답을 출력하는 것도 아니었다.. [이 곳](https://yabmoons.tistory.com/498)의 풀이를 참조했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int N;
+
+// 총 점수
+int scores = 0;
+
+// 블록의 고유번호
+int figureNum = 1;
+
+// 남은 블록의 갯수
+int blockCnt = 0;
+
+// 빨간영역부터 파란색, 초록색 영역까지 거리는 10
+// 총 너비는 4
+// 파란색, 초록색이므로 2개의 색
+int area[10][4][2];
+
+vector<pair<int, pair<int, int>>> v;
+
+struct sPos
+{
+	int x;
+	int y;
+}Delta[] = {
+	{0, 1},
+	{0, -1},
+	{1, 0},
+	{-1, 0}
+};
+
+// idx번줄에 있는 c 색깔의 블록들을 지운다.
+void Remove(int idx, int c)
+{	
+	// 너비는 4이므로 4번반복
+	for (int i = 0; i < 4; i++)
+	{
+		if (area[idx][i][c] != 0)
+		{
+			blockCnt--;
+			area[idx][i][c] = 0;
+		}
+	}
+}
+
+
+// 블록을 내리는 함수
+void SetBlock(int type, int x, int y)
+{
+	switch (type)
+	{
+	// 만약 블록타입이 1이라면
+	case 1:
+	{
+		// 파란색 블록은 오른쪽으로 옮긴다. x = 세로, y = 가로
+		int bIdx = y + 1;
+		
+		// 0일동안 계속해서 오른쪽으로 옮긴다.
+		while (bIdx < 10 && area[bIdx][x][0] == 0)
+			bIdx++;
+
+		// 도달한 위치에 번호를 부여한다.
+		area[bIdx - 1][x][0] = figureNum;
+
+		int gIdx = x + 1;
+		
+		while (gIdx < 10 && area[gIdx][y][1] == 0)
+			gIdx++;
+
+		// 번호를 하나 늘려준다.
+		area[gIdx - 1][y][1] = figureNum++;
+
+		// 블록은 카운트는 2개 늘려준다.
+		blockCnt = blockCnt + 2;
+	}
+		break;
+	// 2번 타입일 경우
+	case 2:
+	{	
+		// 파란색의 경우 2칸 오른쪽으로 옮긴다.
+		int bIdx = y + 2;
+
+		while (bIdx < 10 && area[bIdx][x][0] == 0)
+			bIdx++;
+
+		// 도착한 위치에 두곳에 설치
+		area[bIdx - 1][x][0] = figureNum;
+		area[bIdx - 2][x][0] = figureNum;
+
+		// 초록색의 경우 한칸 아래로 내린다.
+		int gIdx = x + 1;
+
+		// 초록색의 경우는 가로로 두칸을 차지하기에 현재 위치에서 가로 두칸을 확인해야한다.
+		while (gIdx < 10 && (area[gIdx][y][1] == 0 && area[gIdx][y + 1][1] == 0))
+			gIdx++;
+
+		area[gIdx - 1][y][1] = figureNum;
+		area[gIdx - 1][y + 1][1] = figureNum++;
+
+		// 총 블록수는 4개 늘어난다.
+		blockCnt = blockCnt + 4;
+	}
+		break;
+	case 3:
+	{
+		// 3번의 경우 2번과 반대 이번에는 파란색이 위아래로 2칸을 검사한다.
+		int bIdx = y + 1;
+
+		while (bIdx < 10 && (area[bIdx][x][0] == 0 && area[bIdx][x + 1][0] == 0))
+			bIdx++;
+
+		area[bIdx - 1][x][0] = figureNum;
+		area[bIdx - 1][x + 1][0] = figureNum;
+
+		int gIdx = x + 2;
+
+		while (gIdx < 10 && area[gIdx][y][1] == 0)
+			gIdx++;
+
+		area[gIdx - 1][y][1] = figureNum;
+		area[gIdx - 2][y][1] = figureNum++;
+
+		blockCnt = blockCnt + 4;
+	}
+		break;
+	}
+}
+
+void Move(int idx, int c)
+{
+	// 3번은 빨간색의 영역이다. 따라서 더이상 검사하지 않는다.
+	if (idx == 3)
+		return;
+
+	// 현재 인덱스에서 -1을하면 바로 위 블록의 인덱스가 나온다.
+	int moveIdx = idx - 1;
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (area[moveIdx][i][c] == 0)
+			continue;
+
+		// 현재 위치의 값을 구하고
+		int x = moveIdx;
+		int y = i;
+		int val = area[x][y][c];
+		bool flag = false;
+
+		// 자기 블록번호와 동일한 블록번호를 가지는 블록의 위치를 찾는다.
+		for (int j = 0; j < 4; j++)
+		{
+			// 다시한번 여기서 x는 세로 y는 가로이다.
+			int xx = moveIdx + Delta[j].y;
+			int yy = y + Delta[j].x;
+
+			if (xx >= 4 && xx < 10 && yy >= 0 && y < 4)
+			{
+				// 만약 동일한 번호를 가지는 짝을 찾았다면
+				// 두 블록이 이동가능한 거리를 계산한다.
+				if (area[x][y][c] == area[xx][yy][c])
+				{
+					flag = true;
+
+					int tempX = x + 1;
+					int cnt = 1;
+
+					while (1)
+					{
+						// 만약 더 이동할 수 있지만 자기자신의 짝에 가려진다면
+						if (tempX < 10 && area[tempX][y][c] == val)
+						{
+							// 큰 수를 대입
+							cnt = 987654321;
+							break;
+						}
+
+						// 더이상 이동이 불가능하거나 범위를 넘어가면 나간다.
+						if (area[tempX][y][c] != 0 || tempX >= 10)
+							break;
+
+						tempX++;
+						cnt++;
+					}
+
+					cnt--;
+
+					int tempXX = xx + 1;
+					
+					int cnt2 = 1;
+					// 위와 마찬가지
+					while (1)
+					{
+						if (tempXX < 10 && area[tempXX][yy][c] == val)
+						{
+							cnt2 = 987654321;
+							break;
+						}
+
+						if (area[tempXX][yy][c] != 0 || tempXX >= 10)
+							break;
+
+						tempXX++;
+						cnt2++;
+					}
+
+					cnt2--;
+
+					// 두 이동 거리에서 최소값을 찾는다.
+					int moveCnt = min(cnt, cnt2);
+					// 이동
+					area[x + moveCnt][y][c] = area[x][y][c];
+					area[xx + moveCnt][yy][c] = area[xx][yy][c];
+
+					// 이동후에 원래 위치에 있는 값은 초기화
+					// 만약 겹치는 위치에 있었다면 하나만 초기화한다.
+					if (xx + moveCnt == x)
+						area[x][y][c] = 0;
+					else
+						area[x][y][c] = area[xx][yy][c] = 0;
+
+					break;
+				}
+			}
+		}
+
+		// 동일한 짝을 찾지 못했을 경우
+		if (!flag)
+		{
+			int tempX = x + 1;
+			int cnt = 1;
+			
+			// 이 경우는 짝은 신경쓰지말고 그냥 쭉 내린다.
+			while (tempX < 10 && area[tempX][y][c] == 0)
+			{
+				tempX++;
+				cnt++;
+			}
+
+			cnt--;
+
+			// 값을 갱신한다.
+			area[x + cnt][y][c] = area[x][y][c];
+			area[x][y][c] = 0;
+		}
+	}
+	
+	// 재귀호출로 또 바로 위에 블록을 내린다.
+	Move(idx - 1, c);
+}
+
+void RemoveBlock()
+{
+	bool check = false;
+
+	for (int c = 0; c < 2; c++)
+	{
+		for (int i = 6; i < 10; i++)
+		{
+			int cnt = 0;
+
+			for (int j = 0; j < 4; j++)
+			{
+				if (area[i][j][c] != 0)
+					cnt++;
+			}
+
+			// 만약 한줄을 만들었을 경우
+			if (cnt == 4)
+			{
+				check = true;
+				scores++;
+				Remove(i, c);
+				Move(i, c);
+			}
+		}
+	}
+}
+
+void Check()
+{
+	for (int c = 0; c < 2; c++)
+	{
+		int cnt = 0;
+
+		for (int sp = 4; sp < 6; sp++)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				if (area[sp][i][c] != 0)
+				{
+					cnt++;
+					break;
+				}
+			}
+		}
+
+		// 특별한 영역에 걸치는 블록수만큼 블록을 아래로 내린다.
+		if (cnt != 0)
+		{
+			for (int i = 0; i < cnt; i++)
+			{
+				Remove(9, c);
+				Move(9, c);
+			}
+		}
+	}
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 0; i < N; i++)
+	{
+		int t, x, y;
+
+		cin >> t >> x >> y;
+
+		v.push_back({ t, {x, y} });
+	}
+
+	for (int i = 0; i < v.size(); i++)
+	{
+		int t = v[i].first;
+		int x = v[i].second.first;
+		int y = v[i].second.second;
+
+		SetBlock(t, x, y);
+		RemoveBlock();
+		Check();
+	}
+
+	cout << scores << "\n";
+	cout << blockCnt << "\n";
+
+	return 0;
+}
+```
