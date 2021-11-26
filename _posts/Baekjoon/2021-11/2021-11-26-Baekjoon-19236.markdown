@@ -1,0 +1,256 @@
+---
+layout: post
+title: 청소년 상어
+date: 2021-11-26 10:58:23 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/19236)
+# 청소년 상어
+
+# 풀이
+DFS, 백트랙킹 문제였다. 어떻게 풀어야할지 감은 왔지만 코드는 잘 나오질 않았다. 결국에는 [이 곳](https://yabmoons.tistory.com/495)을 참조해서 풀었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+const int MAX = 4;
+
+struct sFish
+{
+	int x;
+	int y;
+	int dir;
+	bool alive;
+};
+
+int answer = 0;
+
+struct sPos
+{
+	int x;
+	int y;
+}Delta[] = {
+	{0, 0},
+	{-1, 0},
+	{-1, -1},
+	{0, -1},
+	{1, -1},
+	{1, 0},
+	{1, 1},
+	{0, 1},
+	{-1, 1}
+};
+
+int arr[MAX][MAX];
+
+sFish fish[20];
+
+void SwapFish(int a, int b)
+{
+	sFish temp = fish[a];
+	fish[a].x = fish[b].x;
+	fish[a].y = fish[b].y;
+
+	fish[b].x = temp.x;
+	fish[b].y = temp.y;
+}
+
+void MoveFish()
+{
+    // 총 16마리 생선을 움직인다.
+	for (int i = 1; i <= 16; i++)
+	{
+        // 만약 죽어있다면 건너뛴다.
+		if (!fish[i].alive)
+			continue;
+
+		int x = fish[i].x;
+		int y = fish[i].y;
+		int dir = fish[i].dir;
+
+		int nx = x + Delta[dir].x;
+		int ny = y + Delta[dir].y;
+
+		bool found = false;
+
+		if (nx >= 0 && ny >= 0 && nx < 4 && ny < 4)
+		{
+            // 만약 빈곳이라면
+			if (arr[nx][ny] == 0)
+			{
+				found = true;
+				fish[i].x = nx;
+				fish[i].y = ny;
+				arr[nx][ny] = i;
+				arr[x][y] = 0;
+			}
+            // 만약 생선이 있는곳이라면 위치를 바꾼다.
+			else if (arr[nx][ny] != -1)
+			{
+				found = true;
+				SwapFish(i, arr[nx][ny]);
+				swap(arr[x][y], arr[nx][ny]);
+			}
+		}
+
+
+        // 새로운 위치를 찾지 못했을 경우는 반시계방향으로 돌기 시작한다.
+		if (!found)
+		{
+            // 먼저 45도 돌린다.
+			int nDir = dir + 1;
+			if (nDir == 9)
+				nDir = 1;
+
+			int nx = x + Delta[nDir].x;
+			int ny = y + Delta[nDir].y;
+            // 원래 방향과 다를때까지
+			while (nDir != dir)
+			{
+				if (nx >= 0 && ny >= 0 && nx < 4 && ny < 4)
+				{
+                    // 찾았을 시 새로운 방향으로 등록해준다.
+					if (arr[nx][ny] == 0)
+					{
+						fish[i].x = nx;
+						fish[i].y = ny;
+						arr[nx][ny] = i;
+						arr[x][y] = 0;
+						fish[i].dir = nDir;
+						break;
+					}
+					else if (arr[nx][ny] != -1)
+					{
+						SwapFish(i, arr[nx][ny]);
+						swap(arr[x][y], arr[nx][ny]);
+						fish[i].dir = nDir;
+						break;
+					}
+				}
+
+				nDir++;
+				if (nDir == 9)
+					nDir = 1;
+
+
+				nx = x + Delta[nDir].x;
+				ny = y + Delta[nDir].y;
+			}
+		}
+	}
+}
+
+void CopyState(int A[][MAX], int B[][MAX], sFish* C, sFish* D)
+{
+	for (int i = 0; i < MAX; i++)
+	{
+		for (int j = 0; j < MAX; j++)
+		{
+			A[i][j] = B[i][j];
+		}
+	}
+
+	for (int i = 1; i <= 16; i++)
+		C[i] = D[i];
+}
+
+void MakeState(int x, int y, int nx, int ny, int fishNum, bool val)
+{
+    // 생선을 먹었을시
+	if (val)
+	{
+        // 원래 위치를 0
+		arr[x][y] = 0;
+        // 새로운 위치를 -1
+		arr[nx][ny] = -1;
+        // 생선은 사망
+		fish[fishNum].alive = false;
+	}
+	else
+	{
+        // 다시 원상태로 돌아간다.
+		arr[x][y] = -1;
+		arr[nx][ny] = fishNum;
+		fish[fishNum].alive = true;
+	}
+}
+
+void DFS(int x, int y, int dir, int sum)
+{
+    // 먼저 최댓값을 기록한다.
+	answer = max(answer, sum);
+
+    // 다시 원래상태로 돌아가기위해서
+    // 임시 변수들을 선언하고 전역변수의 값을 복사한다.
+	int temp[MAX][MAX] = {};
+	sFish tempFish[20];
+	CopyState(temp, arr, tempFish, fish);
+
+	MoveFish();
+
+    // 최대 3칸까지 움직일 수 있다
+	for (int i = 1; i <= 3; i++)
+	{
+		int nx = x + Delta[dir].x * i;
+		int ny = y + Delta[dir].y * i;
+
+		if (nx >= 0 && ny >= 0 && nx < 4 && ny < 4)
+		{
+            // 만약 생선이 없다면 건너뛴다.
+			if (arr[nx][ny] == 0)
+				continue;
+
+            // 생선이 있다면 방향과 숫자를 가져오고
+			int fishNum = arr[nx][ny];
+			int nDir = fish[fishNum].dir;
+
+            // DFS를 실시한다.
+			MakeState(x, y, nx, ny, fishNum, true);
+			DFS(nx, ny, nDir, sum + fishNum);
+			MakeState(x, y, nx, ny, fishNum, false);
+		}
+		else
+			break;
+	}
+
+    // 여기서 복사했던 값을 기반으로 다시 원래상태로 돌아간다.
+	CopyState(arr, temp, fish, tempFish);
+}
+
+int main()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			int a, b;
+
+			cin >> a >> b;
+
+			arr[i][j] = a;
+
+			fish[a] = { i, j, b, true };
+		}
+	}
+
+    // 초기 상태를 설정한다.
+	int sum = arr[0][0];
+	int dir = fish[sum].dir;
+	fish[sum].alive = false;
+    // 상어가 있는 곳은 -1
+	arr[0][0] = -1;
+
+	DFS(0, 0, dir, sum);
+
+
+	cout << answer << "\n";
+
+	return 0;
+}
+```
