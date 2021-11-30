@@ -1,0 +1,404 @@
+---
+layout: post
+title: 어른 상어
+date: 2021-11-30 10:13:13 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/19237)
+# 어른 상어
+
+# 풀이
+예제도 다 맞고 질문 글에 올라온 반례도 다 정답인데.. 도대체 어디서 틀린지를 알 수가 없어서 한참을 헤맸는데 어처구니 없게도 정렬기준을 잘못 잡아서 1%에서 오답이 처리가 된 것이 이유였다...
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+const int MAX = 21;
+
+int N, M, K;
+
+int arr[MAX][MAX] = {};
+pair<int, int> smell[MAX][MAX] = {};
+
+struct sDelta
+{
+	int r;
+	int c;
+}Delta[] = {
+	{0, 0},
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+struct sShark
+{
+	int r;
+	int c;
+	int dir;
+	int ups[4];
+	int downs[4];
+	int lefts[4];
+	int rights[4];
+};
+
+sShark sharkArr[MAX * MAX] = {};
+
+// 냄세는 바로 갱신하지 않는다.
+void BFS(int r, int c, int idx, int dir)
+{
+    // 먼저 주위의 빈칸을 우선 둘러보고 그 이후에 자기 자신의 냄세가 있는 곳을 둘러본다.
+
+	switch (dir)
+	{
+	case 1:
+	{
+		bool found = false;
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = r + Delta[sharkArr[idx].ups[i]].r;
+			int nc = c + Delta[sharkArr[idx].ups[i]].c;
+
+			if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+				continue;
+
+			if (smell[nr][nc].first == 0 && smell[nr][nc].second == 0)
+			{
+				// smell[nr][nc].first = idx;
+				// smell[nr][nc].second = K;
+				sharkArr[idx].dir = sharkArr[idx].ups[i];
+				sharkArr[idx].r = nr;
+				sharkArr[idx].c = nc;
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				int nr = r + Delta[sharkArr[idx].ups[i]].r;
+				int nc = c + Delta[sharkArr[idx].ups[i]].c;
+
+				if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+					continue;
+
+				if (smell[nr][nc].first == idx && smell[nr][nc].second != 0)
+				{
+					// smell[nr][nc].first = idx;
+					// smell[nr][nc].second = K;
+					sharkArr[idx].dir = sharkArr[idx].ups[i];
+					sharkArr[idx].r = nr;
+					sharkArr[idx].c = nc;
+					break;
+				}
+			}
+		}
+	}
+		break;
+	case 2:
+	{
+		bool found = false;
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = r + Delta[sharkArr[idx].downs[i]].r;
+			int nc = c + Delta[sharkArr[idx].downs[i]].c;
+
+			if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+				continue;
+
+			if (smell[nr][nc].first == 0 && smell[nr][nc].second == 0)
+			{
+				// smell[nr][nc].first = idx;
+				// smell[nr][nc].second = K;
+				sharkArr[idx].dir = sharkArr[idx].downs[i];
+				sharkArr[idx].r = nr;
+				sharkArr[idx].c = nc;
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				int nr = r + Delta[sharkArr[idx].downs[i]].r;
+				int nc = c + Delta[sharkArr[idx].downs[i]].c;
+
+				if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+					continue;
+
+				if (smell[nr][nc].first == idx && smell[nr][nc].second != 0)
+				{
+					// smell[nr][nc].first = idx;
+					// smell[nr][nc].second = K;
+					sharkArr[idx].dir = sharkArr[idx].downs[i];
+					sharkArr[idx].r = nr;
+					sharkArr[idx].c = nc;
+					break;
+				}
+			}
+		}
+	}
+		break;
+	case 3:
+	{
+		bool found = false;
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = r + Delta[sharkArr[idx].lefts[i]].r;
+			int nc = c + Delta[sharkArr[idx].lefts[i]].c;
+
+			if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+				continue;
+
+			if (smell[nr][nc].first == 0 && smell[nr][nc].second == 0)
+			{
+				// smell[nr][nc].first = idx;
+				// smell[nr][nc].second = K;
+				sharkArr[idx].dir = sharkArr[idx].lefts[i];
+				sharkArr[idx].r = nr;
+				sharkArr[idx].c = nc;
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				int nr = r + Delta[sharkArr[idx].lefts[i]].r;
+				int nc = c + Delta[sharkArr[idx].lefts[i]].c;
+
+				if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+					continue;
+
+				if (smell[nr][nc].first == idx && smell[nr][nc].second != 0)
+				{
+					// smell[nr][nc].first = idx;
+					// smell[nr][nc].second = K;
+					sharkArr[idx].dir = sharkArr[idx].lefts[i];
+					sharkArr[idx].r = nr;
+					sharkArr[idx].c = nc;
+					break;
+				}
+			}
+		}
+	}
+		break;
+	case 4:
+	{
+		bool found = false;
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = r + Delta[sharkArr[idx].rights[i]].r;
+			int nc = c + Delta[sharkArr[idx].rights[i]].c;
+
+			if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+				continue;
+
+			if (smell[nr][nc].first == 0 && smell[nr][nc].second == 0)
+			{
+				// smell[nr][nc].first = idx;
+				// smell[nr][nc].second = K;
+				sharkArr[idx].dir = sharkArr[idx].rights[i];
+				sharkArr[idx].r = nr;
+				sharkArr[idx].c = nc;
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				int nr = r + Delta[sharkArr[idx].rights[i]].r;
+				int nc = c + Delta[sharkArr[idx].rights[i]].c;
+
+				if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+					continue;
+
+				if (smell[nr][nc].first == idx && smell[nr][nc].second != 0)
+				{
+					// smell[nr][nc].first = idx;
+					// smell[nr][nc].second = K;
+					sharkArr[idx].dir = sharkArr[idx].rights[i];
+					sharkArr[idx].r = nr;
+					sharkArr[idx].c = nc;
+					break;
+				}
+			}
+		}
+	}
+		break;
+	}
+}
+
+int main()
+{
+	cin >> N >> M >> K;
+
+	int index = 1;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+
+			if (arr[i][j] != 0)
+			{
+				sharkArr[index].r = i;
+				sharkArr[index].c = j;
+				index++;
+			}
+		}
+	}
+
+    // 상어는 1번부터 시작한다 따라서 1을 더해서 정렬해줘야한다...
+	sort(sharkArr + 1, sharkArr + index, [](const sShark& a, const sShark& b) {
+		return arr[a.r][a.c] < arr[b.r][b.c];
+	});
+
+	for (int i = 1; i <= M; i++)
+	{
+		int dir;
+
+		cin >> dir;
+
+		sharkArr[i].dir = dir;
+		smell[sharkArr[i].r][sharkArr[i].c].first = i;
+		smell[sharkArr[i].r][sharkArr[i].c].second = K;
+	}
+
+
+	for (int i = 1; i <= M; i++)
+	{
+		int a, b, c, d;
+
+		cin >> a >> b >> c >> d;
+
+		sharkArr[i].ups[0] = a;
+		sharkArr[i].ups[1] = b;
+		sharkArr[i].ups[2] = c;
+		sharkArr[i].ups[3] = d;
+
+		cin >> a >> b >> c >> d;
+
+		sharkArr[i].downs[0] = a;
+		sharkArr[i].downs[1] = b;
+		sharkArr[i].downs[2] = c;
+		sharkArr[i].downs[3] = d;
+
+		cin >> a >> b >> c >> d;
+
+		sharkArr[i].lefts[0] = a;
+		sharkArr[i].lefts[1] = b;
+		sharkArr[i].lefts[2] = c;
+		sharkArr[i].lefts[3] = d;
+
+
+		cin >> a >> b >> c >> d;
+
+		sharkArr[i].rights[0] = a;
+		sharkArr[i].rights[1] = b;
+		sharkArr[i].rights[2] = c;
+		sharkArr[i].rights[3] = d;
+	}
+	
+	int t = 1;
+
+	int cnt = M;
+	bool finish = false;
+
+	while (t <= 1000)
+	{
+        // 상어의 번호 순으로 정렬된 배열을 순회한다.
+		for (int i = 1; i <= M; i++)
+		{
+			int r = sharkArr[i].r;
+			int c = sharkArr[i].c;
+			int dir = sharkArr[i].dir;
+
+            // 만약 -1이라면 쫓겨난 상어이므로 신경쓰지 않는다.
+			if (r == -1 && c == -1)
+				continue;
+			
+			BFS(r, c, i, dir);
+
+            // 만약 새로 도착한 위치가 0이라면 그냥 위치를 새롭게 갱신한다.
+			if (arr[sharkArr[i].r][sharkArr[i].c] == 0)
+			{
+				arr[r][c] = 0;
+				arr[sharkArr[i].r][sharkArr[i].c] = i;
+			}
+            // 만약 새로 도착한 위치에 이미 상어가 있을 경우는
+            // 현재 상어을 내쫓는다. 상어의 배열을 인덱스 순으로 정렬했기에
+            // 가장 숫자가 작은 상어가 먼저 움직일 것이고 먼저 자리를 잡고 있을것이다.
+            // 따라서 그 이후에 도착한 상어는 무조건 쫓겨난다.
+			else if (arr[sharkArr[i].r][sharkArr[i].c] != 0)
+			{
+				arr[r][c] = 0;
+				sharkArr[i].r = -1;
+				sharkArr[i].c = -1;
+				cnt--;
+			}
+		}
+
+        // 냄세를 줄인다.
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (smell[i][j].second != 0)
+				{
+					smell[i][j].second--;
+
+                    // 만약 냄세가 0이라면 주인의 번호도 사라진다.
+					if (smell[i][j].second == 0)
+						smell[i][j].first = 0;
+				}
+			}
+		}
+
+        // 냄세를 줄이고나서 새롭게 냄세를 갱신한다.
+		for (int i = 1; i <= M; i++)
+		{
+			if (sharkArr[i].r == -1 && sharkArr[i].c == -1)
+				continue;
+
+			smell[sharkArr[i].r][sharkArr[i].c].first = i;
+			smell[sharkArr[i].r][sharkArr[i].c].second = K;
+		}
+
+        // 만약 남은 상어가 한마리라는 뜻은 상어 1번이 혼자 남았다는 뜻
+		if (cnt == 1)
+		{
+			finish = true;
+			break;
+		}
+
+		t++;
+	}
+
+
+	if (finish)
+		cout << t << "\n";
+	else
+		cout << -1 << "\n";
+
+	return 0;
+}
+```
