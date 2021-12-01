@@ -1,0 +1,258 @@
+---
+layout: post
+title: 스타트 택시
+date: 2021-12-01 10:12:54 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/19238)
+# 스타트 택시
+
+# 풀이
+문제에 생각지도 못한 케이스가 많아서 시간을 많이 잡아먹은 문제였다. A의 출발지와 B의 목적지가 같은 경우가 생길 수 있으므로 하나의 이차원 배열에 출발지와 목적지를 잡으면 안됬었고 또한 출발지는 다양하더라도 목적지는 하나의 목적지일수도 있기에 이것또한 처리를 해야했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 21;
+
+int start[MAX][MAX] = {};
+vector<int> dest[MAX][MAX] = {};
+
+int N, M;
+
+unsigned int fuel;
+
+unsigned int prevUsedFuel;
+
+struct sPos
+{
+	int r;
+	int c;
+
+	sPos() : r(0), c(0) {}
+
+
+	sPos(int _r, int _c) : r(_r), c(_c) {}
+
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+sPos pos;
+
+bool BFS(bool customer)
+{
+	bool visited[MAX][MAX] = {};
+
+    // 손님을 태울때
+	if (customer)
+	{
+
+		visited[pos.r][pos.c] = true;
+
+		queue<pair<sPos, unsigned int>> q;
+
+		vector<pair<sPos, unsigned int>> v;
+
+		q.push({ pos, 0 });
+
+		while (!q.empty())
+		{
+			pair<sPos, unsigned int> cur = q.front();
+			int cr = cur.first.r;
+			int cc = cur.first.c;
+			unsigned int usedFuel = cur.second;
+			q.pop();
+
+            // 만약 연료를 다 써버렸다면 건너뛴다.
+			if (usedFuel == fuel)
+				continue;
+
+            // 모든 가능한 손님을 저장한다.
+			if (start[cr][cc] >= 1)
+			{
+				v.push_back({ sPos(cr, cc), usedFuel });
+			}
+
+			for (int i = 0; i < 4; i++)
+			{
+				int nr = cr + Delta[i].r;
+				int nc = cc + Delta[i].c;
+
+				if (nr < 1 || nc < 1 || nr > N || nc > N)
+					continue;
+
+				if (visited[nr][nc] || start[nr][nc] == -1)
+					continue;
+
+				visited[nr][nc] = true;
+				q.push({ sPos(nr, nc), usedFuel + 1});
+			}
+		}
+
+        // 가능한 손님이 아무도 없다면 거짓
+		if(v.empty())
+			return false;
+		else
+		{
+            // 문제의 조건대로 처리를한다.
+            // 사용한 연료 = 이동 거리 이므로 사용한 연료기준으로 정렬하고
+            // 사용한 연료가 같다면 행과 열 기준으로 정렬한다.
+			sort(v.begin(), v.end(), [](const pair<sPos, unsigned int>& a, const pair<sPos, unsigned int>& b) {
+				if (a.second == b.second)
+				{
+					if (a.first.r != b.first.r)
+						return a.first.r < b.first.r;
+					else
+						return a.first.c < b.first.c;
+				}
+				else
+					return a.second < b.second;
+			});
+
+            // 위치 갱신
+			pos.r = v[0].first.r;
+			pos.c = v[0].first.c;
+			prevUsedFuel = v[0].second;
+
+			return true;
+		}
+	}
+	else
+	{
+		visited[pos.r][pos.c] = true;
+
+        // 현재 출발지점의 번호가 손님의 번호
+		int currentCostomer = start[pos.r][pos.c];
+
+		start[pos.r][pos.c] = 0;
+
+		queue <pair<sPos, unsigned int>> q;
+
+		q.push({ pos, 0 });
+
+		while (!q.empty())
+		{
+			pair<sPos, unsigned int> cur = q.front();
+			int cr = cur.first.r;
+			int cc = cur.first.c;
+			unsigned int usedFuel = cur.second;
+			q.pop();
+
+            // 목적지가 같은 손님이 여럿일 수도 있다 따라서 반복해서 찾아낸다.
+			auto iter = find_if(dest[cr][cc].begin(), dest[cr][cc].end(), [&](const int& a) {
+				return a == currentCostomer;
+			});
+
+            // 만약 있을 경우
+			if (iter != dest[cr][cc].end())
+			{
+				pos.r = cr;
+				pos.c = cc;
+				fuel -= usedFuel;
+                // -1을 집어넣어서 다음 탐색시에 스킵하도록 한다.
+				*iter = -1;
+				fuel += usedFuel * 2;
+				return true;
+			}
+
+			if (usedFuel == fuel)
+				continue;
+
+			for (int i = 0; i < 4; i++)
+			{
+				int nr = cr + Delta[i].r;
+				int nc = cc + Delta[i].c;
+
+				if (nr < 1 || nc < 1 || nr > N || nc > N)
+					continue;
+
+				if (visited[nr][nc] || dest[nr][nc].front() == -1 )
+					continue;
+
+				visited[nr][nc] = true;
+				q.push({ sPos(nr, nc), usedFuel + 1 });
+			}
+
+		}
+
+		return false;
+	}
+}
+
+int main()
+{
+	cin >> N >> M >> fuel;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			cin >> start[i][j];
+			if (start[i][j] == 1)
+			{
+				start[i][j] = -1;
+				dest[i][j].push_back(-1);
+			}
+			else if(start[i][j] == 0)
+				dest[i][j].push_back(0);
+		}
+	}
+
+
+	cin >> pos.r >> pos.c;
+
+
+	for (int i = 1; i <= M; i++)
+	{
+		int sr, sc, dr, dc;
+
+		cin >> sr >> sc >> dr >> dc;
+
+		start[sr][sc] = i;
+		dest[dr][dc].push_back(i);
+	}
+
+
+	int cnt = M;
+
+	bool finish = false;
+
+	while (!finish)
+	{
+
+
+		if (!BFS(true))
+			break;
+
+		fuel -= prevUsedFuel;
+
+		if (!BFS(false))
+			break;
+
+		cnt--;
+
+		if (cnt == 0)
+		{
+			finish = true;
+			break;
+		}
+	}
+
+	if (finish)
+		cout << fuel << "\n";
+	else
+		cout << -1 << "\n";
+
+	return 0;
+}
+```
