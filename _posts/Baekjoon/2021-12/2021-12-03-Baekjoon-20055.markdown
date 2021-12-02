@@ -1,0 +1,100 @@
+---
+layout: post
+title: 컨베이어 벨트 위의 로봇
+date: 2021-12-03 07:29:11 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/20055)
+# 컨베이어 벨트 위의 로봇
+
+# 풀이
+문제가 잘 이해가 안되서 좀 헤맸던 문제였다. 주의할 점은 문제에서는 1부터 N까지의 컨베이어 벨트이기에 만약 0부터 인덱스를 센다면 N - 1이 로봇이 내려야할 위치가 된다. 또한 먼저 올라간 로봇부터 움직이기에 회전을 위해서 덱을 사용했는데 덱을 순회할때는 N - 2부터 시작해야한다. 이러한 사실들을 눈치채지 못해서 한참을 고민하다 인터넷을 참고하여 잘못된 점을 고칠 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int N, K;
+
+// 내구도, 로봇이 위치했는지
+deque<pair<int, bool>> dq;
+
+
+int main()
+{
+	cin >> N >> K;
+
+	for (int i = 0; i < 2 * N; i++)
+	{
+		int a;
+
+		cin >> a;
+		
+		dq.push_back({ a, false });
+	}
+
+
+	int t = 1;
+
+	
+	while (1)
+	{
+        // 회전시킨다.
+		pair<int, bool> b = dq.back();
+		dq.pop_back();
+		dq.push_front(b);
+
+        // 회전이후에 만약 내려야할 위치에 로봇이 있다면 내린다.
+		dq[N - 1].second = false;
+
+
+        // N - 1이 내려야할 위치 따라서 N - 2부터 시작한다.
+		for (int i = N - 2; i >= 0; i--)
+		{
+            // 만약 다음 위치가 비어있으며 내구도가 1이상이고 현재 위치에 로봇이 있다면
+			if (!dq[i + 1].second && dq[i + 1].first >= 1 && dq[i].second)
+			{
+                // 움직인다.
+				dq[i].second = false;
+				dq[i + 1].second = true;
+				dq[i + 1].first--;
+			}
+		}
+
+
+        // 움직이고 나서 내려야할 위치에 로봇을 내린다.
+		dq[N - 1].second = false;
+
+        // 첫번째 위치에 로봇을 올린다.
+		if (!dq[0].second && dq[0].first >= 1)
+		{
+			dq[0].second = true;
+			dq[0].first--;
+		}
+
+
+		int cnt = 0;
+
+		for (int i = 0; i < N * 2; i++)
+		{
+			if (dq[i].first <= 0)
+				cnt++;
+		}
+
+		if (cnt >= K)
+			break;
+
+		t++;
+	}
+
+	cout << t << "\n";
+
+	
+	return 0;
+}
+```
