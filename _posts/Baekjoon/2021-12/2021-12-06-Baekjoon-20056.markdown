@@ -1,0 +1,259 @@
+---
+layout: post
+title: 마법사 상어와 파이어볼
+date: 2021-12-06 08:51:27 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/20056)
+# 마법사 상어와 파이어볼
+
+# 풀이
+문제에 `격자의 행과 열은 1번부터 N번까지 번호가 매겨져 있고, 1번 행은 N번과 연결되어 있고, 1번 열은 N번 열과 연결되어 있다.`이 부분을 제대로 파악하지 못하고 문제를 풀어서 몇몇 테스트 케이스에서 계속 오답이 나왔다. 이 부분을 제대로 처리하고 위치 갱신 코드를 수정해서 제출해서 정답 판정을 받을 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 51;
+
+struct sPos
+{
+	int r;
+	int c;
+	
+	sPos() : r(0), c(0) {}
+	sPos(int _r, int _c) : r(_r), c(_c) {}
+	
+}Delta[] = {
+	{-1, 0},
+	{-1, 1},
+	{0, 1},
+	{1, 1},
+	{1, 0},
+	{1, -1},
+	{0, -1},
+	{-1, -1}
+};
+
+struct sFireBall
+{
+	sPos pos;
+	bool moved;
+	int mass;
+	int speed;
+	int dir;
+
+	sFireBall() : pos(0, 0), dir(0), speed(0), mass(0), moved(false) {}
+	sFireBall(sPos _pos, int _dir, int _mass) : pos(_pos), dir(_dir), mass(_mass), speed(0), moved(false) {}
+};
+
+int N, M, K;
+
+vector<sFireBall> v[MAX][MAX];
+
+int main()
+{
+	cin >> N >> M >> K;
+
+	for (int i = 0; i < M; i++)
+	{
+		int r, c, m, s, d;
+
+		cin >> r >> c >> m >> s >> d;
+
+		sPos pos;
+
+		pos.r = r;
+		pos.c = c;
+
+		sFireBall fireBall;
+
+		fireBall.pos = pos;
+		fireBall.mass = m;
+		fireBall.speed = s;
+		fireBall.dir = d;
+        // 움직였는지를 체크한다.
+		fireBall.moved = false;
+
+		v[r][c].push_back(fireBall);
+	}
+
+	
+	while (K--)
+	{
+        // 먼저 파이어볼을 움직인다.
+		for (int i = 1; i <= N; i++)
+		{
+			for (int j = 1; j <= N; j++)
+			{
+				if (v[i][j].size() != 0)
+				{
+					for (int k = 0; k < v[i][j].size(); k++)
+					{
+                        // 만약 한번이라도 움직인 파이어볼이라면 또 움직이지 않는다.
+						if (v[i][j][k].moved)
+							continue;
+
+						sFireBall ball = v[i][j][k];
+
+						int row = ball.pos.r;
+						int col = ball.pos.c;
+						int speed = ball.speed;
+						int dir = ball.dir;
+
+                        // 최대 속도만큼 반복한다.
+						for (int s = 1; s <= speed; s++)
+						{
+							int nrow = row + Delta[dir].r;
+							int ncol = col + Delta[dir].c;
+
+                            // 만약 새로운 행이 경계선을 넘어갔을 경우
+							if (nrow < 1)
+								row = N;
+							else if (nrow > N)
+								row = 1;
+                            // 아니라면 그냥 대입한다.
+							else
+								row = nrow;
+
+                            // 위와 마찬가지
+							if (ncol < 1)
+								col = N;
+							else if (ncol > N)
+								col = 1;
+							else
+								col = ncol;
+						}
+
+                        // 이동후 파이어볼을 벡터에 넣는다.
+						ball.pos.r = row;
+						ball.pos.c = col;
+                        // 이동했다고 체크
+						ball.moved = true;
+						v[row][col].push_back(ball);
+					}
+
+                    // 현재 벡터에서 움직인적이 없는 파이어볼을 제거한다. 왜냐하면 위의 반복문으로 이동 후에 그냥 원래 위치의 벡터를 클리어 해버리면 이 위치로 이동한 파이어볼도 없어지기 때문
+                    // 배열의 크기가 그렇게 크지 않고 겹쳐봤자 최대 50 X 50이라 생각해서 그냥
+                    // 벡터에서 제거연산을 했다.
+					v[i][j].erase(remove_if(v[i][j].begin(), v[i][j].end(), [](const sFireBall& ball) {
+						return !ball.moved;
+					}), v[i][j].end());
+				}
+			}
+		}
+
+
+        // 이동을 끝마친 후 질량 계산, 속도 계산을 한다.
+		for (int i = 1; i <= N; i++)
+		{
+			for (int j = 1; j <= N; j++)
+			{
+                // 적어도 2 이상이라면
+				if (v[i][j].size() >= 2)
+				{
+					int sumMass = 0;
+					int sumSpeed = 0;
+
+                    // 방향이 전부 짝수, 홀수로 이뤄졌는지 판단한다.
+					bool odd = true;
+					bool even = true;
+
+                    // 질량과 속도의 합을 구한다.
+					for (int k = 0; k < v[i][j].size(); k++)
+					{
+						sumMass += v[i][j][k].mass;
+						sumSpeed += v[i][j][k].speed;
+
+                        // 만약 방향이 홀수라면
+						if (v[i][j][k].dir % 2 == 1)
+							even = false;
+
+                        // 만약 방향이 짝수라면
+						if (v[i][j][k].dir % 2 == 0)
+							odd = false;
+					}
+
+
+                    // 계산 결과
+					int resultMass = sumMass / 5;
+					int resultSpeed = sumSpeed / v[i][j].size();
+
+                    // 이제 이 위치의 파이어볼은 먼저 비워준다.
+					v[i][j].clear();
+
+                    // 만약 질량이 0이 아니라면
+					if (resultMass != 0)
+					{   
+                        // 만약 홀수또는 짝수라면
+						if (even || odd)
+						{
+							for (int dir = 0; dir <= 6; dir += 2)
+							{
+								sFireBall ball;
+
+								ball.pos.r = i;
+								ball.pos.c = j;
+
+								ball.dir = dir;
+								ball.mass = resultMass;
+								ball.speed = resultSpeed;
+								ball.moved = false;
+
+								v[i][j].push_back(ball);
+							}
+						}
+						else
+						{
+							for (int dir = 1; dir <= 7; dir += 2)
+							{
+								sFireBall ball;
+
+								ball.pos.r = i;
+								ball.pos.c = j;
+
+								ball.dir = dir;
+								ball.mass = resultMass;
+								ball.speed = resultSpeed;
+								ball.moved = false;
+
+								v[i][j].push_back(ball);
+							}
+						}
+					}
+				}
+                // 사이즈가 1인 경우에도 움직였는지는 초기화 해준다.
+				else if(v[i][j].size() == 1)
+				{
+					v[i][j][0].moved = false;
+				}
+			}
+		}
+	}
+
+	int ans = 0;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			if (v[i][j].size() != 0)
+			{
+				for (int k = 0; k < v[i][j].size(); k++)
+				{
+					ans += v[i][j][k].mass;
+				}
+			}
+		}
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
