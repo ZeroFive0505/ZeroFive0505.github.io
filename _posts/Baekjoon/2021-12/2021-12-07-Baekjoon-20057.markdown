@@ -1,0 +1,169 @@
+---
+layout: post
+title: 마법사 상어와 토네이도
+date: 2021-12-07 12:06:09 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/20057)
+# 마법사 상어와 토네이도
+
+# 풀이
+회전하는 배열을 표현하기 위해서 처음에는 안쪽에서 바깥쪽으로 배열을 채워보려 했는데 패턴이 잘 보이질 않아서 바깥쪽에서 안쪽으로 채워넣는 방법으로 방향 배열을 만들었다. 그 이후 모래를 날리게 했는데 이것또한 방향에 따라서 바뀌는 것을 감을 못잡아서 한참을 헤매다 결국 [이 곳](https://yabmoons.tistory.com/601)을 참조하여 문제를 풀었다.
+
+# 코드
+```c++
+#include <iostream>
+
+const int MAX = 501;
+
+using namespace std;
+
+int N;
+
+int arr[MAX][MAX];
+
+struct sPos
+{
+	int r;
+	int c;
+}Delta[] = {
+	{0, 1}, // 오른쪽으로
+	{0, -1}, // 왼쪽으로
+	{1, 0}, // 아래로
+	{-1, 0} // 위로
+};
+
+// 방향에 따른 모래가 퍼질때 다른 형태를 가진다.
+int rdr[4][10] = { { -1, 1, -1, 1, -1, 1, -2, 2, 0, 0 },{ -1, 1, -1, 1, -1, 1, -2, 2, 0, 0 },
+				  { 0, 0, 1, 1, 2, 2, 1, 1, 3, 2}, { 0, 0, -1, -1, -2, -2, -1, -1, -3, -2} };
+int cdc[4][10] = { { 0, 0, 1, 1, 2, 2, 1, 1, 3, 2}, { 0, 0, -1, -1, -2, -2, -1, -1, -3, -2},
+				  { -1, 1, -1, 1, -1, 1, -2, 2, 0, 0}, {-1, 1, -1, 1, -1, 1, -2, 2, 0, 0} };
+int percentages[9] = { 1, 1, 7, 7, 10, 10, 2, 2, 5 };
+
+int ans = 0;
+
+int ChangeDir(int dir)
+{
+    // 방향이 오른쪽이었다면
+    // 이제는 위로
+	if (dir == 0)
+		return 3;
+    // 왼쪽이었다면 아래로
+	else if (dir == 1)
+		return 2;
+    // 아래였다면 오른쪽으로
+	else if (dir == 2)
+		return 0;
+    // 위쪽이었다면 왼쪽으로
+	else
+		return 1;
+}
+
+void Spread(int r, int c, int dir)
+{
+    // 먼저 토네이도 갈 방향을 구한다.
+	int rr = r + Delta[dir].r;
+	int cc = c + Delta[dir].c;
+
+    // 만약 모래가 없다면 그냥 돌아간다.
+	if (arr[rr][cc] == 0)
+		return;
+
+    // 현재 모래양을 구한다.
+	int sand = arr[rr][cc];
+	int temp = sand;
+
+    // 총 9방향으로 모래를 퍼트린다.
+	for (int i = 0; i < 9; i++)
+	{
+        // 현재 방향에 맞춰서 새로운 좌표를 구한다.
+		int nr = r + rdr[dir][i];
+		int nc = c + cdc[dir][i];
+
+		int per = percentages[i];
+
+		int remain = (temp * per) / 100;
+
+        // 만약 격자를 나갈 경우 정답에 더한다.
+		if (nr < 1 || nc < 1 || nr > N || nc > N)
+			ans += remain;
+        // 아닐 경우 그냥 모래를 추가한다.
+		else
+			arr[nr][nc] += remain;
+
+        // 해당 칸의 모래는 감소한다.
+		sand -= remain;
+	}
+    
+    // a좌표의 값을 계산한다.
+	int nr = r + rdr[dir][9];
+	int nc = c + cdc[dir][9];
+    
+	if (nr < 1 || nc < 1 || nr > N || nc > N)
+		ans += sand;
+	else
+		arr[nr][nc] += sand;
+
+    // 현재 위치의 모래가 다 퍼졌으니 0으로 만든다.
+	arr[rr][cc] = 0;
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+    // 시작위치와 초기 값
+	int r = (N + 1) / 2;
+	int c = (N + 1) / 2;
+	int dir = 1;
+	int moveCnt = 1;
+
+	while (1)
+	{   
+        // 토네이도는 2번동안 동일한 칸 수를 움직이낟.
+		for (int i = 0; i < 2; i++)
+		{
+            // 움직이는 양만큼 움직이고 모래를 퍼트린다.
+			for (int j = 0; j < moveCnt; j++)
+			{
+				Spread(r, c, dir);
+				r += Delta[dir].r;
+				c += Delta[dir].c;
+			}
+            
+
+            // 방향을 바꾼다.
+			dir = ChangeDir(dir);
+		}
+
+		moveCnt++;
+
+        // N번 만큼 움직이게되면 토네이도는 소멸한다.
+		if (moveCnt == N)
+		{
+            // 소멸하기전 마지막 모래를 퍼트린다.
+			for (int j = 0; j < moveCnt; j++)
+			{
+				Spread(r, c, dir);
+				r += Delta[dir].r;
+				c += Delta[dir].c;
+			}
+
+			break;
+		}
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
