@@ -1,0 +1,194 @@
+---
+layout: post
+title: 열쇠
+date: 2021-12-08 09:16:31 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/9328)
+# 열쇠
+
+# 풀이
+map과 큐를 이용하여 풀었다. 또한 빌딩의 바깥벽으로 출입이 가능하다고 해서 그걸 고려해서 경계선을 검사했다. 매순간마다 키를 주웠을때 그 키에 연결된 모든 문을 열어버리고 다시 방문 배열을 초기화 하는 방식으로 풀었는데 시간 초과가 다행이 뜨지는 않았다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <cstring>
+#include <map>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 102;
+
+char arr[MAX][MAX] = {};
+bool visited[MAX][MAX] = {};
+
+int w, h;
+
+struct sPos
+{
+	int r;
+	int c;
+
+	sPos() : r(0), c(0) {}
+	sPos(int _r, int _c) : r(_r), c(_c) {}
+
+}Delta[] = {
+	{-1, 0},
+	{0, 1},
+	{1, 0},
+	{0, -1}
+};
+
+int main()
+{
+	int t;
+
+	cin >> t;
+
+	while (t--)
+	{
+		cin >> h >> w;
+
+        // 먼저 모든 배열을 초기화한다.
+        // 여기서 지도배열은 일단 모두 이동가능한 곳으로 초기화한다.
+		memset(arr, '.', sizeof(arr));
+		memset(visited, false, sizeof(visited));
+
+        // 키와 키에 해당하는 문들의 위치를 저장하는 맵
+		map<char, vector<sPos>> mapKey;
+
+        // 1부터 시작한다. 0과 h + 1위치는 빌딩 밖
+		for (int i = 1; i <= h; i++)
+		{
+			for (int j = 1; j <= w; j++)
+			{
+				cin >> arr[i][j];
+
+                // 문들의 위치를 기록한다.
+				if (isupper(arr[i][j]))
+				{
+					mapKey[arr[i][j]].push_back(sPos(i, j));
+				}
+			}
+		}
+
+		string keys;
+
+		cin >> keys;
+        
+        // 일단 전부다 대문자로 만든다.
+		if (keys[0] != '0')
+		{
+			transform(keys.begin(), keys.end(), keys.begin(), ::toupper);
+		}
+		else
+			keys.clear();
+
+		sPos pos(0, 0);
+
+		queue<sPos> q;
+
+		q.push(pos);
+
+		visited[pos.r][pos.c] = true;
+
+		int cnt = 0;
+
+        // BFS 시작
+		while (!q.empty())
+		{
+			sPos cur = q.front();
+			int cr = cur.r;
+			int cc = cur.c;
+			q.pop();
+
+			for (int i = 0; i < 4; i++)
+			{
+				int nr = cr + Delta[i].r;
+				int nc = cc + Delta[i].c;
+
+                // 경계선은 조금더 오프셋을 줘서 검사한다.
+				if (nr < 0 || nc < 0 || nr >= (h + 2) || nc >= (w + 2))
+					continue;
+
+				if (visited[nr][nc] || arr[nr][nc] == '*')
+					continue;
+
+                // 만약 알파벳일 경우
+				if (isalpha(arr[nr][nc]))
+				{
+                    // 만약 대문자일 경우 문이다.
+					if (isupper(arr[nr][nc]))
+					{
+						char door = arr[nr][nc];
+
+						bool match = false;
+
+                        // 현재 가지고 있는 열쇠중에 매치되는게 있는지 찾는다.
+						for (int j = 0; j < keys.size(); j++)
+						{
+							if (keys[j] == door)
+							{
+								match = true;
+								break;
+							}
+						}
+
+                        // 찾았다면
+						if (match)
+						{
+							arr[nr][nc] = '.';
+							visited[nr][nc] = true;
+							q.push({ nr, nc });
+						}
+						else
+							visited[nr][nc] = true;
+					}
+					else
+					{
+                        // 만약 소문자라면 새로운 열쇠
+						char door = toupper(arr[nr][nc]);
+						auto iter = mapKey[door].begin();
+						auto iterEnd = mapKey[door].end();
+
+                        // 이 열쇠로 열 수 있는 모든 곳을 열어버린다.
+						for(; iter != iterEnd; iter++)
+						{ 
+							sPos doorPos = sPos(iter->r, iter->c);
+							arr[doorPos.r][doorPos.c] = '.';
+						}
+						char temp = arr[nr][nc];
+						arr[nr][nc] = '.';
+						q.push({ nr, nc });
+
+                        // 새롭게 갈 수 있는곳이 갱신되었으므로 초기화한다.
+						memset(visited, false, sizeof(visited));
+					}
+				}
+				else if (arr[nr][nc] == '$')
+				{
+					arr[nr][nc] = '.';
+					visited[nr][nc] = true;
+					q.push({ nr, nc });
+					cnt++;
+				}
+				else
+				{
+					visited[nr][nc] = true;
+					q.push({ nr, nc });
+				}
+			}
+		}
+
+		cout << cnt << "\n";
+	}
+
+	return 0;
+}
+```
