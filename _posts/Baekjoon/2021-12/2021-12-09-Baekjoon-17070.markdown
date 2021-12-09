@@ -1,0 +1,156 @@
+---
+layout: post
+title: 파이프 옮기기 1
+date: 2021-12-09 09:46:21 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17070)
+# 파이프 옮기기 1
+
+# 풀이
+구조체를 이용해서 DFS를 통해서 예제 테스트 케이스는 모두 정답을 출력해서 제출해봤지만 5%에서 오답 처리가 됬다. 어딜 잘 못했는지 한참을 찾다가 재귀 호출을 할때 파이프가 이동가능한지를 검사하고 옮겨야하는데 재귀 호출후에 그 검사를 해서 오답이 됬던 것이다..
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 17;
+
+int arr[MAX][MAX] = {};
+
+int N;
+
+int cnt = 0;
+
+struct sPos
+{
+	int r1;
+	int r2;
+	int c1;
+	int c2;
+
+	int dir;
+
+	sPos() : r1(0), r2(0), c1(0), c2(0), dir(0) {}
+	
+	sPos(int _r1, int _c1, int _r2, int _c2) : r1(_r1), r2(_r2), c1(_c1), c2(_c2), dir(0) {}
+
+	bool IsFinished()
+	{
+		if ((r1 == N && c1 == N) || (r2 == N && c2 == N))
+			return true;
+		else
+			return false;
+	}
+
+	bool IsOut()
+	{
+		if (r1 > N || r2 > N || c1 > N || c2 > N)
+			return true;
+		else
+			return false;
+	}
+};
+
+void DFS(sPos pos)
+{
+    // 경계선을 나갔는지?
+	if (pos.IsOut())
+		return;
+    
+    // 도달했는지
+	if (pos.IsFinished())
+	{
+		cnt++;
+		return;
+	}
+
+    // 현재 파이프의 타입에 따라 다른 파이프 이동
+	switch (pos.dir)
+	{
+    // 가로 타입 파이프의 경우
+	case 0:
+	{
+        // 가로로 그대로 이동하거나
+		sPos temp1(pos.r2, pos.c2, pos.r2, pos.c2 + 1);
+		temp1.dir = 0;
+
+        // 대각선으로 이동이 가능하다
+		sPos temp2(pos.r2, pos.c2, pos.r2 + 1, pos.c2 + 1);
+		temp2.dir = 2;
+
+        // 재귀 호출전 벽이 있는지 검사
+		if(arr[temp1.r2][temp1.c2] != 1)
+			DFS(temp1);
+
+		if(arr[temp2.r1 + 1][temp2.c1] != 1 &&
+			arr[temp2.r1][temp2.c1 + 1] != 1 &&
+			arr[temp2.r2][temp2.c2] != 1)
+			DFS(temp2);
+	}
+		break;
+	case 1:
+	{
+		sPos temp1(pos.r2, pos.c2, pos.r2 + 1, pos.c2);
+		temp1.dir = 1;
+
+		sPos temp2(pos.r2, pos.c2, pos.r2 + 1, pos.c2 + 1);
+		temp2.dir = 2;
+
+		if(arr[temp1.r2][temp1.c2] != 1)
+			DFS(temp1);
+		if (arr[temp2.r1 + 1][temp2.c1] != 1 &&
+			arr[temp2.r1][temp2.c1 + 1] != 1 &&
+			arr[temp2.r2][temp2.c2] != 1)
+			DFS(temp2);
+	}
+		break;
+	case 2:
+	{
+		sPos temp1(pos.r2, pos.c2, pos.r2, pos.c2 + 1);
+		temp1.dir = 0;
+
+		sPos temp2(pos.r2, pos.c2, pos.r2 + 1, pos.c2);
+		temp2.dir = 1;
+
+		sPos temp3(pos.r2, pos.c2, pos.r2 + 1, pos.c2 + 1);
+		temp3.dir = 2;
+
+		if(arr[temp1.r2][temp1.c2] != 1)
+			DFS(temp1);
+		if(arr[temp2.r2][temp2.c2] != 1)
+			DFS(temp2);
+		if (arr[temp3.r1 + 1][temp3.c1] != 1 &&
+			arr[temp3.r1][temp3.c1 + 1] != 1 &&
+			arr[temp3.r2][temp3.c2] != 1)
+			DFS(temp3);
+	}
+		break;
+	}
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	sPos pos(1, 1, 1, 2);
+
+	DFS(pos);
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
