@@ -1,0 +1,270 @@
+---
+layout: post
+title: 색종이 붙이기
+date: 2021-12-15 08:56:00 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17136)
+# 색종이 붙이기
+
+# 문제
+> <그림 1>과 같이 정사각형 모양을 한 다섯 종류의 색종이가 있다. 색종이의 크기는 1×1, 2×2, 3×3, 4×4, 5×5로 총 다섯 종류가 있으며, 각 종류의 색종이는 5개씩 가지고 있다.
+![img](https://upload.acmicpc.net/496452ae-ce36-4d77-93f7-19d7f3f9ce28/-/preview/)
+색종이를 크기가 10×10인 종이 위에 붙이려고 한다. 종이는 1×1 크기의 칸으로 나누어져 있으며, 각각의 칸에는 0 또는 1이 적혀 있다. 1이 적힌 칸은 모두 색종이로 덮여져야 한다. 색종이를 붙일 때는 종이의 경계 밖으로 나가서는 안되고, 겹쳐도 안 된다. 또, 칸의 경계와 일치하게 붙여야 한다. 0이 적힌 칸에는 색종이가 있으면 안 된다.
+종이가 주어졌을 때, 1이 적힌 모든 칸을 붙이는데 필요한 색종이의 최소 개수를 구해보자.
+
+# 출력
+> 모든 1을 덮는데 필요한 색종이의 최소 개수를 출력한다. 1을 모두 덮는 것이 불가능한 경우에는 -1을 출력한다.
+
+# 첫 시도
+나름대로 백트랙킹을 이용한 방법으로 코드를 작성해봤는데 1의 숫자가 비교적 적을 경우에는 시간내에 답을 출력했지만 1이 많아지면 속도가 급격하게 느려졌다. 그래서 종이를 작은거부터하는게 아니라 큰거 부터 해봐도 역시나 속도는 빨라지지 않았다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = 987654321;
+
+const int MAX = 10;
+
+int arr[MAX][MAX];
+
+int ans = INF;
+
+int ones = 0;
+
+int papers[5] = { 5, 5, 5, 5, 5 };
+
+bool Check(int y, int x, int p)
+{
+	for (int i = y; i < y + p; i++)
+	{
+		for (int j = x; j < x + p; j++)
+		{
+			if (i >= MAX || j >= MAX)
+				return false;
+
+			if (arr[i][j] == 0)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+void MakeState(int y, int x, int p)
+{
+
+	for (int i = y; i < y + p; i++)
+	{
+		for (int j = x; j < x + p; j++)
+		{
+			arr[i][j] = 0;
+			ones--;
+		}
+	}
+}
+
+void RestoreState(int y, int x, int p)
+{
+	for (int i = y; i < y + p; i++)
+	{
+		for (int j = x; j < x + p; j++)
+		{
+			arr[i][j] = 1;
+			ones++;
+		}
+	}
+}
+
+void DFS(int y, int cnt)
+{
+	if (ones == 0)
+	{
+		ans = min(cnt, ans);
+		return;
+	}
+
+
+	for (int i = y; i < MAX; i++)
+	{
+		for (int j = 0; j < MAX; j++)
+		{
+			if (arr[i][j] == 1)
+			{
+				for (int k = 4; k >= 0; k--)
+				{
+					if (Check(i, j, k + 1))
+					{
+						if (papers[k] > 0)
+						{
+							papers[k]--;
+							MakeState(i, j, k + 1);
+							DFS(i, cnt + 1);
+							papers[k]++;
+							RestoreState(i, j, k + 1);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+int main()
+{
+	for (int i = 0; i < MAX; i++)
+	{
+		for (int j = 0; j < MAX; j++)
+		{
+			cin >> arr[i][j];
+
+			if (arr[i][j] == 1)
+				ones++;
+		}
+	}
+
+	DFS(0, 0);
+
+	if (ans == INF)
+		cout << -1 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```
+
+# 풀이
+[이 곳](https://jaimemin.tistory.com/1249)을 참조하여 풀었다. 로직은 비슷하다. 다만 DFS를 호출할때 종이의 너비만큼 건너뛰는등 이러한 최적화가 더 포함이 되어있는 방식이었고 이 코드로는 1이 많은 경우에도 빠르게 답을 출력할 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 10;
+
+const int INF = 987654321;
+
+int arr[MAX][MAX] = {};
+int cnt = 0;
+int ans = INF;
+
+int papers[6] = { 0, 5, 5, 5, 5, 5 };
+
+void DFS(int y, int x)
+{
+    // 마지막 열까지 도착했다면
+	if (x >= MAX)
+	{
+        // 다음 행으로 넘어간다.
+		DFS(y + 1, 0);
+		return;
+	}
+
+    // 만약 모든 행을 탐색했다면
+	if (y >= MAX)
+	{
+        // 답을 갱신한다.
+		ans = min(ans, cnt);
+		return;
+	}
+
+    // 만약 현재 덮어야 할 종이가 없다면
+	if (arr[y][x] == 0)
+	{
+        // 다음 열로 넘어간다.
+		DFS(y, x + 1);
+		return;
+	}
+
+	for (int k = 5; k >= 1; k--)
+	{
+        // 만약 종이가 없거나 현재 위치에서 종이의 너비가 경계선을 넘어갈 경우
+        // 건너뛴다.
+		if (papers[k] == 0 || y + k > MAX || x + k > MAX)
+			continue;
+
+		bool check = true;
+
+		for (int i = 0; i < k; i++)
+		{
+			for (int j = 0; j < k; j++)
+			{
+                // 너비만큼 반복하면서 0인 지점이 있는지를 찾는다.
+				if (arr[y + i][x + j] == 0)
+				{
+					check = false;
+					break;
+				}
+			}
+
+			if (!check)
+				break;
+		}
+
+
+        // 만약 범위내에 0이 있다면
+        // 건너뛴다.
+		if (!check)
+			continue;
+
+        // 종이를 덮는다.
+		for (int i = 0; i < k; i++)
+		{
+			for (int j = 0; j < k; j++)
+			{
+				arr[y + i][x + j] = 0;
+			}
+		}
+
+		papers[k]--;
+		cnt++;
+
+        // k 너비 만큼의 종이를 붙였으니
+        // k만큼 건너뛴다.
+		DFS(y, x + k);
+
+        // 다시 원상태로 되돌린다.
+		for (int i = 0; i < k; i++)
+		{
+			for (int j = 0; j < k; j++)
+			{
+				arr[y + i][x + j] = 1;
+			}
+		}
+
+		papers[k]++;
+		cnt--;
+	}
+}
+
+int main()
+{
+	for (int i = 0; i < MAX; i++)
+	{
+		for (int j = 0; j < MAX; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	ans = INF;
+
+	DFS(0, 0);
+
+	if (ans == INF)
+		cout << -1 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```
