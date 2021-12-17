@@ -1,0 +1,353 @@
+---
+layout: post
+title: 배열 돌리기 4
+date: 2021-12-17 07:07:02 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17406)
+# 배열 돌리기 4
+
+# 첫 시도
+반복문과 리스트를 이용해서 배열의 태두리부터 중심지점까지 회전하는 코드를 만들어서 예제 입력의 경우 정답이 잘 나오길래 제출해보니 처음에는 런타임 에러가 뜨다가 혹시나해서 리스트가 비어있을경우 반복문을 빠져나가는 방법으로 했는데 이번에는 오답 판정을 받았다.
+
+# 코드 
+```c++
+#include <iostream>
+#include <list>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int N, M, K;
+
+const int MAX = 55;
+
+const int INF = 987654321;
+
+int arr[MAX][MAX] = {};
+int tempArr[MAX][MAX] = {};
+
+int main()
+{
+	cin >> N >> M >> K;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	vector<vector<int>> rotations(K);
+	vector<int> perm;
+	
+	for (int i = 0; i < K; i++)
+	{
+		int r, c, s;
+
+		cin >> r >> c >> s;
+
+		rotations[i].push_back(r);
+		rotations[i].push_back(c);
+		rotations[i].push_back(s);
+
+		perm.push_back(i);
+	}
+
+	int ans = INF;
+
+	do
+	{
+		int r, c, s;
+
+
+		for (int i = 1; i <= N; i++)
+		{
+			for (int j = 1; j <= M; j++)
+			{
+				tempArr[i][j] = arr[i][j];
+			}
+		}
+
+		for (int i = 0; i < perm.size(); i++)
+		{
+			r = rotations[perm[i]][0];
+			c = rotations[perm[i]][1];
+			s = rotations[perm[i]][2];
+
+
+			int r1 = r - s;
+			int c1 = c - s;
+
+			int r2 = r + s;
+			int c2 = c + s;
+
+			int cnt = r2 - r1;
+
+			while (r1 != r && c1 != c)
+			{
+				int startR = r1;
+				int startC = c1;
+
+				list<pair<int, pair<int, int>>> rotList;
+				list<int> listNum;
+
+				int rot = 0;
+
+				while (rot < cnt)
+				{
+					rotList.push_back({ tempArr[startR][startC + rot], {startR, startC + rot} });
+					listNum.push_back(tempArr[startR][startC + rot]);
+					rot++;
+				}
+
+				startC += rot;
+
+				rot = 0;
+
+				while (rot < cnt)
+				{
+					rotList.push_back({ tempArr[startR + rot][startC], {startR + rot, startC} });
+					listNum.push_back(tempArr[startR + rot][startC]);
+					rot++;
+				}
+
+				startR += rot;
+
+				rot = 0;
+
+				while (rot < cnt)
+				{
+					rotList.push_back({ tempArr[startR][startC - rot], { startR, startC - rot } });
+					listNum.push_back(tempArr[startR][startC - rot]);
+					rot++;
+				}
+
+				startC -= rot;
+
+				rot = 0;
+
+
+				while (rot < cnt)
+				{
+					rotList.push_back({ tempArr[startR - rot][startC], {startR - rot, startC} });
+					listNum.push_back(tempArr[startR - rot][startC]);
+					rot++;
+				}
+
+				startR -= rot;
+
+				rot = 0;
+
+				cnt /= 2;
+
+				auto iter1 = rotList.begin();
+				auto iterEnd1 = rotList.end();
+
+				if (listNum.empty())
+					break;
+
+				int b = listNum.back();
+				listNum.pop_back();
+
+				listNum.push_front(b);
+
+				auto iter2 = listNum.begin();
+				auto iterEnd2 = listNum.end();
+
+				for (; iter1 != iterEnd1 && iter2 != iterEnd2; iter1++, iter2++)
+				{
+					tempArr[iter1->second.first][iter1->second.second] = *iter2;
+				}
+
+				r1++;
+				c1++;
+
+			}
+		}
+
+		for (int i = 1; i <= N; i++)
+		{
+			int sum = 0;
+			for (int j = 1; j <= M; j++)
+			{
+				sum += tempArr[i][j];
+			}
+
+			ans = min(ans, sum);
+		}
+
+	} while (next_permutation(perm.begin(), perm.end()));
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
+
+# 풀이
+[이 곳](https://yabmoons.tistory.com/289)의 풀이를 참조하여 정답을 받을 수 있었다. 로직은 크게 다르지 않는데 도대체 어느곳에서 틀렸는지.. 전혀 모르겠다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int INF = 987654321;
+const int MAX = 51;
+const int MAX_K = 6;
+
+struct sRect
+{
+	int R, C, S;
+};
+
+int N, M, K, R, C, S;
+int ans = INF;
+
+int arr[MAX][MAX] = {};
+int tempArr[MAX][MAX] = {};
+bool selected[MAX_K];
+
+vector<sRect> v;
+
+vector<int> turnOrder;
+
+int dr[] = { 0, 0, 1, -1 };
+int dc[] = { 1, -1, 0, 0 };
+
+int ChangeDirection(int d)
+{
+	if (d == 0)
+		return 3;
+	else if (d == 1)
+		return 2;
+	else if (d == 2)
+		return 0;
+	else
+		return 1;
+}
+
+void Rotate(const sRect& rect)
+{
+	int sr = rect.R - rect.S;
+	int sc = rect.C - rect.S;
+	int er = rect.R + rect.S;
+	int ec = rect.C + rect.S;
+
+	int cnt = (er - sr) / 2;
+
+	for (int i = 0; i < cnt; i++)
+	{
+		int cr = sr;
+		int cc = sc;
+
+		int temp = tempArr[cr][cc];
+
+		int d = 2;
+
+		while (1)
+		{
+			int nr = cr + dr[d];
+			int nc = cc + dc[d];
+
+			if (nr == sr && nc == sc)
+			{
+				tempArr[cr][cc] = temp;
+				break;
+			}
+
+			if (sr <= nr && nr <= er - i && sc <= nc && nc <= ec - i)
+			{
+				tempArr[cr][cc] = tempArr[nr][nc];
+				cr = nr;
+				cc = nc;
+			}
+			else
+			{
+				d = ChangeDirection(d);
+			}
+		}
+
+
+		sr++;
+		sc++;
+	}
+}
+
+void DFS(int depth)
+{
+	if (depth == K)
+	{
+		for (int i = 1; i <= N; i++)
+		{
+			for (int j = 1; j <= M; j++)
+			{
+				tempArr[i][j] = arr[i][j];
+			}
+		}
+
+		for (int i = 0; i < turnOrder.size(); i++)
+		{
+			int order = turnOrder[i];
+			Rotate(v[order]);
+		}
+
+
+		for (int i = 1; i <= N; i++)
+		{
+			int sum = 0;
+			for (int j = 1; j <= M; j++)
+			{
+				sum += tempArr[i][j];
+			}
+
+			ans = min(ans, sum);
+		}
+	}
+
+	for (int i = 0; i < v.size(); i++)
+	{
+		if (!selected[i])
+		{
+			selected[i] = true;
+			turnOrder.push_back(i);
+			DFS(depth + 1);
+			turnOrder.pop_back();
+			selected[i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M >> K;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	for (int i = 0; i < K; i++)
+	{
+		int r, c, s;
+		cin >> r >> c >> s;
+		v.push_back({ r, c, s });
+	}
+
+	DFS(0);
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
