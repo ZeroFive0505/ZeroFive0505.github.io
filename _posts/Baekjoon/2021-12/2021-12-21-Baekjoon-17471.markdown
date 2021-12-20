@@ -1,0 +1,180 @@
+---
+layout: post
+title: 게리맨더링
+date: 2021-12-21 07:57:05 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17471)
+# 게리맨더링
+
+# 풀이
+[이 곳](https://www.acmicpc.net/problem/17471)을 참조했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+const int MAX = 11;
+
+const int INF = 987654321;
+
+int N;
+
+int ans = INF;
+
+int arr[MAX] = {};
+
+bool connect[MAX][MAX] = {};
+
+bool selected[MAX] = {};
+
+bool CheckConnection(const vector<int>& v, bool val)
+{
+	bool visited[MAX] = {};
+
+	queue<int> q;
+
+    // 벡터의 시작지점 정점부터 BFS탐색을 시작한다.
+	q.push(v[0]);
+	visited[v[0]] = true;
+	int cnt = 1;
+
+	while (!q.empty())
+	{
+		int f = q.front();
+		q.pop();
+
+        // 모든 정점을 순회하면서
+		for (int i = 1; i <= N; i++)
+		{
+            // 만약 연결이 되었고 현재 정점이 매개변수로 넘어온 val가 같은지(구역은 참 또는 거짓은 두 구역으로 나눠진다.)
+            // 또는 아직 방문되지 않았다면
+			if (connect[f][i] && selected[i] == val && !visited[i])
+			{
+                // 방문을하고 카운트를 늘려준다.
+				visited[i] = true;
+				cnt++;
+				q.push(i);
+			}
+		}
+	}
+
+    // 만약 위의 BFS에서 정확히 모든 정점을 순회할 수 있었다면
+    // 현재 선택된 구역은 모두 서로 연결됬다는 뜻이다.
+	if (cnt == v.size())
+		return true;
+	else
+		return false;
+}
+
+bool Check()
+{
+	vector<int> a, b;
+
+    // a는 참, b는 거짓으로 두 구역을 나눈다.
+	for (int i = 1; i <= N; i++)
+	{
+		if (selected[i])
+			a.push_back(i);
+		else
+			b.push_back(i);
+	}
+
+    // 두 구역중 선택된 지역이 없다면 조건 위반
+	if (a.size() == 0 || b.size() == 0)
+		return false;
+
+    // a의 경우 모든 참으로 지정된 정점이 서로 연결되어 있는지 확인한다.
+	bool aState = CheckConnection(a, true);
+
+    // 만약 아니라면 거짓
+	if (!aState)
+		return false;
+
+	bool bState = CheckConnection(b, false);
+
+	if (!bState)
+		return false;
+
+	return true;
+}
+
+void Calculate()
+{
+	int a, b, diff;
+	a = 0;
+	b = 0;
+	for (int i = 1; i <= N; i++)
+	{
+		if (selected[i])
+			a += arr[i];
+		else
+			b += arr[i];
+	}
+
+	diff = abs(a - b);
+
+	ans = min(ans, diff);
+}
+
+void DFS(int idx, int depth)
+{
+    // 최소 하나라도 선택됬을시에도 검사를 해야한다.
+	if (depth >= 1)
+	{
+		if (Check())
+			Calculate();
+	}
+
+
+    // 조합
+	for (int i = idx; i <= N; i++)
+	{
+		if (!selected[i])
+		{
+			selected[i] = true;
+			DFS(i, depth + 1);
+			selected[i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 1; i <= N; i++)
+	{
+		cin >> arr[i];
+	}
+
+	for (int i = 1; i <= N; i++)
+	{
+		int cnt;
+		cin >> cnt;
+
+		for (int j = 0; j < cnt; j++)
+		{
+			int a;
+			cin >> a;
+			connect[i][a] = true;
+			connect[a][i] = true;
+		}
+	}
+
+	DFS(1, 0);
+
+	if (ans == INF)
+		cout << -1 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```
