@@ -9,7 +9,7 @@ categories: Baekjoon
 # 게리맨더링
 
 # 풀이
-[이 곳](https://www.acmicpc.net/problem/17471)을 참조했다.
+[이 곳](https://yabmoons.tistory.com/291)을 참조했다.
 
 # 코드
 ```c++

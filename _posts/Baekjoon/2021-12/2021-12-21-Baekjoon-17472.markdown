@@ -1,0 +1,303 @@
+---
+layout: post
+title: 다리 만들기 2
+date: 2021-12-21 08:54:12 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/17472)
+# 다리 만들기 2
+
+# 풀이
+[이 곳](https://yabmoons.tistory.com/292)을 참조했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+const int MAXAREA = 11;
+
+const int MAXNUM = 7;
+
+const int INF = 987654321;
+
+int N, M;
+
+int ans = INF;
+
+int totalArea;
+
+int arr[MAXAREA][MAXAREA] = {};
+// 섬 번호
+int label[MAXAREA][MAXAREA] = {};
+// 거리
+int dist[MAXNUM][MAXNUM] = {};
+
+// BFS를 이용해서 섬에 번호를 부여할 시에 사용
+bool visited[MAXAREA][MAXAREA] = {};
+
+// 모든 정점이 연결됬을 경우 간선의 수는 n(n - 1) / 2
+bool selected[MAXNUM * MAXNUM] = {};
+
+// 모든 섬의 좌표
+vector<pair<int, int>> v;
+// 해당 섬 번호에 포함된 좌표
+vector<pair<int, int>> areaPos[MAXAREA];
+// 다리의 건설이 가능할 경우 저장하는 배열
+vector<pair<pair<int, int>, int>> bridgeList;
+
+int dr[] = { 0, 0, 1, -1 };
+int dc[] = { 1, -1, 0, 0 };
+
+void DFS(int r, int c, int dir, int size, int start, int end)
+{
+	int nr = r + dr[dir];
+	int nc = c + dc[dir];
+
+    // 만약 경계선을 넘는다면 돌아간다.
+	if (nr < 0 || nc < 0 || nr >= N || nc >= M)
+		return;
+
+    // 만약 바다라면 다시 DFS
+	if (arr[nr][nc] == 0)
+		DFS(nr, nc, dir, size + 1, start, end);
+    // 만약 섬에 도달했다면
+	else if (arr[nr][nc] == 1)
+	{   
+        // 목적지라면
+		if (label[nr][nc] == end)
+		{   
+            // 만약 건설된 다리의 갯수가 2이상이라면
+			if (size > 1)
+			{   
+                // 거리를 갱신한다.
+				if (dist[start][end] > size)
+				{
+					dist[start][end] = size;
+					dist[end][start] = size;
+				}
+
+				return;
+			}
+		}
+		else
+			return;
+	}
+}
+
+void MakeBridge(int start, int end)
+{
+    // 현재 start의 포함된 모든 섬의 영역을들 순회한다.
+	for (int i = 0; i < areaPos[start].size(); i++)
+	{
+		int r = areaPos[start][i].first;
+		int c = areaPos[start][i].second;
+
+		for (int j = 0; j < 4; j++)
+		{
+			int nr = r + dr[j];
+			int nc = c + dc[j];
+
+			if (nr < 0 || nc < 0 || nr >= N || nc >= M)
+				continue;
+
+            // 범위를 넘지 않았다면 한 방향으로 쭉 DFS를 시도한다.
+			if (arr[nr][nc] == 0)
+				DFS(r, c, j, 0, start, end);
+		}
+	}
+}
+
+void GetDist()
+{
+    // 섬의 번호는 1번부터 시작한다.
+	for (int i = 1; i < totalArea; i++)
+	{
+		for (int j = i + 1; j < totalArea; j++)
+		{
+            // 다리를 만든다.
+			MakeBridge(i, j);
+            
+			if (dist[i][j] == INF)
+				continue;
+            // 만약 거리가 무한대가 아니라면 추가
+			bridgeList.push_back({ {i, j}, dist[i][j] });
+		}
+	}
+}
+
+void BFS(int r, int c, int num)
+{
+    // 방문하고
+	visited[r][c] = true;
+	queue<pair<int, int>> q;
+    // 번호를 부여
+	label[r][c] = num;
+	q.push({ r, c });
+    // 현재 섬 번호에 포함되는 좌표를 추가한다.
+	areaPos[num].push_back({ r, c });
+
+	while (!q.empty())
+	{
+		int cr = q.front().first;
+		int cc = q.front().second;
+		q.pop();
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = cr + dr[i];
+			int nc = cc + dc[i];
+
+			if (nr < 0 || nc < 0 || nr >= N || nc >= M)
+				continue;
+
+			if (visited[nr][nc] || arr[nr][nc] == 0)
+				continue;
+
+			visited[nr][nc] = true;
+			label[nr][nc] = num;
+			areaPos[num].push_back({ nr, nc });
+			q.push({ nr, nc });
+		}
+	}
+}
+
+bool CheckState()
+{
+	bool connected[MAXNUM][MAXNUM] = {};
+	bool connectedIsland[MAXNUM] = {};
+
+    // 선택된 다리로만 섬들을 일단 연결한다.
+	for (int i = 0; i < bridgeList.size(); i++)
+	{
+		if (selected[i])
+		{
+			int r = bridgeList[i].first.first;
+			int c = bridgeList[i].first.second;
+
+			connected[r][c] = true;
+			connected[c][r] = true;
+		}
+	}
+
+	queue<int> q;
+
+    // 1번 섬부터 시작한다.
+	q.push(1);
+
+	connectedIsland[1] = true;
+
+	int cnt = 1;
+	bool flag = false;
+
+	while (!q.empty())
+	{
+		int cur = q.front();
+		q.pop();
+
+        // 만약 모든 섬을 순회할 수 있었다면 참을 반환
+		if (cnt == totalArea - 1)
+		{
+			flag = true;
+			break;
+		}
+
+        // 모든 섬을 순회한다.
+		for (int i = 1; i < totalArea; i++)
+		{
+            // 자기 자신은 제외하고
+			if (cur == i)
+				continue;
+
+            // 만약 연결되어 있으면서 아직 방문하지 않았다면
+			if (connected[cur][i] && !connectedIsland[i])
+			{
+				connectedIsland[i] = true;
+				q.push(i);
+				cnt++;
+			}
+		}
+	}
+
+	return flag;
+}
+
+void DistDFS(int idx, int depth, int sum)
+{
+    // 만약 다리가 하나라도 생겼다면 
+	if (depth >= 1)
+	{
+        // 모든 섬이 연결되었는지 검사한다.
+		if (CheckState())
+			ans = min(ans, sum);
+	}
+
+	for (int i = idx; i < bridgeList.size(); i++)
+	{
+		if (!selected[i])
+		{
+			selected[i] = true;
+			DistDFS(i, depth + 1, sum + bridgeList[i].second);
+			selected[i] = false;
+		}
+	}
+}
+
+int main()
+{
+    // 먼저 거리는 모두 무한대로 초기화
+	for (int i = 0; i < MAXNUM; i++)
+	{
+		for (int j = 0; j < MAXNUM; j++)
+		{
+			dist[i][j] = INF;
+		}
+	}
+
+	cin >> N >> M;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < M; j++)
+		{
+			cin >> arr[i][j];
+
+            // 만약 섬이 존재할시에 벡터에 저장한다.
+			if (arr[i][j] == 1)
+				v.push_back({ i, j });
+		}
+	}
+
+    // BFS를 통해 섬에 번호를 부여한다.
+	int num = 1;
+
+	for (int i = 0; i < v.size(); i++)
+	{
+		int r = v[i].first;
+		int c = v[i].second;
+
+		if (visited[r][c])
+			continue;
+
+		BFS(r, c, num++);
+	}
+
+    // 전체 섬의 갯수는 영역의 수
+	totalArea = num;
+
+	GetDist();
+
+	DistDFS(0, 0, 0);
+
+	if (ans == INF)
+		cout << -1 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```
