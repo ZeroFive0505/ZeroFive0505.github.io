@@ -1,0 +1,190 @@
+---
+layout: post
+title: 상어 초등학교
+date: 2021-12-22 14:32:49 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/21608)
+# 상어 초등학교
+
+# 풀이
+예제와 질문 게시판의 반례는 전부 다 통과하는데 계속 오답처리가 나서 뭐가 문제인지 한참을 찾은 문제다. 결국에는 질문게시판에 질문글을 올려서 틀린부분을 찾아서 고치니 정답 판정을 받을 수 있었던 문제.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 21;
+
+int N;
+
+vector<int> v[MAX * MAX];
+int arr[MAX][MAX] = {};
+
+struct sPos
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{0, 1},
+	{1, 0},
+	{0, -1}
+};
+
+struct sSeatInfo
+{
+	int r;
+	int c;
+	int favCnt;
+	int emptyCnt;
+
+	sSeatInfo(int _r, int _c, int _favCnt, int _emptyCnt) :
+		r(_r), c(_c), favCnt(_favCnt), emptyCnt(_emptyCnt)
+	{}
+
+};
+
+int main()
+{
+	cin >> N;
+
+    // 학생의 번호와 좋아하는 학생의 번호를 입력받는다.
+	for (int i = 0; i < N * N; i++)
+	{
+		int num;
+
+		cin >> num;
+			
+		for (int j = 0; j < 4; j++)
+		{
+			int favorite;
+
+			cin >> favorite;
+
+			v[num].push_back(favorite);
+		}
+
+
+		vector<sSeatInfo> temp;
+
+        // 모든 자리를 둘러본다.
+		for (int r = 0; r < N; r++)
+		{
+			for (int c = 0; c < N; c++)
+			{
+				int favCnt = 0;
+				int emptyCnt = 0;
+
+                // 현재 자리가 빈곳이면
+				if (arr[r][c] == 0)
+				{   
+                    // 주위 4자리를 살펴본다.
+					for (int k = 0; k < 4; k++)
+					{
+						int nr = r + Delta[k].r;
+						int nc = c + Delta[k].c;
+
+						if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+							continue;
+
+                        // 만약 먼저 사람이 앉아있을 경우에는
+						if (arr[nr][nc] != 0)
+						{   
+                            // 이 사람의 번호가 좋아하는 번호 목록에 있는지 확인한다.
+							auto iter = find_if(v[num].begin(), v[num].end(), [&](const int a) {
+								return a == arr[nr][nc];
+							});
+
+							if (iter != v[num].end())
+							{
+								favCnt++;
+							}
+						}
+						else
+							emptyCnt++;
+
+					}
+
+					temp.push_back(sSeatInfo(r, c, favCnt, emptyCnt));
+
+				}
+			}
+		}
+
+
+        // 문제에 주어진 조건대로 정렬을한다.
+		sort(temp.begin(), temp.end(), [](const sSeatInfo& a, const sSeatInfo& b) {
+			if (a.favCnt != b.favCnt)
+				return a.favCnt > b.favCnt;
+			else if (a.emptyCnt != b.emptyCnt) // else if (a.favCnt == b.favCnt)로 했었을때 오답 처리
+				return a.emptyCnt > b.emptyCnt;
+			else
+			{
+				if (a.r != b.r)
+					return a.r < b.r;
+				else
+					return a.c < b.c;
+			}
+		});
+
+		arr[temp[0].r][temp[0].c] = num;
+	}
+
+	int ans = 0;
+
+    // 만족도를 계산한다.
+	for (int i = 0; i < N; i++)
+	{
+
+		for (int j = 0; j < N; j++)
+		{
+			int cnt = 0;
+
+			for (int k = 0; k < 4; k++)
+			{
+				int nr = i + Delta[k].r;
+				int nc = j + Delta[k].c;
+
+				if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+					continue;
+
+				auto iter = find_if(v[arr[i][j]].begin(), v[arr[i][j]].end(), [&](const int a) {
+					return a == arr[nr][nc];
+				});
+
+				if (iter != v[arr[i][j]].end())
+					cnt++;
+			}
+
+			switch (cnt)
+			{
+			case 0:
+				break;
+			case 1:
+				ans += 1;
+				break;
+			case 2:
+				ans += 10;
+				break;
+			case 3:
+				ans += 100;
+				break;
+			case 4:
+				ans += 1000;
+				break;
+			}
+		}
+	}
+
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
