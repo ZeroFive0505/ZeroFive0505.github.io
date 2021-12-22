@@ -1,0 +1,270 @@
+---
+layout: post
+title: 상어 중학교
+date: 2021-12-23 08:31:18 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/21609)
+# 상어 중학교
+
+# 풀이
+상어 초등학교와 조건이 비슷한 문제였지만 무지개 블록 때문에 고생했던 문제였다. 무지개 블록은 다른 블록끼리도 서로 공유할 수 있기에 중복 방문이 가능하다. 따라서 무지개 블록의 방문 배열을 따로 할당 받고 BFS를 하고나서 계속 초기화를 하면서 중복 방문이 가능하게 했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+const int MAX = 21;
+
+int N, M;
+
+int arr[MAX][MAX] = {};
+bool visited[MAX][MAX] = {};
+bool rainbowVisited[MAX][MAX] = {};
+
+struct sGroup
+{
+	int r;
+	int c;
+	int rainbow;
+	int size;
+	int num;
+
+	sGroup(int _r, int _c, int _rainbow, int _size, int _num) :
+		r(_r), c(_c), rainbow(_rainbow), size(_size), num(_num) {}
+};
+
+struct sPos
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{0, 1},
+	{1, 0},
+	{0, -1}
+};
+
+vector<pair<sGroup, vector<pair<int, int>>>> vecGroup;
+
+// 반시계 방향으로 돌린다.
+void Rotate()
+{
+	int temp[MAX][MAX] = {};
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			temp[i][j] = arr[i][j];
+		}
+	}
+
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			arr[i][j] = temp[j][N - i - 1];
+		}
+	}
+}
+
+// 블록을 내릴 수 있을때까지 내린다.
+void Fall(int r, int c, int num)
+{
+	int cr = r;
+
+	while (1)
+	{
+		int nr = cr + 1;
+
+		if (nr >= N)
+			break;
+
+		if (arr[nr][c] != -2)
+			break;
+
+		cr = nr;
+	}
+
+	arr[r][c] = -2;
+	arr[cr][c] = num;
+}
+
+void BFS(int r, int c, int num)
+{
+	queue<pair<int, int>> q;
+
+	visited[r][c] = true;
+
+	q.push({ r, c });
+
+	vector<pair<int, int>> coords;
+
+	coords.push_back({ r, c });
+
+	int numRainbow = 0;
+
+	while (!q.empty())
+	{
+		pair<int, int> f = q.front();
+		int cr = f.first;
+		int cc = f.second;
+		q.pop();
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = cr + Delta[i].r;
+			int nc = cc + Delta[i].c;
+
+			if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+				continue;
+
+            // 방문검사
+			if (visited[nr][nc] || rainbowVisited[nr][nc])
+				continue;
+
+            // 만약 같은 블록을 찾았거나 무지개 블록이라면
+			if (arr[nr][nc] == num || arr[nr][nc] == 0)
+			{   
+
+                // 무지개 블록일 경우
+				if (arr[nr][nc] == 0)
+				{
+					numRainbow++;
+					rainbowVisited[nr][nc] = true;
+				}
+                // 일반 블록일 경우
+				else
+					visited[nr][nc] = true;
+
+				coords.push_back({ nr, nc });
+				q.push({ nr, nc });
+			}
+				
+		}
+	}
+
+    // 사이즈가 2 이상이라면
+	if (coords.size() >= 2)
+	{
+		vecGroup.push_back({ sGroup(r, c, numRainbow, coords.size(), num), coords });
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+
+	int ans = 0;
+
+	while (1)
+	{
+		for (int i = 0; i < N; i++)
+		{
+			for (int j = 0; j < N; j++)
+			{
+                // BFS를 시행한다.
+				if (visited[i][j])
+					continue;
+
+                // -1은 검은색 블록이라 넘기고 -2은 공백 블록
+                // 무지개 블록의 경우 기준 블록을 편하게 잡기 위해서 넘긴다.
+				if (arr[i][j] != -1 && arr[i][j] != 0 && arr[i][j] != -2)
+				{
+                    // 왼쪽 상단에서 반복문으로 BFS가 가능한 블록을 찾으므로
+                    // 기준블록의 경우 자동적으로 i, j가 된다.
+					BFS(i, j, arr[i][j]);
+                    // BFS를 한 이후에는 무지개 블록 방문 배열은 초기화한다.
+					memset(rainbowVisited, false, sizeof(rainbowVisited));
+				}
+			}
+		}
+
+        // 만약 그룹을 하나도 찾을 수 없었다면 빠져나간다.
+		if (vecGroup.empty())
+			break;
+
+        // 문제에 나온 조건대로 정렬한다.
+		sort(vecGroup.begin(), vecGroup.end(), [&](const pair<sGroup, vector<pair<int, int>>>& a, 
+			const pair<sGroup, vector<pair<int, int>>>& b) {
+			if (a.first.size!= b.first.size)
+				return a.first.size > b.first.size;
+			else if (a.first.rainbow != b.first.rainbow)
+				return a.first.rainbow > b.first.rainbow;
+			else
+			{
+				if (a.first.r != b.first.r)
+					return a.first.r > b.first.r;
+				else
+					return a.first.c > b.first.c;
+			}
+		});
+
+        // 조건에 맞는 첫번째 블록을 전부 공백으로 만들고 점수를 추가
+		auto iter = vecGroup[0].second.begin();
+		auto iterEnd = vecGroup[0].second.end();
+
+		ans = ans + (vecGroup[0].first.size * vecGroup[0].first.size);
+        
+		for (; iter != iterEnd; iter++)
+		{
+			arr[(*iter).first][(*iter).second] = -2;
+		}
+
+		vecGroup.clear();
+
+        // 블록을 내린다. 이때 N - 1부터 시작해서 내린다.
+		for (int i = N - 1; i >= 0; i--)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (arr[i][j] != -1 && arr[i][j] != -2)
+				{
+					Fall(i, j, arr[i][j]);
+				}
+			}
+		}
+
+        // 반시계 회전
+		Rotate();
+
+        // 다시 블록을 내린다.
+		for (int i = N - 1; i >= 0; i--)
+		{
+			for (int j = 0; j < N; j++)
+			{
+				if (arr[i][j] != -1 && arr[i][j] != -2)
+				{
+					Fall(i, j, arr[i][j]);
+				}
+			}
+		}
+
+        // 방문 배열 초기화
+		memset(visited, false, sizeof(visited));
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
