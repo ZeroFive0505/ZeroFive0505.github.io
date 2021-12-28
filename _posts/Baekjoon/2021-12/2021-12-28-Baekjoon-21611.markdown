@@ -1,0 +1,260 @@
+---
+layout: post
+title: 마법사 상어와 블리자드
+date: 2021-12-28 09:32:11 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/21611)
+# 마법사 상어와 블리자드
+
+# 풀이
+[이 곳](https://zoosso.tistory.com/929)의 풀이를 참조하여 풀 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int N, M;
+
+int totalCnt = 0;
+
+const int MAX = 50;
+
+int ans = 0;
+
+int arr[MAX][MAX] = {};
+
+vector<int> vecMarble;
+
+struct sPos
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+// 중앙의 상어를 중심으로 좌하우상
+int Directions[] = { 2, 1, 3, 0 };
+
+void CastBlizard(int d, int s)
+{
+    // 상어의 위치에서 s만큼 구슬을 파괴한다.
+	for (int i = 1; i <= s; i++)
+	{
+		int nextR = N / 2 + i * Delta[d].r;
+		int nextC = N / 2 + i * Delta[d].c;
+
+		if (arr[nextR][nextC] == 0)
+			continue;
+
+		arr[nextR][nextC] = 0;
+
+		totalCnt--;
+	}
+}
+
+// 상어의 위치에서부터 모든 구슬을 벡터로 만들어 가져온다.
+void GetMarbles()
+{
+	vecMarble.clear();
+
+	int dir = 0;
+    // 처음 길이는 1로 초기화
+	int len = 1;
+
+    // 시작지점
+	pair<int, int> cur = { N / 2, N / 2 };
+
+    // 전체 가져온 구슬의 갯수
+	int idx = 0;
+
+	while (idx != totalCnt)
+	{
+        // 2번씩 반복하면서 len만큼 순회한다.
+		for (int i = 0; i < 2; i++)
+		{
+            // len만큼 순회한다
+			for (int j = 0; j < len; j++)
+			{
+				cur.first += Delta[Directions[dir]].r;
+				cur.second += Delta[Directions[dir]].c;
+
+                // 만약 구슬이 있다면
+				if (arr[cur.first][cur.second])
+				{   
+                    // 넣고 갯수를 늘린다.
+					vecMarble.push_back(arr[cur.first][cur.second]);
+					idx++;
+				}
+
+                // 만약 전체 갯수를 다 채웠다면 반환
+				if (idx == totalCnt)
+					return;
+			}
+
+            // len만큼 돌때마다 회전한다.
+			dir = (dir + 1) % 4;
+		}
+        
+        // 길이를 늘린다.
+		len++;
+	}
+}
+
+void ExplodeMarble()
+{
+    // 구슬을 벡터로 가져온다.
+	GetMarbles();
+
+	bool flag = true;
+
+    // 구슬이 파괴 콤보가 끊기지 않을때까지 반복
+	while (flag)
+	{
+		vector<int> v;
+
+		flag = false;
+
+		for (int s = 0; s < vecMarble.size(); s++)
+		{
+			int e = s;
+
+            // 같은 구슬이 연속될때까지
+			while (e < vecMarble.size() && vecMarble[e] == vecMarble[s])
+				e++;
+
+            // 만약 4개 이상이라면
+			if (e - s >= 4)
+			{
+                // 구슬을 파괴한다.
+				ans += vecMarble[s] * (e - s);
+                // 구슬을 파괴했으므로 반복문은 다시 돌아봐야함
+				flag = true;
+			}
+			else
+			{
+                // 아닐경우 임시 배열에 넣는다.
+				for (int j = s; j < e; j++)
+				{
+					v.push_back(vecMarble[j]);
+				}
+			}
+
+            // 시작지점 새롭게 갱신한다.
+			s = e - 1;
+		}
+
+        // 임시벡터의 값으로 초기화한다. 따라서 따로 구슬을 땡겨줄 필요는 없다.
+		vecMarble = v;
+	}
+}
+
+void ChangeMarble()
+{
+	vector<int> v;
+    
+    // 모든 구슬을 순회한다.
+	for (int i = 0; i < vecMarble.size(); i++)
+	{   
+        // 만약 임시 벡터가 전체 구슬의 갯수를 넘었다면
+		if (v.size() >= N * N)
+			break;
+
+		int e = i;
+
+        // 구슬이 같을동안 반복한다.
+		while (e < vecMarble.size() && vecMarble[e] == vecMarble[i])
+			e++;
+
+        // 새롭게 추가되는 구슬은 그룹의 갯수와 구슬의 번호
+		v.push_back(e - i);
+		v.push_back(vecMarble[i]);
+
+		i = e - 1;
+	}
+
+    // 사이즈를 넘었을경우 그 갯수만큼 빼준다.
+	for (int i = v.size(); i >= N * N; i--)
+		v.pop_back();
+    
+    // 새롭게 갱신
+	vecMarble = v;
+    // 구슬의 수도 갱신
+	totalCnt = vecMarble.size();
+}
+
+// 회전모양의 배열을 다시 초기화해서 만든다.
+void SetArr()
+{
+	memset(arr, 0, sizeof(arr));
+
+	int dir = 0, len = 1;
+
+	pair<int, int> cur = { N / 2, N / 2 };
+
+	int idx = 0;
+
+    while (idx != vecMarble.size())
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			for (int j = 0; j < len; j++)
+			{
+				cur.first += Delta[Directions[dir]].r;
+				cur.second += Delta[Directions[dir]].c;
+				arr[cur.first][cur.second] = vecMarble[idx++];
+
+				if (idx == vecMarble.size())
+					return;
+			}
+
+			dir = (dir + 1) % 4;
+		}
+
+		len++;
+	}
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cin >> arr[i][j];
+
+			if (arr[i][j])
+				totalCnt++;
+		}
+	}
+
+	for (int i = 0; i < M; i++)
+	{
+		int d, s;
+
+		cin >> d >> s;
+
+
+		CastBlizard(d - 1, s);
+		ExplodeMarble();
+		ChangeMarble();
+		SetArr();
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
