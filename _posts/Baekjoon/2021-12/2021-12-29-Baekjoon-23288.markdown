@@ -1,0 +1,212 @@
+---
+layout: post
+title: 주사위 굴리기 2
+date: 2021-12-29 09:17:24 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/23288)
+# 주사위 굴리기 2
+
+# 풀이
+문제에 주어진 조건대로 주사위의 처음 위치를 설정하고 지도에 접촉한 주사위 눈의 값에 따라 방향을 꺾고나서 BFS를 이용해서 점수를 구하면 되는 문제.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+int N, M, K;
+
+const int DICE = 6;
+
+const int MAX = 21;
+
+int arr[MAX][MAX] = {};
+
+enum Face
+{
+	UP = 0,
+	DOWN,
+	EAST,
+	WEST,
+	FRONT,
+	BACK
+};
+
+int dice[DICE] = { 1, 6, 3, 4, 2, 5 };
+
+struct sPos
+{
+	int r;
+	int c;
+}Delta[] = {
+	{0, 1},
+	{1, 0},
+	{0, -1},
+	{-1, 0}
+};
+
+int ans = 0;
+
+void Rotate(int dir)
+{
+	switch (dir)
+	{
+	case 0:
+	{
+		int up = dice[Face::UP];
+		int east = dice[Face::EAST];
+		int down = dice[Face::DOWN];
+		int west = dice[Face::WEST];
+
+		dice[Face::UP] = west;
+		dice[Face::EAST] = up;
+		dice[Face::DOWN] = east;
+		dice[Face::WEST] = down;
+	}
+		break;
+	case 1:
+	{
+		int up = dice[Face::UP];
+		int back = dice[Face::BACK];
+		int down = dice[Face::DOWN];
+		int front = dice[Face::FRONT];
+
+		dice[Face::BACK] = up;
+		dice[Face::DOWN] = back;
+		dice[Face::FRONT] = down;
+		dice[Face::UP] = front;
+	}
+		break;
+	case 2:
+	{
+		int up = dice[Face::UP];
+		int east = dice[Face::EAST];
+		int down = dice[Face::DOWN];
+		int west = dice[Face::WEST];
+
+		dice[Face::WEST] = up;
+		dice[Face::DOWN] = west;
+		dice[Face::EAST] = down;
+		dice[Face::UP] = east;
+	}
+		break;
+	case 3:
+	{
+		int up = dice[Face::UP];
+		int back = dice[Face::BACK];
+		int down = dice[Face::DOWN];
+		int front = dice[Face::FRONT];
+
+		dice[Face::FRONT] = up;
+		dice[Face::DOWN] = front;
+		dice[Face::BACK] = down;
+		dice[Face::UP] = back;
+	}
+		break;
+	}
+}
+
+
+void BFS(const pair<int, int>& pos, int num)
+{
+	bool visited[MAX][MAX] = {};
+
+	visited[pos.first][pos.second] = true;
+
+	queue<pair<int, int>> q;
+
+	q.push(pos);
+
+	int cnt = 1;
+
+	while (!q.empty())
+	{
+		pair<int, int> f = q.front();
+		q.pop();
+		int cr = f.first;
+		int cc = f.second;
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = cr + Delta[i].r;
+			int nc = cc + Delta[i].c;
+
+			if (nr < 1 || nr > N || nc < 1 || nc > M)
+				continue;
+
+			if (visited[nr][nc] || arr[nr][nc] != num)
+				continue;
+
+			cnt++;
+			visited[nr][nc] = true;
+			q.push({ nr, nc });
+		}
+	}
+
+	ans += cnt * num;
+}
+
+int main()
+{
+	cin >> N >> M >> K;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	int dir = 0;
+
+
+	pair<int, int> pos;
+
+	pos.first = 1;
+	pos.second = 1;
+
+
+	while (K--)
+	{
+		int nr = pos.first + Delta[dir].r;
+		int nc = pos.second + Delta[dir].c;
+
+        // 바깥으로 나갈경우 반대방향으로
+		if (nr < 1 || nr > N || nc < 1 || nc > M)
+		{
+			dir = (dir + 2) % 4;
+			nr = pos.first + Delta[dir].r;
+			nc = pos.second + Delta[dir].c;
+		}
+
+		pos.first = nr;
+		pos.second = nc;
+
+		Rotate(dir);
+
+		int score = arr[pos.first][pos.second];
+
+        // 시계 방향 회전
+		if (dice[Face::DOWN] > score)
+			dir = (dir + 1) % 4;
+        // 반시계 방향 회전
+		else if (dice[Face::DOWN] < score)
+			dir = (dir + 3) % 4;
+
+		BFS(pos, score);
+
+	}
+
+	cout << ans << "\n";
+
+
+	return 0;
+}
+```
