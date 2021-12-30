@@ -1,0 +1,443 @@
+---
+layout: post
+title: 온풍기 안녕!
+date: 2021-12-30 09:56:00 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/23289)
+# 온풍기 안녕!
+
+# 풀이
+바람이 퍼져나가는 방식도 그렇고 벽의 존재로 바람이 퍼지고 안 퍼지고의 유무로 정신이 나갈거 같은 문제였다... [여기](https://yabmoons.tistory.com/718)서 자세한 풀이법을 보고 그대로 따라서 푼 문제.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+const int MAX = 21;
+
+int R, C, K, W;
+
+int arr[MAX][MAX] = {};
+bool wallArr[MAX][MAX][4] = {};
+
+vector<pair<int, int>> searchPos;
+vector<pair<pair<int, int>, int>> heater;
+vector<pair<pair<int, int>, int>> wall;
+
+struct sPos
+{
+	int r;
+	int c;
+}Delta[] = {
+	{0, 1},
+	{0, -1},
+	{1, 0},
+	{-1, 0}
+};
+
+// 순서대로 온풍기의 방향이 오른쪽을 향할때, 왼쪽, 아래, 위
+int wdr[4][3] = { {-1, 0, 1}, {-1, 0, 1}, {1, 1, 1}, {-1, -1, -1} };
+int wdc[4][3] = { {1, 1, 1,}, {-1, -1, -1}, {-1, 0, 1}, {-1, 0, 1} };
+
+void UpdateTemp(int temp[][MAX])
+{
+	for (int r = 1; r <= R; r++)
+	{
+		for (int c = 1; c <= C; c++)
+		{
+			arr[r][c] += temp[r][c];
+		}
+	}
+}
+
+void ControlTemp()
+{
+	int temp[MAX][MAX] = {};
+
+	// 왼쪽 최상단부터 온도를 조절한다.
+	for (int r = 1; r <= R; r++)
+	{
+		for (int c = 1; c <= C; c++)
+		{
+			for (int i = 0; i < 2; i++)
+			{
+				// 방향은 오른쪽 아님 아래만
+				int dir = i == 0 ? 0 : 2;
+
+				int nr = r + Delta[dir].r;
+				int nc = c + Delta[dir].c;
+
+				if (nr >= 1 && nr <= R && nc >= 1 && nc <= C)
+				{
+					// 해당방향으로 벽이 없다면
+					if (!wallArr[r][c][dir])
+					{
+						// 온도가 높은 칸에서 낮은칸으로 온도변화
+						pair<int, int> maxCoord, minCoord;
+
+						if (arr[r][c] > arr[nr][nc])
+						{
+							maxCoord = { r, c };
+							minCoord = { nr, nc };
+						}
+						else
+						{
+							maxCoord = { nr, nc };
+							minCoord = { r, c };
+						}
+
+						int diff = abs(arr[r][c] - arr[nr][nc]);
+						diff /= 4;
+						temp[maxCoord.first][maxCoord.second] -= diff;
+						temp[minCoord.first][minCoord.second] += diff;
+					}
+				}
+			}
+		}
+	}
+	
+	// 한번의 모든 온도를 갱신한다.
+	UpdateTemp(temp);
+}
+
+
+void SetWall()
+{
+	for (int i = 0; i < W; i++)
+	{
+		int r, c, t;
+
+		r = wall[i].first.first;
+		c = wall[i].first.second;
+		t = wall[i].second;
+
+		// 0 : 오른쪽
+		// 1 : 왼쪽
+		// 2 : 아래
+		// 3 : 위
+		if (t == 0)
+		{
+			// 0번 벽은 위와 아래를 가로막는 벽이다.
+			// 따라서 r, c에서 위로 벽을 설정하고
+			// r - 1, c에서는 아래로 벽을 설정한다.
+			wallArr[r][c][3] = true;
+			wallArr[r - 1][c][2] = true;
+		}
+		else
+		{
+			// 1번 벽은 현재위치에서 오른쪽으로 벽을 만든다.
+			// r, c에서 오른쪽으로 벽을 만들고
+			// r, c + 1에서 왼쪽으로 벽을 만든다.
+			wallArr[r][c][0] = true;
+			wallArr[r][c + 1][1] = true;
+		}
+	}
+}
+
+int ChangeDir(int d)
+{
+	// 문제에서는 온풍기 방향은
+	// 1 : 오른쪽
+	// 2 : 왼쪽
+	// 3 : 위
+	// 4 : 아래
+	// 이렇게 되어있지만
+	// 이 방향을 오른쪽, 왼쪽, 아래, 위로 바꾼다.
+	switch (d)
+	{
+	case 1:
+		return 0;
+	case 2:
+		return 1;
+	case 3:
+		return 3;
+	case 4:
+		return 2;
+	}
+}
+
+bool CheckWall(int r, int c, int d, int dir)
+{
+	// dir = 1일 경우에만 바람이 일직선으로 날아가는 경우
+	// 0, 2는 대각선으로 바람이 진행
+
+	// 온풍기의 방향과 똑같은 방향으로 바람이 나갈 경우에는
+	if (dir == 1)
+	{
+		// 그 방향으로 벽이 없다면 진행이 가능
+		if (!wallArr[r][c][d])
+			return true;
+	}
+	// 대각선으로 진행할 경우에는
+	// 이 방향에서는 통일되게 r, c가 -1 씩 감소하는 대각선 방향이라 가정
+	else if (dir == 0)
+	{
+		// 오른쪽으로 진행한다면
+		if (d == 0)
+		{
+			// 현재 방향에서 위쪽
+			int upr = r - 1;
+			int upc = c;
+
+			// 현재 위치에서 위쪽으로 벽이 없고
+			// 위쪽에서 오른쪽으로 가는 벽이 없으면 바람이 갈 수 있다.
+			if (!wallArr[r][c][3] && !wallArr[upr][upc][0])
+				return true;
+		}
+		// 왼쪽으로 바람이 진행될 경우
+		else if (d == 1)
+		{
+			// 오른쪽과 마찬가지로 위의 벽을 살펴본다.
+			int upr = r - 1;
+			int upc = c;
+
+			// 현재 위치에서 위쪽으로 벽이 없고
+			// 위쪽 위치에서 왼쪽으로가는 벽이 없으면 바람이 갈 수 있다.
+			if (!wallArr[r][c][3] && !wallArr[upr][upc][1])
+				return true;
+		}
+		// 아래로 바람이 진행될 경우
+		else if (d == 2)
+		{
+			// 왼쪽
+			int dnr = r;
+			int dnc = c - 1;
+
+			// 만약 현재 위치에서 왼쪽으로 가는 벽이 없고
+			// 왼쪽의 위치에서 아래의 벽이 없다면
+			if (!wallArr[r][c][1] && !wallArr[dnr][dnc][2])
+				return true;
+		}
+		// 바람이 위로 진행될 경우
+		else if (d == 3)
+		{
+			int dnr = r;
+			int dnc = c - 1;
+
+			// 현재 위치에서 왼쪽으로 가는 벽이 없고
+			// 왼쪽 위치에서 위로가는 벽이 없다면
+			if (!wallArr[r][c][1] && !wallArr[dnr][dnc][3])
+				return true;
+		}
+	}
+	// 이 경우에는 r, c가 +1 되는 대각선 방향
+	else if (dir == 2)
+	{
+		// 오른쪽 바람
+		if (d == 0)
+		{
+			// 아래의 벽을 검사한다.
+			int upr = r + 1;
+			int upc = c;
+
+			// 만약 현재위치에서 아래로 가는 벽이 없고
+			// 아래 위치에서 오른쪽으로 가는 벽이 없다면
+			if (!wallArr[r][c][2] && !wallArr[upr][upc][0])
+				return true;
+		}
+		// 왼쪽 바람
+		else if (d == 1)
+		{
+			int upr = r + 1;
+			int upc = c;
+
+			// 만약 현재 위치에서 아래로가는 벽이 없고
+			// 아래위치에서 왼쪽으로 가는 벽이 없다면
+			if (!wallArr[r][c][2] && !wallArr[upr][upc][1])
+				return true;
+		}
+		// 아래
+		else if (d == 2)
+		{
+			// 오른쪽의 벽을 살펴본다.
+			int dnr = r;
+			int dnc = c + 1;
+
+			// 만약 현재위치에서 오른쪽으로 가는 벽이 없고
+			// 오른쪽위치에서 아래로 가는 벽이 없으면
+			if (!wallArr[r][c][0] && !wallArr[dnr][dnc][2])
+				return true;
+		}
+		// 위
+		else if (d == 3)
+		{
+			// 오른쪽 벽을 살펴본다.
+			int dnr = r;
+			int dnc = c + 1;
+
+
+			// 만약 현재 위치에서 오른쪽으로가는 벽이없고
+			// 오른쪽에서 위로 가는 벽이없다면
+			if (!wallArr[r][c][0] && !wallArr[dnr][dnc][3])
+				return true;
+		}
+	}
+
+	return false;
+}
+
+void Spread(int r, int c, int d)
+{
+	bool updated[MAX][MAX] = {};
+	d = ChangeDir(d);
+
+	r += Delta[d].r;
+	c += Delta[d].c;
+
+	if (r < 1 || c < 1 || r > R || c > C)
+		return;
+
+	queue<pair<pair<int, int>, int>> q;
+	// 가장 처음 나오는 바람의 온도는 5도
+	q.push({ {r, c}, 5 });
+
+	while (!q.empty())
+	{
+		pair<pair<int, int>, int> f = q.front();
+		int cr = f.first.first;
+		int cc = f.first.second;
+		int wind = f.second;
+
+		q.pop();
+
+		arr[cr][cc] += wind;
+
+		// 바람의 세기가 1이라면 더이상 퍼지지 않는다.
+		if (wind == 1)
+			continue;
+
+		// 바람을 부채꼴 모양으로 퍼트린다.
+		for (int i = 0; i < 3; i++)
+		{
+			int nr = cr + wdr[d][i];
+			int nc = cc + wdc[d][i];
+
+			if (nr >= 1 && nr <= R && nc >= 1 && nc <= C)
+			{
+				// 부채꼴로 퍼지면서 생길 중복 온도 갱신과 벽검사를 한다.
+				if (!updated[nr][nc] && CheckWall(cr, cc, d, i))
+				{
+					updated[nr][nc] = true;
+					q.push({ {nr, nc}, wind - 1 });
+				}
+			}
+		}
+	}
+}
+
+void SpreadWind()
+{
+	for (int i = 0; i < heater.size(); i++)
+	{
+		int r = heater[i].first.first;
+		int c = heater[i].first.second;
+		int d = heater[i].second;
+
+		Spread(r, c, d);
+	}
+}
+
+void DecTemp()
+{
+	// 위, 아래 벽 가장자리의 온도를 1도 내린다.
+	for (int i = 1; i <= C; i++)
+	{
+		if (arr[1][i] > 0)
+			arr[1][i]--;
+
+		if (arr[R][i] > 0)
+			arr[R][i]--;
+	}
+
+	// 오른쪽, 왼쪽 벽 가장자리의 온도를 1도 내린다.
+	for (int i = 2; i < R; i++)
+	{
+		if (arr[i][1] > 0)
+			arr[i][1]--;
+
+		if (arr[i][C] > 0)
+			arr[i][C]--;
+	}
+}
+
+bool Check()
+{
+	// 원하는 위치가 K도 이상이 되었는지 확인한다.
+	for (int i = 0; i < searchPos.size(); i++)
+	{
+		int r = searchPos[i].first;
+		int c = searchPos[i].second;
+
+		if (arr[r][c] < K)
+			return false;
+	}
+
+	return true;
+}
+
+int main()
+{
+	cin >> R >> C >> K;
+
+	for (int i = 1; i <= R; i++)
+	{
+		for (int j = 1; j <= C; j++)
+		{
+			cin >> arr[i][j];
+
+			// 온풍기의 바람 방향
+			// 1 : 오른쪽
+			// 2 : 왼쪽
+			// 3 : 위
+			// 4 : 아래
+			if (arr[i][j] != 0 && arr[i][j] != 5)
+				heater.push_back({ {i, j}, arr[i][j] });
+			else if (arr[i][j] == 5)
+				searchPos.push_back({ i, j });
+			
+			arr[i][j] = 0;
+		}
+	}
+
+	cin >> W;
+
+	for (int i = 0; i < W; i++)
+	{
+		int r, c, t;
+
+		cin >> r >> c >> t;
+
+		wall.push_back({ {r, c, }, t });
+	}
+
+	SetWall();
+
+	int ans = 0;
+
+	while (1)
+	{
+		if (ans > 100)
+			break;
+
+		SpreadWind();
+		ControlTemp();
+		DecTemp();
+
+		ans++;
+
+		if (Check())
+			break;
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
