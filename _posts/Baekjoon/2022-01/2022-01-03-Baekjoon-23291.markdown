@@ -1,0 +1,265 @@
+---
+layout: post
+title: 어항 정리
+date: 2022-01-03 09:18:44 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/23291)
+# 어항 정리
+
+# 풀이
+배열을 돌돌 말듯이 어떻게 회전해야할지와 어떻게 배열을 쪼개고 다시 쌓고 해야할지 전혀 감이 오질 안 와서 [이 곳](https://zoosso.tistory.com/1069)의 풀이를 참조하여 풀었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <string.h>
+
+using namespace std;
+
+const int MIN = 0;
+const int INF = 987654321;
+const int EMPTY = 0;
+
+struct sNode
+{
+	int r;
+	int c;
+}Delta[] = {
+	{0, 1},
+	{1, 0},
+	{0, -1},
+	{-1, 0}
+};
+
+const int MAX = 105;
+
+int N, K;
+
+int ans = 0;
+
+int arr[MAX][MAX] = {};
+
+void AddFish()
+{
+	vector<sNode> v;
+
+	int minVal = INF;
+
+    // 모든 어항을 순회한다.
+	for (int r = 1; r <= N; r++)
+	{
+		for (int c = 1; c <= N; c++)
+		{
+            // 만약 비어있다면 넘어간다.
+			if (arr[r][c] == EMPTY)
+				continue;
+
+            // 만약 현재 어항의 값이 최소 값보다 작다면
+			if (arr[r][c] < minVal)
+			{
+                // 갱신하고 벡터를 한번 비우고 다시 새롭게 넣어준다.
+				minVal = arr[r][c];
+				v.clear();
+				v.push_back({ r, c });
+			}
+            // 갱신할 위치를 추가해준다.
+			else if (arr[r][c] == minVal)
+			{
+				v.push_back({ r, c });
+			}
+		}
+	}
+
+    // 물고기를 한마리 늘려준다.
+	for (int i = 0; i < v.size(); i++)
+	{
+		arr[v[i].r][v[i].c]++;
+	}
+}
+
+void Roll()
+{
+    // https://zoosso.tistory.com/1069 정확한 해설은 이곳을 참조
+	int pivot, w, h;
+
+	pivot = 1;
+	w = 1;
+	h = 1;
+
+	for (int i = 0; ; i++)
+	{
+		if (pivot - 1 + w + h > N)
+			break;
+
+		for (int c = pivot; c < pivot + w; c++)
+		{
+			for (int r = N; N - h < r; r--)
+			{
+				int nextR = (N - w) + (c - pivot);
+				int nextC = (pivot + w) + (N - r);
+
+				arr[nextR][nextC] = arr[r][c];
+				arr[r][c] = EMPTY;
+			}
+		}
+
+		pivot += (i / 2 + 1);
+	
+		if (i % 2 == 1)
+			w++;
+		else
+			h++;
+	}
+}
+
+void ControlFish()
+{
+	int tempArr[MAX][MAX] = {};
+
+	for (int r = 1; r <= N; r++)
+	{
+		for (int c = 1; c <= N; c++)
+		{
+			if (arr[r][c] != EMPTY)
+			{
+				tempArr[r][c] += arr[r][c];
+
+				for (int i = 0; i < 4; i++)
+				{
+					int nr = r + Delta[i].r;
+					int nc = c + Delta[i].c;
+
+					if (arr[nr][nc] == EMPTY)
+						continue;
+
+                    // 물고기가 더 많은 곳에서 적은 곳으로 보내준다.
+					if (arr[r][c] > arr[nr][nc])
+					{
+						int diff = (arr[r][c] - arr[nr][nc]) / 5;
+						tempArr[r][c] -= diff;
+						tempArr[nr][nc] += diff;
+					}
+				}
+			}
+		}
+	}
+
+	memcpy(arr, tempArr, sizeof(tempArr));
+}
+
+void AlignFish()
+{
+	queue<int> q;
+
+	for (int c = 1; c <= N; c++)
+	{
+        // 만약 비어있다면 스킵
+		if (arr[N][c] == EMPTY)
+			continue;
+
+        // 아래에서 위로 순회하면서
+		for (int r = N; r >= 1; r--)
+		{
+            // 만약 물고기가 없다면 빠져나간다.
+			if (arr[r][c] == EMPTY)
+				break;
+
+            // 큐에 넣는다.
+			q.push(arr[r][c]);
+			arr[r][c] = EMPTY;
+		}
+	}
+
+	int col = 1;
+    // 다시 일렬로 쭉 펴서 저장한다.
+	while (!q.empty())
+	{
+		arr[N][col++] = q.front();
+		q.pop();
+	}
+}
+
+void Fold()
+{
+	int quarterN = N / 4;
+	int sCol[4] = { 0, N, N - quarterN + 1, N };
+	int cDir[4] = { 0, -1, 1, -1 };
+
+	int srcCol = 1;
+
+    // 맨 아래에서 바로 윗줄부터 시작한다.
+	for (int i = 1; i <= 3; i++)
+	{   
+        // N 부터 시작해서 
+        // N - N / 4 + 1 에서 다시 N까지 좌우로 반복한다.
+		int col = sCol[i];
+        // N / 4만큼 반복한다.
+		for (int j = 0; j < quarterN; j++)
+		{
+			arr[N - i][col] = arr[N][srcCol];
+			arr[N][srcCol] = EMPTY;
+			col += cDir[i];
+			srcCol++;
+		}
+	}
+}
+
+int GetDiff()
+{
+	int minVal = INF;
+	int maxVal = MIN;
+
+	for (int r = 1; r <= N; r++)
+	{
+		for (int c = 1; c <= N; c++)
+		{
+			if (arr[r][c] == EMPTY)
+				continue;
+
+			minVal = min(minVal, arr[r][c]);
+
+			maxVal = max(maxVal, arr[r][c]);
+		}
+	}
+
+
+	return maxVal - minVal;
+}
+
+int main()
+{
+	cin >> N >> K;
+
+	for (int i = 1; i <= N; i++)
+	{
+		cin >> arr[N][i];
+	}
+
+	while (1)
+	{
+		AddFish();
+
+		Roll();
+		ControlFish();
+		AlignFish();
+
+		Fold();
+		ControlFish();
+		AlignFish();
+
+		ans++;
+
+		if (GetDiff() <= K)
+			break;
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```

@@ -1,0 +1,349 @@
+---
+layout: post
+title: 마법사 상어와 복제
+date: 2022-01-03 08:08:11 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/23290)
+# 마법사 상어와 복제
+
+# 문제
+> 마법사 상어는 파이어볼, 토네이도, 파이어스톰, 물복사버그, 비바라기, 블리자드 마법을 할 수 있다. 오늘은 기존에 배운 물복사버그 마법의 상위 마법인 복제를 배웠고, 4 × 4 크기의 격자에서 연습하려고 한다. (r, c)는 격자의 r행 c열을 의미한다. 격자의 가장 왼쪽 윗 칸은 (1, 1)이고, 가장 오른쪽 아랫 칸은 (4, 4)이다.
+격자에는 물고기 M마리가 있다. 각 물고기는 격자의 칸 하나에 들어가 있으며, 이동 방향을 가지고 있다. 이동 방향은 8가지 방향(상하좌우, 대각선) 중 하나이다. 마법사 상어도 연습을 위해 격자에 들어가있다. 상어도 격자의 한 칸에 들어가있다. 둘 이상의 물고기가 같은 칸에 있을 수도 있으며, 마법사 상어와 물고기가 같은 칸에 있을 수도 있다.
+상어의 마법 연습 한 번은 다음과 같은 작업이 순차적으로 이루어진다.
+
+> 1. 상어가 모든 물고기에게 복제 마법을 시전한다. 복제 마법은 시간이 조금 걸리기 때문에, 아래 5번에서 물고기가 복제되어 칸에 나타난다.
+> 2. 모든 물고기가 한 칸 이동한다. 상어가 있는 칸, 물고기의 냄새가 있는 칸, 격자의 범위를 벗어나는 칸으로는 이동할 수 없다. 각 물고기는 자신이 가지고 있는 이동 방향이 이동할 수 있는 칸을 향할 때까지 방향을 45도 반시계 회전시킨다. 만약, 이동할 수 있는 칸이 없으면 이동을 하지 않는다. 그 외의 경우에는 그 칸으로 이동을 한다. 물고기의 냄새는 아래 3에서 설명한다.
+> 3. 상어가 연속해서 3칸 이동한다. 상어는 현재 칸에서 상하좌우로 인접한 칸으로 이동할 수 있다. 연속해서 이동하는 칸 중에 격자의 범위를 벗어나는 칸이 있으면, 그 방법은 불가능한 이동 방법이다. 연속해서 이동하는 중에 상어가 물고기가 있는 같은 칸으로 이동하게 된다면, 그 칸에 있는 모든 물고기는 격자에서 제외되며, 제외되는 모든 물고기는 물고기 냄새를 남긴다. 가능한 이동 방법 중에서 제외되는 물고기의 수가 가장 많은 방법으로 이동하며, 그러한 방법이 여러가지인 경우 사전 순으로 가장 앞서는 방법을 이용한다. 사전 순에 대한 문제의 하단 노트에 있다.
+> 4. 두 번 전 연습에서 생긴 물고기의 냄새가 격자에서 사라진다.
+> 5. 1에서 사용한 복제 마법이 완료된다. 모든 복제된 물고기는 1에서의 위치와 방향을 그대로 갖게 된다.
+
+> 격자에 있는 물고기의 위치, 방향 정보와 상어의 위치, 그리고 연습 횟수 S가 주어진다. S번 연습을 모두 마쳤을때, 격자에 있는 물고기의 수를 구해보자.
+
+# 입력
+> 첫째 줄에 물고기의 수 M, 상어가 마법을 연습한 횟수 S가 주어진다. 둘째 줄부터 M개의 줄에는 물고기의 정보 fx, fy, d가 주어진다. (fx, fy)는 물고기의 위치를 의미하고, d는 방향을 의미한다. 방향은 8 이하의 자연수로 표현하고, 1부터 순서대로 ←, ↖, ↑, ↗, →, ↘, ↓, ↙ 이다. 마지막 줄에는 sx, sy가 주어지며, 상어가 (sx, sy)에 있음을 의미한다.
+격자 위에 있는 물고기의 수가 항상 1,000,000 이하인 입력만 주어진다.
+
+# 출력
+> S번의 연습을 마친 후 격자에 있는 물고기의 수를 출력한다.
+
+# 풀이
+백트랙킹을 이용하여 모든 중복순열을 구한뒤에 그걸 문자열로 바꿔서 정렬해서 경로를 찾는 방법으로 풀어봤는데.. 이상하게 몇몇 예제에서 계속 잘못된 출력이 나와서 아무리 뭐가 문제인지 찾아봐도 찾을 수가 없어서 결국 [이 곳](https://yabmoons.tistory.com/719)의 풀이를 참조하여 풀었다.. 아쉽다..
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct sFish
+{
+	int r;
+	int c;
+	int dir;
+};
+
+const int MAX = 5;
+
+const int N = 4;
+
+int M, S, maxEat;
+
+int tempRoute[3], route[3];
+
+int smell[MAX][MAX] = {};
+
+vector<sFish> fishArr[MAX][MAX], copyArr[MAX][MAX];
+
+pair<int, int> shark;
+
+int fdr[] = { 0, 0, -1, -1, -1, 0, 1, 1, 1 };
+int fdc[] = { 0, -1, -1, 0, 1, 1, 1, 0, -1 };
+
+int sdr[] = { 0, -1, 0, 1, 0 };
+int sdc[] = { 0, 0, -1, 0, 1 };
+
+void CopyArr(vector<sFish> A[][MAX], vector<sFish> B[][MAX])
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			A[i][j] = B[i][j];
+		}
+	}
+}
+
+// 물고기 복제
+void CopyFish()
+{
+	CopyArr(copyArr, fishArr);
+}
+
+int ChangeDir(int dir)
+{
+    // 반시계 회전
+	switch (dir)
+	{
+	case 1:
+		return 8;
+	case 2:
+		return 1;
+	case 3:
+		return 2;
+	case 4:
+		return 3;
+	case 5:
+		return 4;
+	case 6:
+		return 5;
+	case 7:
+		return 6;
+	case 8:
+		return 7;
+	}
+}
+
+void MoveFish()
+{
+    // 임시 벡터에 넣어서 중복된 이동을 방지한다.
+	vector<sFish> temp[MAX][MAX];
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+            // i, j에 있는 모든 물고기를 한칸 움직인다.
+			for (int k = 0; k < fishArr[i][j].size(); k++)
+			{
+				int r = fishArr[i][j][k].r;
+				int c = fishArr[i][j][k].c;
+				int dir = fishArr[i][j][k].dir;
+
+				int nr = r;
+				int nc = c;
+
+				bool flag = false;
+
+				for (int l = 0; l < 8; l++)
+				{
+					nr = r + fdr[dir];
+					nc = c + fdc[dir];
+
+					if (nr >= 0 && nc >= 0 && nr < N && nc < N)
+					{
+						if (((nr != shark.first || nc != shark.second) &&
+							smell[nr][nc] == 0))
+						{
+							flag = true;
+							break;
+						}
+					}
+
+					dir = ChangeDir(dir);
+				}
+
+                // 만약 이동이 가능했다면
+				if (flag)
+				{
+                    // 새로운위치
+					sFish f = { nr, nc, dir };
+					temp[nr][nc].push_back(f);
+				}
+                // 아니라면
+				else
+				{
+                    // 원래 위치
+					sFish f = { r, c, dir };
+					temp[r][c].push_back(f);
+				}
+
+			}
+		}
+	}
+    
+    // 이동이 끝난 벡터를 다시 원래의 벡터에 집어넣는다.
+	CopyArr(fishArr, temp);
+}
+
+// BFS
+int RouteTest()
+{
+	bool visited[MAX][MAX] = {};
+	int r = shark.first;
+	int c = shark.second;
+
+	int eat = 0;
+
+    // 최대 이동횟수는 3번
+	for (int i = 0; i < 3; i++)
+	{
+		int dir = tempRoute[i];
+		int nr = r + sdr[dir];
+		int nc = c + sdc[dir];
+        
+        // 범위를 벗어난다면 -1을 반환
+		if (nr < 0 || nc < 0 || nr >= N || nc >= N)
+			return -1;
+
+        // 만약 방문한적이 없는 곳이라면
+		if (!visited[nr][nc])
+		{
+            // 방문처리와
+			visited[nr][nc] = true;
+            // 먹은 생선수를 갱신한다.
+			eat += fishArr[nr][nc].size();
+		}
+
+		r = nr;
+		c = nc;
+	}
+
+	return eat;
+}
+
+// 백트랙킹
+void FindRoute(int depth)
+{
+	if (depth >= 3)
+	{
+        // 임시경로로 먹은 갯수를 확인한다.
+		int eatNum = RouteTest();
+
+		if (eatNum > maxEat)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				route[i] = tempRoute[i];
+			}
+
+			maxEat = eatNum;
+		}
+
+		return;
+	}
+
+    // 모든 이동가능한 경우의 수를 구한다.
+    // 여기서 문제에서 제시한 조건을 만족하는 순서대로
+    // 경로를 구한다. 즉 111이 가장 처음 생기는 중복순열이며
+    // 다음은 112등으로 알아서 사전순으로 테스트가 된다.
+	for (int i = 1; i <= 4; i++)
+	{
+		tempRoute[depth] = i;
+		FindRoute(depth + 1);
+	}
+}
+
+void MoveShark(int currentTime)
+{
+	int r = shark.first;
+	int c = shark.second;
+
+    // 구한 경로로 움직인다.
+	for (int i = 0; i < 3; i++)
+	{
+		int dir = route[i];
+		int nr = r + sdr[dir];
+		int nc = c + sdc[dir];
+
+        // 만약 생선이 있는 곳이라면
+		if (fishArr[nr][nc].size() != 0)
+		{
+            // 냄세를 갱신하고 생선을 모두 없앤다.
+			smell[nr][nc] = currentTime;
+			fishArr[nr][nc].clear();
+		}
+
+		r = nr;
+		c = nc;
+		shark.first = r;
+		shark.second = c;
+	}
+}
+
+// 상어가 움직이기 전 초기값설정
+void Shark(int currentTime)
+{
+	maxEat = -1;
+	FindRoute(0);
+	MoveShark(currentTime);
+}
+
+void RemoveSmell(int currentTime)
+{
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			if (smell[i][j] == 0)
+				continue;
+            // 만약 현재 시간과 냄세의 차이가 2라면 냄세는 없어진다.
+			if (currentTime - smell[i][j] == 2)
+				smell[i][j] = 0;
+		}
+	}
+}
+
+void BornFish()
+{
+    // 가장 처음에 복제된 물고기가 다시 원래 배열에 들어간다.
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			for (int k = 0; k < copyArr[i][j].size(); k++)
+			{
+				fishArr[i][j].push_back(copyArr[i][j][k]);
+			}
+		}
+	}
+}
+
+
+int main()
+{
+	cin >> M >> S;
+
+	for (int i = 0; i < M; i++)
+	{
+		int r, c, d;
+
+		cin >> r >> c >> d;
+		r--;
+		c--;
+
+		sFish f = { r, c, d };
+		fishArr[r][c].push_back(f);
+	}
+
+	cin >> shark.first >> shark.second;
+	shark.first--;
+	shark.second--;
+
+	for (int i = 1; i <= S; i++)
+	{
+		CopyFish();
+		MoveFish();
+		Shark(i);
+		RemoveSmell(i);
+		BornFish();
+	}
+
+
+	int ans = 0;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			ans += fishArr[i][j].size();
+		}
+	}
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
