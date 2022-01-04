@@ -1,0 +1,71 @@
+---
+layout: post
+title: 카드
+date: 2022-01-04 09:32:56 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/11652)
+# 카드
+
+# 문제
+> 준규는 숫자 카드 N장을 가지고 있다. 숫자 카드에는 정수가 하나 적혀있는데, 적혀있는 수는 -262보다 크거나 같고, 262보다 작거나 같다.
+준규가 가지고 있는 카드가 주어졌을 때, 가장 많이 가지고 있는 정수를 구하는 프로그램을 작성하시오. 만약, 가장 많이 가지고 있는 정수가 여러 가지라면, 작은 것을 출력한다.
+
+# 입력
+> 첫째 줄에 준규가 가지고 있는 숫자 카드의 개수 N (1 ≤ N ≤ 100,000)이 주어진다. 둘째 줄부터 N개 줄에는 숫자 카드에 적혀있는 정수가 주어진다.
+
+# 출력
+> 첫째 줄에 준규가 가장 많이 가지고 있는 정수를 출력한다.
+
+# 풀이
+맵을 이용해서 빈도수를 확인하고 그걸 다시 벡터에 넣은다음 조건대로 정렬해서 첫 원소를 출력한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <map>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int N;
+
+int main()
+{
+	cin >> N;
+	
+	map<long long, int> hashMap;
+
+	for (int i = 0; i < N; i++)
+	{
+		long long num;
+
+		cin >> num;
+
+		hashMap[num]++;
+	}
+
+	vector<pair<long long, int>> v;
+
+	auto iter = hashMap.begin();
+	auto iterEnd = hashMap.end();
+
+	for (; iter != iterEnd; iter++)
+	{
+		v.push_back({ iter->first, iter->second });
+	}
+
+	sort(v.begin(), v.end(), [](const pair<long long, int>& a, const pair<long long, int>& b) {
+		if (a.second != b.second)
+			return a.second > b.second;
+		else
+			return a.first < b.first;
+	});
+
+	cout << v[0].first << "\n";
+
+	return 0;
+}
+```
