@@ -2,7 +2,7 @@
 layout: post
 title:  마리오카트 3
 date:   2021-10-10 13:05:03+0900
-categories: WIN-API
+categories: WINAPI
 ---
 
 # 캐릭터간 충돌과 타일맵 속성과 충돌
