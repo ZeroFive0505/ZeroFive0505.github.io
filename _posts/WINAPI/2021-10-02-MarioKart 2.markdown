@@ -1,0 +1,14 @@
+---
+layout: post
+title:  마리오카트 #2
+date:   2021-10-02 12:20:49 +0900
+categories: WIN API
+---
+
+# 색깔문제
+플레이어 캐릭터도 렌더링을 어느정도 끝마치고 색깔이 이상하게 나오는 문제 때문에 한참을 인터넷을 찾아다니다가 [이 글](https://forums.codeguru.com/showthread.php?320470-bitmap-displays-wrong-colors)에서 COLORREF 변수는 색깔을 b, g, r 순으로 저장하고 CreateBitmap은 r, g, b순의 데이터를 요구한다는 글을 보고 혹시나해서 r, b의 순서를 바꿔보니..
+
+# 결과
+![Imgur](https://imgur.com/o4lwLA1.gif)
+
+드디어 색깔이 제대로 나왔다.. 왜 저 순서를 바꿔놓은 건지 정말.. 이제 처음에 비트맵에서 색깔 정보를 저장하는 속도만 좀더 빠르게하면 더 좋을 것 같다.
