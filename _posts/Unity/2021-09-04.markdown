@@ -1,8 +1,8 @@
 ---
 layout: post
-title: FPS 개발일지
+title: Unity FPS
 date: 2021-09-04 14:11:33 +0900
-categories: Unity FPS
+categories: Unity
 ---
 
 # Unity FPS

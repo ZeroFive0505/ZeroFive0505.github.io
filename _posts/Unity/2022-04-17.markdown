@@ -1,0 +1,179 @@
+---
+layout: post
+title: Unity Topdown
+date: 2022-04-17 07:43:18 +0900
+categories: Unity
+---
+
+# 탑다운 슈터
+저번에 혼자서 만들던 FPS는 디자인, 기획 등에서 역량의 부족으로 결국에는 FPS에 비하면 좀 더 디자인하기 간단한 게임을 프로토타입으로 만들어보자는 마음으로 탑다운을 만들기 시작했다. 스테이지에 경우에는 랜덤하게 생성되는 방식을 해보면 어떨까 고민을 시작하고 자료를 찾아서 구현을 시작했다.
+
+
+# 랜덤한 던전 생성하기
+
+[![랜덤 던전 생성](https://img.youtube.com/vi/gHU5RQWbmWE/0.jpg)](https://www.youtube.com/watch?v=OOGDMbHtU9Q "생성")
+
+위 동영상을 참조하여 랜덤한 던전을 만들어낼 수 있었다. 
+랜덤 던전 생성은 DFS로 일정 갯수가 생성될때까지 또는 더이상 새롭게 방문할 공간이 없을 때까지 반복된다.
+
+주요 코드는 다음과 같다.
+
+
+```cs
+        board = new List<Cell>();
+        
+        // 먼저 가로 세로 갯수만큼 셀을 생성
+        for(int i = 0; i < size.x; i++)
+        {
+            for(int j = 0; j < size.y; j++)
+            {
+                board.Add(new Cell());
+            }
+        }
+
+        int currentCell = startPos;
+
+        // DFS를 위해 스택을 하나 만든다.
+        Stack<int> path = new Stack<int>();
+
+        int k = 0;
+
+        while(k < 1000)
+        {
+            // 현재 방은 방문
+            board[currentCell].visited = true;
+
+            // 시작위치의 방인지?
+            if (currentCell == startPos)
+                board[currentCell].startRoom = true;
+            else
+                board[currentCell].startRoom = false;
+
+            // 만약 현재 방이 한계치와 같다면 반복문을 빠져나간다.
+            if(currentCell == board.Count - 1)
+            {
+                break;
+            }
+
+            // 4방향으로 이웃을 확인한다.
+            List<int> neighbors = CheckNeighbors(currentCell);
+
+            // 만약 이웃이 없다면
+            if(neighbors.Count == 0)
+            {
+                // 스택이 비어있다면 끝
+                if (path.Count == 0)
+                    break;
+                // 아니라면 되돌아간다.
+                else
+                    currentCell = path.Pop();
+            }
+            else
+            {
+                // 방문위치를 기록
+                path.Push(currentCell);
+
+                // 이웃중에 랜덤한 이웃을 방문한다.
+                int newCell = neighbors[Random.Range(0, neighbors.Count)];
+
+                // 만약 새로운 방이 현재 방 번호보다 크다면
+                if(newCell > currentCell)
+                {
+                    // 새로운 방은 오른쪽 또는 아래에 위치한 경우
+                    // 오른쪽에 존재하는 경우
+                    if(newCell - 1 == currentCell)
+                    {
+                        // 현재 방의 오른쪽 문을 연다.
+                        board[currentCell].status[(int)WallDirection.RIGHT] = true;
+                        // 새로운 방으로 갱신하고 왼쪽문을 연다.
+                        currentCell = newCell;
+                        board[currentCell].status[(int)WallDirection.LEFT] = true;
+                    }
+                    else
+                    {
+                        // 아래로 가는 경우는 아래의 방을 생성한다.
+                        board[currentCell].status[(int)WallDirection.DOWN] = true;
+                        currentCell = newCell;
+                        // 마찬가지로 새로운방은 위로 문을 연다.
+                        board[currentCell].status[(int)WallDirection.UP] = true;
+                    }
+                }
+                else
+                {
+                    // 이 경우는 왼쪽또는 위쪽에 생성되는 경우
+
+                    // 왼쪽
+                    if (newCell + 1 == currentCell)
+                    {
+                        board[currentCell].status[(int)WallDirection.LEFT] = true;
+                        currentCell = newCell;
+                        board[currentCell].status[(int)WallDirection.RIGHT] = true;
+                    }
+                    // 위
+                    else
+                    {
+                        board[currentCell].status[(int)WallDirection.UP] = true;
+                        currentCell = newCell;
+                        board[currentCell].status[(int)WallDirection.DOWN] = true;
+                    }
+                }
+            }
+
+            k++;
+        }
+```
+
+이웃을 확인하고 가져오는 코드는 다음과 같다.
+
+```cs
+    List<int> CheckNeighbors(int cell)
+    {
+        List<int> neighbors = new List<int>();
+
+        // 먼저 위쪽 방을 확인한다.
+        // 이때 size.x는 방 가로의 수이며 만약 현재 방번호에서
+        // 뺄경우 0보다 크거나 같고 방문도 안했다면 위쪽 방을 추가
+        if (cell - size.x >= 0 && !board[(cell - size.x)].visited)
+        {
+            neighbors.Add((cell - size.x));
+        }
+
+        // 아래의 경우
+        if (cell + size.x < board.Count && !board[(cell + size.x)].visited)
+        {
+            neighbors.Add((cell + size.x));
+        }
+
+        // 오른쪽의 경우에는 가장 오른쪽인지 먼저 확인한다.
+        // 만약 현재 방에서 한칸 오른쪽으로 갔을 경우 나머지가 0이 아니라면 가장 오른쪽 이므로 방을 생성하면 안된다.
+        if ((cell + 1) % size.x != 0 && !board[(cell + 1)].visited)
+        {
+            neighbors.Add((cell + 1));
+        }
+
+        // 왼쪽의 경우에는 오른쪽과 마찬가지로 가장 왼쪽에 위치했는지를 확인한다.
+        if (cell % size.x != 0 && !board[(cell - 1)].visited)
+        {
+            neighbors.Add((cell - 1));
+        }
+
+        // 이웃의 목록을 반환한다.
+        return neighbors;
+    }
+```
+
+
+![Imgur](https://imgur.com/GROVMqF.gif)
+
+
+# 파티클, 포스트 프로세싱, 카메라 흔들림
+
+초기 프로토 타입은 플레이어를 움직이고 투사체를 발사하는 정도 였지만 역시나 너무 심심해보여서 투사체를 발사하는 순간 카메라의 흔들림과 파티클을 생성하도록 했다. 또한 이동하는 경우에도 파티클을 생성해서 좀 더 플레이어가 어느 방향으로 이동하고 있는지 가늠이 되도록 했다. 투사체의 파티클의 경우 Emission 수치를 높이고 Unity에서 제공하는 포스트 프로세싱으로 Bloom효과를 줬다.
+
+![Imgur](https://imgur.com/49BmrMy.gif)
+
+# 던전 진입 데모
+
+시작위치의 방에서 벗어나서 새로운 방에 진입할 경우 출입구가 닫히며 적이 랜덤한 위치에서 생성되고 플레이어를 추적하고 공격하게 만들었다. 적은 초기 플레이어 프리팹을 이용해서 파티클은 존재하지 않는다.
+
+![Imgur](https://imgur.com/JxAbgST.gif)
