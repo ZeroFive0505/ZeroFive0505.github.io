@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  리버 시티 걸즈 개발 일지
-date:   2022-04-16 09:01:32 +0900
+title: 리버 시티 걸즈 개발 일지
+date: 2022-04-16 09:01:32 +0900
 categories: DirectX
 ---
 
