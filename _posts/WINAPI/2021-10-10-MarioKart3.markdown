@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  마리오카트 #3
+title:  마리오카트 3
 date:   2021-10-10 13:05:03+0900
 categories: WIN API
 ---
