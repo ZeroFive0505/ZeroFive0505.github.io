@@ -2,7 +2,7 @@
 layout: post
 title: Unity Prototype pattern
 date: 2021-06-30 13:57:18 +0900
-categories: Unity DesignPattern
+categories: Unity
 ---
 
 # Unity Prototype 패턴

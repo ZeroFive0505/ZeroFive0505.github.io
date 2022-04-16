@@ -2,7 +2,7 @@
 layout: post
 title: Unity Observer pattern
 date: 2021-06-30 13:45:10 +0900
-categories: Unity DesignPattern
+categories: Unity
 ---
 
 # Unity Observer 패턴

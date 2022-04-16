@@ -2,7 +2,7 @@
 layout: post
 title: Unity Singleton pattern
 date: 2021-07-01 13:46:26 +0900
-categories: Unity DesignPattern
+categories: Unity
 ---
 
 # Unity Singleton 패턴

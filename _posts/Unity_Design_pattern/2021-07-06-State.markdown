@@ -2,7 +2,7 @@
 layout: post
 title: Unity State Pattern
 date: 2021-07-06 14:24:01 +0900
-categories: Unity DesignPattern
+categories: Unity
 ---
 
 # Unity State 패턴

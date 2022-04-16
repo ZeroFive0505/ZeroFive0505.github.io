@@ -2,7 +2,7 @@
 layout: post
 title: Unity Object pooling
 date: 2021-07-07 16:48:15 +0900
-categories: Unity DesignPattern
+categories: Unity
 ---
 
 # Unity 오브젝트 풀링 패턴

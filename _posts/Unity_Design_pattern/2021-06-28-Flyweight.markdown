@@ -2,7 +2,7 @@
 layout: post
 title: Unity Flyweight pattern
 date: 2021-06-28 15:05:55 +0900
-categories: Unity DesignPattern
+categories: Unity
 ---
 
 # Unity Flyweight 패턴
