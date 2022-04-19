@@ -1,0 +1,387 @@
+---
+layout: post
+title: 벽 부수고 이동하기 2
+date: 2022-04-19 09:33:08 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14442)
+# 벽 부수고 이동하기 2
+
+# 문제
+> N×M의 행렬로 표현되는 맵이 있다. 맵에서 0은 이동할 수 있는 곳을 나타내고, 1은 이동할 수 없는 벽이 있는 곳을 나타낸다. 당신은 (1, 1)에서 (N, M)의 위치까지 이동하려 하는데, 이때 최단 경로로 이동하려 한다. 최단경로는 맵에서 가장 적은 개수의 칸을 지나는 경로를 말하는데, 이때 시작하는 칸과 끝나는 칸도 포함해서 센다.
+만약에 이동하는 도중에 벽을 부수고 이동하는 것이 좀 더 경로가 짧아진다면, 벽을 K개 까지 부수고 이동하여도 된다.
+한 칸에서 이동할 수 있는 칸은 상하좌우로 인접한 칸이다.
+맵이 주어졌을 때, 최단 경로를 구해 내는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 N(1 ≤ N ≤ 1,000), M(1 ≤ M ≤ 1,000), K(1 ≤ K ≤ 10)이 주어진다. 다음 N개의 줄에 M개의 숫자로 맵이 주어진다. (1, 1)과 (N, M)은 항상 0이라고 가정하자.
+
+# 출력
+> 첫째 줄에 최단 거리를 출력한다. 불가능할 때는 -1을 출력한다.
+
+# 첫 시도
+BFS와 백트랙킹을 같이 이용해서 코드를 작성했을때 예제를 잘 통과해서 제출해봤지만 메모리 초과가 떴다.
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <queue>
+
+using namespace std;
+
+const int MAX = 1001;
+
+const int INF = 987654321;
+
+int ans = INF;
+
+int N, M, K;
+
+int arr[MAX][MAX] = {};
+int visitedCnt[MAX][MAX] = {};
+
+struct sDelta
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+void BFS(int r, int c)
+{
+	queue<pair<int, int>> q;
+
+	q.push({ r, c });
+
+	while (!q.empty())
+	{
+		pair<int, int> cur = q.front();
+		q.pop();
+		if (cur.first == N && cur.second == M)
+		{
+			ans = visitedCnt[N][M];
+			return;
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			pair<int, int> newPos = cur;
+
+			newPos.first += Delta[i].r;
+			newPos.second += Delta[i].c;
+
+			if (newPos.first <= 0 || newPos.second <= 0 ||
+				newPos.first > N || newPos.second > M)
+				continue;
+
+			if (visitedCnt[newPos.first][newPos.second] > visitedCnt[cur.first][cur.second] 
+				&& arr[newPos.first][newPos.second] == 1)
+			{
+				if (K > 0)
+				{
+					K--;
+					visitedCnt[newPos.first][newPos.second] = visitedCnt[cur.first][cur.second] + 1;
+					arr[newPos.first][newPos.second] = 0;
+					BFS(newPos.first, newPos.second);
+					K++;
+					visitedCnt[newPos.first][newPos.second] = INF;
+					arr[newPos.first][newPos.second] = 1;
+					
+				}
+			}
+			else if (visitedCnt[newPos.first][newPos.second] > visitedCnt[cur.first][cur.second]
+				&& arr[newPos.first][newPos.second] == 0)
+			{
+				visitedCnt[newPos.first][newPos.second] = visitedCnt[cur.first][cur.second] + 1;
+				q.push({ newPos.first, newPos.second });
+			}
+		}
+	}
+}
+
+int main()
+{
+	cin >> N >> M >> K;
+
+	string s;
+	for (int i = 1; i <= N; i++)
+	{
+		cin >> s;
+		int length = s.length();
+
+		for (int j = 0; j < length; j++)
+		{
+			arr[i][j + 1] = s[j] - '0';
+		}
+	}
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= M; j++)
+		{
+			visitedCnt[i][j] = INF;
+		}
+	}
+
+	visitedCnt[1][1] = 1;
+	BFS(1, 1);
+
+	if (ans == INF)
+		cout << -1 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```
+
+# 두번째 시도
+벽 부수고 이동하기 1에서 약간 변형한 방법으로 풀어봤는데 계속해서 시간초과가 떴다.
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <queue>
+
+using namespace std;
+
+const int MAX = 1001;
+
+const int INF = 987654321;
+
+int ans = INF;
+
+int N, M, K;
+
+int arr[MAX][MAX] = {};
+int visitedCnt[11][MAX][MAX] = {};
+
+struct sDelta
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+struct sPos
+{
+	int r;
+	int c;
+	int wallCount;
+
+	sPos(int _r, int _c, int _count) :
+		r(_r), c(_c) , wallCount(_count)
+	{}
+};
+
+void BFS(int r, int c)
+{
+	visitedCnt[K][r][c] = 1;
+
+	queue<sPos> q;
+
+	q.push(sPos(r, c, K));
+
+	while (!q.empty())
+	{
+		sPos cur = q.front();
+		q.pop();
+
+		int cr = cur.r;
+		int cc = cur.c;
+
+		if (cr == N && cc == M)
+		{
+			cout << visitedCnt[cur.wallCount][cr][cc] << "\n";
+			return;
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = cr + Delta[i].r;
+			int nc = cc + Delta[i].c;
+
+			if (nr <= 0 || nc <= 0 || nr > N || nc > M)
+				continue;
+
+			if (visitedCnt[cur.wallCount][nr][nc] != 0)
+				continue;
+
+			if (arr[nr][nc] == 1 && cur.wallCount >= 1)
+			{
+				visitedCnt[cur.wallCount - 1][nr][nc] = visitedCnt[cur.wallCount][cr][cc] + 1;
+				q.push(sPos(nr, nc, cur.wallCount - 1));
+			}
+			else if (arr[nr][nc] == 0 && visitedCnt[cur.wallCount][nr][nc] == 0)
+			{
+				visitedCnt[cur.wallCount][nr][nc] = visitedCnt[cur.wallCount][cr][cc] + 1;
+				q.push(sPos(nr, nc, cur.wallCount));
+			}
+		}
+	}
+
+	cout << -1 << "\n";
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+
+	cin >> N >> M >> K;
+
+	string s;
+
+	for (int i = 1; i <= N; i++)
+	{
+		cin >> s;
+
+		int length = s.length();
+
+		for (int j = 0; j < length; j++)
+		{
+			arr[i][j + 1] = s[j] - '0';
+		}
+	}
+
+	BFS(1, 1);
+
+	return 0;
+}
+```
+
+# 세번째 시도
+결국에는 원인을 못 찾고 [이 곳](https://yabmoons.tistory.com/39)을 참조해서 풀 수 있었다. 도대체 뭐를 놓친걸까...
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <queue>
+
+using namespace std;
+
+const int MAX = 1000;
+
+int N, M, K;
+
+int arr[MAX][MAX] = {};
+bool visited[MAX][MAX][10] = {};
+
+struct sDelta
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+struct sPos
+{
+	int r;
+	int c;
+	int cnt;
+	int breaks;
+
+	sPos(int _r, int _c, int _count, int _breaks) :
+		r(_r), c(_c), cnt(_count), breaks(_breaks)
+	{}
+};
+
+
+
+void BFS()
+{
+	queue<sPos> q;
+
+	q.push(sPos(0, 0, 1, 0));
+	visited[0][0][0] = true;
+
+	while (!q.empty())
+	{
+		sPos cur = q.front();
+		q.pop();
+
+		int cr = cur.r;
+		int cc = cur.c;
+		int cnt = cur.cnt;
+		int wallBreaks = cur.breaks;
+
+		if (cr == N - 1 && cc == M - 1)
+		{
+			cout << cnt << "\n";
+			return;
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			int nr = cr + Delta[i].r;
+			int nc = cc + Delta[i].c;
+
+			if (nr >= 0 && nc >= 0 && nr < N && nc < M)
+			{
+				if (!visited[nr][nc][wallBreaks])
+				{
+					if (arr[nr][nc] == 0)
+					{
+						visited[nr][nc][wallBreaks] = true;
+						q.push(sPos(nr, nc, cnt + 1, wallBreaks));
+					}
+					else if (arr[nr][nc] == 1)
+					{
+						if (wallBreaks < K)
+						{
+							visited[nr][nc][wallBreaks + 1] = true;
+							q.push(sPos(nr, nc, cnt + 1, wallBreaks + 1));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	cout << -1 << "\n";
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+
+	cin >> N >> M >> K;
+
+	string s;
+
+	for (int i = 0; i < N; i++)
+	{
+		cin >> s;
+
+		int length = s.length();
+
+		for (int j = 0; j < length; j++)
+		{
+			arr[i][j] = s[j] - '0';
+		}
+	}
+
+	BFS();
+
+	return 0;
+}
+```
