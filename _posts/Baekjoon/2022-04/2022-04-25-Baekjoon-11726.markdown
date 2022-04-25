@@ -1,0 +1,60 @@
+---
+layout: post
+title: 2×n 타일링
+date: 2022-04-25 09:59:07 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/11726)
+# 2×n 타일링
+
+# 문제
+> 2×n 크기의 직사각형을 1×2, 2×1 타일로 채우는 방법의 수를 구하는 프로그램을 작성하시오.
+아래 그림은 2×5 크기의 직사각형을 채운 한 가지 방법의 예이다.
+![Img](https://onlinejudgeimages.s3-ap-northeast-1.amazonaws.com/problem/11726/1.png)
+
+# 입력
+> 첫째 줄에 n이 주어진다. (1 ≤ n ≤ 1,000)
+
+# 출력
+> 첫째 줄에 2×n 크기의 직사각형을 채우는 방법의 수를 10,007로 나눈 나머지를 출력한다.
+
+# 풀이
+타일을 세로로 배치했을 경우 남은 타일을 채우는 방법의 수는 N - 1, 타일을 가로로 배치했을 경우에는 N - 2개의 방법의 수가 나온다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 1001;
+
+const int MOD = 10007;
+
+int tab[MAX] = {};
+
+int N;
+
+int main()
+{
+	cin >> N;
+
+    // 타일 한줄을 채우는 방법 한가지
+	tab[0] = 1;
+    // 타일 두줄을 채우는 방법 두가지
+	tab[1] = 2;
+
+    // 3번째 줄부터 시작한다.
+	for (int i = 2; i < N; i++)
+	{
+        // i - 1개의 경우의 수와 i - 2개의 경우의 수의 합을 구한다.
+		tab[i] = (tab[i - 1] + tab[i - 2]) % MOD;
+	}
+
+	cout << tab[N - 1] << "\n";
+
+	return 0;
+}
+```

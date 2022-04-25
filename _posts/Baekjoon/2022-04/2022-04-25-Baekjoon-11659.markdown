@@ -1,0 +1,63 @@
+---
+layout: post
+title: 구간 합 구하기 4
+date: 2022-04-25 10:13:20 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/11659)
+# 구간 합 구하기 4
+
+# 문제
+> 수 N개가 주어졌을 때, i번째 수부터 j번째 수까지 합을 구하는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 수의 개수 N과 합을 구해야 하는 횟수 M이 주어진다. 둘째 줄에는 N개의 수가 주어진다. 수는 1,000보다 작거나 같은 자연수이다. 셋째 줄부터 M개의 줄에는 합을 구해야 하는 구간 i와 j가 주어진다.
+
+# 출력
+> 총 M개의 줄에 입력으로 주어진 i번째 수부터 j번째 수까지 합을 출력한다.
+
+# 풀이
+값을 입력받으면서 미리 합을 구해놓고 M개의 질의에서 빠르게 값을 출력할 수 있다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 100001;
+
+int N, M;
+
+int arr[MAX] = {};
+int prefixSum[MAX] = {};
+
+int main()
+{
+	ios::sync_with_stdio(0);
+	cin.tie(0);
+
+	cin >> N >> M;
+
+	prefixSum[0] = 0;
+
+	for (int i = 1; i <= N; i++)
+	{
+		cin >> arr[i];
+		prefixSum[i] = prefixSum[i - 1] + arr[i];
+	}
+
+	while (M--)
+	{
+		int i, j;
+
+		cin >> i >> j;
+
+		cout << prefixSum[j] - prefixSum[i - 1] << "\n";
+	}
+
+	return 0;
+}
+```

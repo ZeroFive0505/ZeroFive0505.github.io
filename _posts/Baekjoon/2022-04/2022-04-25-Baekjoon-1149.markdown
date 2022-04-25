@@ -1,0 +1,84 @@
+---
+layout: post
+title: RGB 거리
+date: 2022-04-25 09:20:02 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1149)
+# RGB 거리
+
+# 문제
+> RGB거리에는 집이 N개 있다. 거리는 선분으로 나타낼 수 있고, 1번 집부터 N번 집이 순서대로 있다.
+집은 빨강, 초록, 파랑 중 하나의 색으로 칠해야 한다. 각각의 집을 빨강, 초록, 파랑으로 칠하는 비용이 주어졌을 때, 아래 규칙을 만족하면서 모든 집을 칠하는 비용의 최솟값을 구해보자.
+> - 1번 집의 색은 2번 집의 색과 같지 않아야 한다.
+> - N번 집의 색은 N-1번 집의 색과 같지 않아야 한다.
+> - i(2 ≤ i ≤ N-1)번 집의 색은 i-1번, i+1번 집의 색과 같지 않아야 한다.
+
+# 입력
+> 첫째 줄에 집의 수 N(2 ≤ N ≤ 1,000)이 주어진다. 둘째 줄부터 N개의 줄에는 각 집을 빨강, 초록, 파랑으로 칠하는 비용이 1번 집부터 한 줄에 하나씩 주어진다. 집을 칠하는 비용은 1,000보다 작거나 같은 자연수이다.
+
+# 출력
+> 첫째 줄에 모든 집을 칠하는 비용의 최솟값을 출력한다.
+
+# 풀이
+Tabulation을 이용하여 풀 수 있었다. 최대 크기와 R, G, B 세가지 경우의 수를 기록하고 최종적으로 셋중에서의 최솟값을 출력한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int N;
+
+const int MAX = 1001;
+
+// Tabulation
+int tab[MAX][3] = {};
+
+// 보기좋게 상수화
+const int RED = 0;
+const int GREEN = 1;
+const int BLUE = 2;
+
+// N번째 집까지 각각 칠하는 비용
+int R[MAX] = {};
+int G[MAX] = {};
+int B[MAX] = {};
+
+int main()
+{
+	cin >> N;
+
+    // i번째 집의 경우 R, G, B 비용
+	for (int i = 0; i < N; i++)
+	{
+		cin >> R[i];
+		cin >> G[i];
+		cin >> B[i];
+	}
+
+    // 초기값을 넣는다.
+	tab[0][RED] = R[0];
+	tab[0][GREEN] = G[0];
+	tab[0][BLUE] = B[0];
+
+    // 2번째 집부터 시작한다.
+	for (int i = 1; i < N; i++)
+	{
+        // i번째 집을 칠할때 빨강의 경우 그전에 칠해진 색과 다른 색일 경우에만 가능하다.
+        // 초록, 파랑도 마찬가지
+		tab[i][RED] = min(tab[i - 1][GREEN], tab[i - 1][BLUE]) + R[i];
+		tab[i][GREEN] = min(tab[i - 1][RED], tab[i - 1][BLUE]) + G[i];
+		tab[i][BLUE] = min(tab[i - 1][RED], tab[i - 1][GREEN]) + B[i];
+	}
+
+
+    // 끝난후에 가장 최소값을 출력한다.
+	cout << min(tab[N - 1][RED], min(tab[N - 1][GREEN], tab[N - 1][BLUE])) << "\n";
+
+	return 0;
+}
+```
