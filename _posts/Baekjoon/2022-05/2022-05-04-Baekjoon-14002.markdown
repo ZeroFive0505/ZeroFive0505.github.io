@@ -1,0 +1,82 @@
+---
+layout: post
+title: 가장 긴 증가하는 부분 수열 4
+date: 2022-05-04 10:23:42 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14002)
+# 가장 긴 증가하는 부분 수열 4
+
+# 문제
+> 수열 A가 주어졌을 때, 가장 긴 증가하는 부분 수열을 구하는 프로그램을 작성하시오.
+예를 들어, 수열 A = {10, 20, 10, 30, 20, 50} 인 경우에 가장 긴 증가하는 부분 수열은 A = {10, 20, 10, 30, 20, 50} 이고, 길이는 4이다.
+
+# 입력
+> 첫째 줄에 수열 A의 크기 N (1 ≤ N ≤ 1,000)이 주어진다.
+둘째 줄에는 수열 A를 이루고 있는 Ai가 주어진다. (1 ≤ Ai ≤ 1,000)
+
+# 출력
+> 첫째 줄에 수열 A의 가장 긴 증가하는 부분 수열의 길이를 출력한다.
+둘째 줄에는 가장 긴 증가하는 부분 수열을 출력한다. 그러한 수열이 여러가지인 경우 아무거나 출력한다.
+
+# 풀이
+예제 출력과 비교했을때 똑같이 나오길래 제출해봤지만.. 오답처리가 됬다. 아마도 길이보다는 부분 수열 출력하는 곳에서 문제가 있는 것 같다. 부분 수열을 기록하고 출력하는 것은 인터넷을 참조하여 수정해서 정답 판정을 받을 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 1001;
+
+int arr[MAX] = {};
+int tab[MAX] = {};
+vector<int> v[MAX];
+vector<int> ans;
+
+int N;
+
+int main()
+{
+	cin >> N;
+
+	for (int i = 1; i <= N; i++)
+	{
+		cin >> arr[i];
+	}
+
+	for (int i = 1; i <= N; i++)
+	{
+		tab[i] = 1;
+		v[i].push_back(arr[i]);
+		for (int j = 1; j <= i; j++)
+		{
+			if (arr[i] > arr[j] && tab[j] + 1 > tab[i])
+			{
+				v[i].clear();
+				v[i] = v[j];
+				v[i].push_back(arr[i]);
+				tab[i] = tab[j] + 1;
+			}
+		}
+
+		if (ans.size() < v[i].size())
+			ans = v[i];
+	}
+
+	cout << ans.size() << "\n";
+
+	for (const int i : ans)
+	{
+		cout << i << " ";
+	}
+
+	cout << "\n";
+
+	return 0;
+}
+```
