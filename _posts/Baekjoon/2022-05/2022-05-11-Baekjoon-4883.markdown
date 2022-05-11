@@ -1,0 +1,87 @@
+---
+layout: post
+title: 삼각 그래프
+date: 2022-05-11 10:40:55 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/4883)
+# 삼각 그래프
+
+# 문제
+>이 문제는 삼각 그래프의 가장 위쪽 가운데 정점에서 가장 아래쪽 가운데 정점으로 가는 최단 경로를 찾는 문제이다.
+삼각 그래프는 사이클이 없는 그래프로 N ≥ 2 개의 행과 3열로 이루어져 있다. 삼각 그래프는 보통 그래프와 다르게 간선이 아닌 정점에 비용이 있다. 어떤 경로의 비용은 그 경로에서 지나간 정점의 비용의 합이다.
+오른쪽 그림은 N = 4인 삼각 그래프이고, 가장 위쪽 가운데 정점에서 가장 아래쪽 가운데 정점으로 경로 중 아래로만 가는 경로의 비용은 7+13+3+6 = 29가 된다. 삼각 그래프의 간선은 항상 아래 그림과 같은 형태로 연결되어 있다. 
+![Img](https://www.acmicpc.net/upload/images/trigraph.png)
+
+# 입력
+> 입력은 여러 개의 테스트 케이스로 이루어져 있다. 각 테스트 케이스의 첫째 줄에는 그래프의 행의 개수 N이 주어진다. (2 ≤ N ≤ 100,000) 다음 N개 줄에는 그래프의 i번째 행에 있는 정점의 비용이 순서대로 주어진다. 비용은 정수이며, 비용의 제곱은 1,000,000보다 작다.
+입력의 마지막 줄에는 0이 하나 주어진다.
+
+# 출력
+> 각 테스트 케이스에 대해서, 가장 위쪽 가운데 정점에서 가장 아래쪽 가운데 정점으로 가는 최소 비용을 테스트 케이스 번호와 아래와 같은 형식으로 출력한다.
+k. n
+k는 테스트 케이스 번호, n은 최소 비용이다.
+
+# 풀이
+[이 곳](https://mapocodingpark.blogspot.com/2020/06/4883.html)풀이를 보고 풀 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 100001;
+
+
+int T, N;
+
+int tab[MAX][3] = {};
+
+int arr[MAX][3] = {};
+
+int main()
+{
+	T = 1;
+
+	while (1)
+	{
+		cin >> N;
+
+		if (N == 0)
+			break;
+
+		for (int i = 1; i <= N; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				cin >> arr[i][j];
+				tab[i][j] = arr[i][j];
+			}
+		}
+
+		tab[1][2] += tab[1][1];
+		tab[1][0] = 987654321;
+		
+		for (int i = 2; i <= N; i++)
+		{
+			tab[i][0] += min(tab[i - 1][0], tab[i - 1][1]);
+
+			int left = min(tab[i - 1][0], tab[i - 1][1]);
+			int right = min(tab[i - 1][1], tab[i - 1][2]);
+
+			tab[i][1] += min(min(left, right), tab[i][0]);
+
+			tab[i][2] += min(min(tab[i - 1][1], tab[i - 1][2]), tab[i][1]);
+		}
+
+		cout << T << ". " << tab[N][1] << "\n";
+
+		T++;
+	}
+
+	return 0;
+}
+```
