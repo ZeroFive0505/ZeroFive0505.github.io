@@ -1,0 +1,82 @@
+---
+layout: post
+title: 가장 큰 정사각형
+date: 2022-05-13 13:36:35 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1915)
+# 가장 큰 정사각형
+
+# 문제
+> n×m의 0, 1로 된 배열이 있다. 이 배열에서 1로 된 가장 큰 정사각형의 크기를 구하는 프로그램을 작성하시오.
+0	1	0	0
+0	1	1	1
+1	1	1	0
+0	0	1	0
+> 위와 같은 예제에서는 가운데의 2×2 배열이 가장 큰 정사각형이다.
+
+# 입력
+> 첫째 줄에 n, m(1 ≤ n, m ≤ 1,000)이 주어진다. 다음 n개의 줄에는 m개의 숫자로 배열이 주어진다.
+
+# 출력
+> 첫째 줄에 가장 큰 정사각형의 넓이를 출력한다.
+
+# 풀이
+처음에는 위, 왼쪽에서 최솟값을 찾아서 1씩 더했는데 오답 처리가 됬다. 대각선도 고려하니 정답 처리를 받아낼 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 1001;
+
+int n, m;
+
+int tab[MAX][MAX] = {};
+
+int main()
+{
+	cin >> n >> m;
+
+	string s;
+
+	int ans = 0;
+
+	for (int i = 0; i < n; i++)
+	{
+		cin >> s;
+		int len = s.length();
+		for (int j = 0; j < len; j++)
+		{
+			tab[i][j] = s[j] - '0';
+
+			ans = max(ans, tab[i][j]);
+		}
+	}
+
+	for (int i = 1; i < n; i++)
+	{
+		for (int j = 1; j < m; j++)
+		{
+			if (tab[i][j] == 0)
+				continue;
+
+			if (tab[i - 1][j] != 0 && tab[i][j - 1] != 0 && tab[i - 1][j - 1] != 0)
+			{
+				tab[i][j] = min(tab[i - 1][j], min(tab[i][j - 1], tab[i - 1][j - 1])) + 1;
+				ans = max(ans, tab[i][j]);
+			}
+		}
+	}
+
+	cout << ans * ans << "\n";
+
+
+	return 0;
+}
+```
