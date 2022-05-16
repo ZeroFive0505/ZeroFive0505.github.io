@@ -1,0 +1,64 @@
+---
+layout: post
+title: 타일 채우기
+date: 2022-05-16 09:47:43 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/2133)
+# 타일 채우기
+
+# 문제
+> 3×N 크기의 벽을 2×1, 1×2 크기의 타일로 채우는 경우의 수를 구해보자.
+
+# 입력
+> 첫째 줄에 N(1 ≤ N ≤ 30)이 주어진다.
+
+# 출력
+> 첫째 줄에 경우의 수를 출력한다.
+
+# 풀이
+홀수개를 채우는 방법은 없다고 생각하고 짝수개를 채우는 방법은 2개를 채우는 3개의 방법이 있다고 초기값을 주고 반복문을 제출해봤지만 역시나 오답이였다. [이 곳](https://yabmoons.tistory.com/536)의 풀이를 보고 풀 수 있었다. 4, 6에서 특별한 타일의 형태를 고려해줘서 점화식을 만들어야 했다..
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 31;
+
+int N;
+
+int tab[MAX] = {};
+
+int main()
+{
+	cin >> N;
+
+	if (N % 2 == 1)
+		cout << 0 << "\n";
+
+	else
+	{
+		tab[0] = 1;
+		tab[1] = 0;
+		tab[2] = 3;
+
+		for (int i = 4; i <= N; i += 2)
+		{
+			tab[i] = tab[i - 2] * tab[2];
+
+			for (int j = i - 4; j >= 0; j -= 2)
+			{
+				tab[i] = tab[i] + (tab[j] * 2);
+			}
+		}
+
+		cout << tab[N] << "\n";
+	}
+
+	return 0;
+}
+```
