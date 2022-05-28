@@ -1,0 +1,27 @@
+---
+layout: post
+title: Unity Topdown #5
+date: 2022-05-28 12:31:12 +0900
+categories: Unity
+---
+
+# 미니맵 줌인, 줌 아웃 기능
+
+![Imgur](https://imgur.com/AiJmzBR.gif)
+
+직교 투영에서 카메라의 크기를 바꾸는 것으로 줌인, 줌 아웃 기능을 만들었다.
+
+# 무기 교체 UI 테스트
+
+![Imgur](https://imgur.com/pON0V30.gif)
+
+저번에 프로토 타입으로 만들어놓은 UI를 수정하고 게임과 연동되게 했다.. 위치를 항상 플레이어 위에 어떻게 잡을까 고민했는데 그냥 UI의 위치를 화면 정중앙에 잡아놓고 교체하거나 추가될때 UI박스의 크기만큼 위치를 수정하는 방식으로 항상 플레이어가 선택한 무기가 위에 위치하도록 했다.
+
+그리고 항상 플레이어를 따라다니도록
+`Vector3 pos = cam.WorldToScreenPoint(lookAt.position + offset);` 이러한 코드를 업데이트에 넣어서 플레이어의 위치에서 살짝 위로 올려서 보기 좋게 설정을 했다.
+
+# 무기 소멸
+
+![Imgur](https://imgur.com/ZwymfPm.gif)
+
+만약 남아있는 총알을 다 쓰게 된다면 자동으로 다른 무기로 교체되고 삭제가 되도록 했다. 생각보다 위치가 계속 조금씩 어긋나고 겹치는 등 제대로 출력하기 위해서 고생을 좀 했다.
