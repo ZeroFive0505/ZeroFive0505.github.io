@@ -1,0 +1,31 @@
+---
+layout: post
+title: Unity Topdown #7
+date: 2022-06-06 11:34:18 +0900
+categories: Unity
+---
+
+# 체력 바 기타 UI, 통로에 배치되는 아이템 추가
+
+
+![Imgur](https://imgur.com/CC3ORzl.gif)
+
+그동안 시간을 조금씩 내서 UI와 추가 요소에 대한 작업들을 했다. 새롭게 추가된 요소로는 일단 방과 방 사이 통로에 배치되는 아이템이 있다. 현재로는 체력을 채워주는 아이템만 생성이 되도록 했다.
+
+# 극한 회피시에 보이는 남은 시간을 보여주는 게이지
+
+![Imgur](https://imgur.com/0CgYE9m.gif)
+
+체력바는 적에게 닿거나 투사체의 맞은 경우에는 일정 수치가 깎이고 또한 극한 회피 성공시에 얼마나 시간이 남았는지도 게이지로 보여주게 작업을 했다.
+
+
+# 현재 완성도에서의 플레이
+
+![Imgur](https://imgur.com/YjEibTt.gif)
+
+![Imgur](https://imgur.com/mSCMtNL.gif)
+
+
+
+# 앞으로 추가해야할 것
+좀 더 다양한 무기를 추가하고 적의 타입과 패턴을 좀 더 추가해야 하는 것을 목표.
