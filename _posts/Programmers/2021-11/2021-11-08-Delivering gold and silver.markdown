@@ -2,7 +2,7 @@
 layout: post
 title: 금과 은 운반하기
 date: 2021-11-08 08:38:09 +0900
-categories: Programmers-Leve3
+categories: Programmers-Level3
 ---
 
 # 금과 은 운반하기

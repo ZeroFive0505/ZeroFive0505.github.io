@@ -2,7 +2,7 @@
 layout: post
 title: 빛의 경로 사이클
 date: 2021-11-02 08:06:34 +0900
-categories: Programmers-Leve2
+categories: Programmers-Level2
 ---
 
 # 빛의 경로 사이클

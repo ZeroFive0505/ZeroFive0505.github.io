@@ -2,7 +2,7 @@
 layout: post
 title: n^2 배열 자르기
 date: 2021-10-30 08:05:55 +0900
-categories: Programmers-Leve2
+categories: Programmers-Level2
 ---
 
 # n^2 배열 자르기

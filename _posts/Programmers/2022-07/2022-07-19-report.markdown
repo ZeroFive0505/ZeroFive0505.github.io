@@ -1,0 +1,71 @@
+---
+layout: post
+title: 신고 결과 받기
+date: 2022-07-19 07:44:44 +0900
+categories: Programmers-Level1
+---
+
+# 신고 결과 받기
+## 문제 링크 -> [Programmers](https://school.programmers.co.kr/learn/courses/30/lessons/92334)
+
+# 문제 풀이
+맵을 이용해서 풀 수 있었다. 2가지의 맵을 이용해서 하나는 신고한 사람과 누구를 신고했는지를 저장하고 다른 하나의 맵에는 신고 누적횟수를 저장하는 방식으로 했는데 여기서 악의적으로 신고를 여러번 하는 경우의 수도 존재하므로 누구를 신고했는지 체크할때 이게 첫 신고인지를 검사하는 방식으로 중복 신고를 막을 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+vector<int> solution(vector<string> id_list, vector<string> report, int k) 
+{
+    vector<int> answer;
+
+    // 누적 신고횟수를 기록할 맵
+    map<string, int> reportMap;
+    // 누가 누구를 신고했는지 기록할 맵
+    map<string, vector<string>> idMap;
+    
+    for (string& s : report)
+    {
+        size_t pos = s.find(" ");
+        // 누가 누구를 신고했는지
+        string a = s.substr(0, pos);
+        string b = s.substr(pos + 1);
+
+        // 만약 이게 첫 신고인지?
+        auto iter = find(idMap[a].begin(), idMap[a].end(), b);
+        // 첫 신고가 맞다면
+        if (iter == idMap[a].end())
+        {
+            // 목록에 추가하고 횟수를 늘려준다.
+            idMap[a].emplace_back(b);
+            reportMap[b]++;
+        }
+    }
+
+    size_t size = id_list.size();
+
+    // 아이디 목록만큼 반복한다.
+    for (size_t i = 0; i < size; i++)
+    {
+        string id = id_list[i];
+        int count = 0;
+        // 현재 아이디가 신고한 유저들을 전부 순회한다.
+        for (string& s : idMap[id])
+        {
+            // 만약 k번 이상 신고 당했다면 카운트 증가
+            if (reportMap[s] >= k)
+                count++;
+        }
+
+        answer.emplace_back(count);
+    }
+
+    return answer;
+}
+```

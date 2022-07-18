@@ -2,7 +2,7 @@
 layout: post
 title: 전력망을 둘로 나누기
 date: 2021-11-01 07:25:48 +0900
-categories: Programmers-Leve2
+categories: Programmers-Level2
 ---
 
 # 전력망을 둘로 나누기

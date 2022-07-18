@@ -2,7 +2,7 @@
 layout: post
 title: 미로 탈출
 date: 2021-11-09 10:49:01 +0900
-categories: Programmers-Leve4
+categories: Programmers-Level4
 ---
 
 # 미로 탈출

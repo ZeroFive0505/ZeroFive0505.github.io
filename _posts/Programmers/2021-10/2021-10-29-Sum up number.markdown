@@ -2,7 +2,7 @@
 layout: post
 title: 없는 숫자 더하기
 date: 2021-10-29 10:52:01 +0900
-categories: Programmers-Level
+categories: Programmers-Level1
 ---
 
 # 없는 숫자 더하기

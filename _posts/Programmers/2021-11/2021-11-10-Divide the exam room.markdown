@@ -2,7 +2,7 @@
 layout: post
 title: 시험장 나누기
 date: 2021-11-10 09:22:43 +0900
-categories: Programmers-Leve5
+categories: Programmers-Level5
 ---
 
 # 시험장 나누기

@@ -1,0 +1,89 @@
+---
+layout: post
+title: k 진수에서 소수 개수 구하기
+date: 2022-07-19 07:44:44 +0900
+categories: Programmers-Level2
+---
+
+# k 진수에서 소수 개수 구하기
+## 문제 링크 -> [Programmers](https://school.programmers.co.kr/learn/courses/30/lessons/92335)
+
+# 문제 풀이
+진수를 바꾸는건 어렵지 않았지만 문제의 조건이 복잡하게 느껴져서 한참을 고민하다가 인터넷을 찾아보고 [이 곳](https://yabmoons.tistory.com/724)에서 힌트를 얻을 수 있었다. 조건을 복잡하게 생각할 필요 없이 그냥 0기준으로 문자열을 쪼개서 소수인지만 체크하면 된다. 그리고 최종적으로 문자열이 비어있지 않다면 다시한번 체크를 한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+
+// 소수인지 확인
+bool IsPrime(long long n)
+{
+    if (n == 0 || n == 1)
+        return false;
+
+    for (long long i = 2; i <= (long long)sqrt(n); i++)
+    {
+        if (n % i == 0)
+            return false;
+    }
+
+    return true;
+}
+
+int solution(int n, int k) 
+{
+    int answer = 0;
+
+    string s;
+
+    // 진수 변환
+    while (n)
+    {
+        int q = n / k;
+        int remain = n % k;
+        n = q;
+
+        s = to_string(remain) + s;
+    }
+
+    size_t size = s.size();
+
+    string temp;
+
+    // 문자열의 길이만큼 반복한다.
+    for (size_t i = 0; i < size; i++)
+    {
+        // 만약 0이라면
+        if (s[i] == '0')
+        {
+            if (temp.size() == 0)
+                continue;
+
+            // 그리고 임시 문자열이 비어있지 않다면 소수 여부 확인
+            if (IsPrime(stol(temp)))
+                answer++;
+
+            // 초기화
+            temp = "";
+        }
+        // 0이 아니라면 일단 추가한다.
+        else
+            temp += s[i];
+    }
+
+    // 왼쪽끝에 0이 있는 경우
+    if (temp.size() != 0)
+    {
+        // 소수 확인
+        if (IsPrime(stol(temp)))
+            answer++;
+    }
+
+    return answer;
+}
+```

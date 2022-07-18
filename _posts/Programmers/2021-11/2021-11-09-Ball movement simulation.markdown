@@ -2,7 +2,7 @@
 layout: post
 title: 공 이동 시뮬레이션
 date: 2021-11-09 08:21:48 +0900
-categories: Programmers-Leve3
+categories: Programmers-Level3
 ---
 
 # 공 이동 시뮬레이션
