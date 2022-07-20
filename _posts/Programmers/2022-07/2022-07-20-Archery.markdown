@@ -1,0 +1,108 @@
+---
+layout: post
+title: 양궁 대회
+date: 2022-07-20 09:41:14 +0900
+categories: Programmers-Level2
+---
+
+# 양궁 대회
+## 문제 링크 -> [Programmers](https://school.programmers.co.kr/learn/courses/30/lessons/92342)
+
+# 문제 풀이
+n개의 화살을 어떤식으로 조합해서 쏴야할지를 정하는 방법을 생각하다가 마땅한 방법이 떠오르질 않아서 결국 인터넷에서 풀이법을 참조하여 풀 수 있었다. [이 곳](https://yjyoon-dev.github.io/kakao/2022/01/17/kakao-2022-blind-04/)의 풀이를 참조하였는데 완전 탐색 풀이식으로 현재 점수를 얻을지 말지를 정해서 최종적으로 최대 차이가 되는 점수를 구하는 방식이였다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> answer(1, -1);
+
+const int INF = 987654321;
+
+int MAX_DIFF = -INF;
+
+// 더 적은 점수의 화살이 많이 쏜 경우를 정답 처리
+bool IsBetter(vector<int>& ryan)
+{
+    // 0점 화살부터 시작한다.
+    for (int i = 10; i >= 0; i--)
+    {
+        // 만약 전에 기록했던거 보다 더 많다면 참
+        if (ryan[i] > answer[i])
+            return true;
+        else if (ryan[i] < answer[i])
+            return false;
+    }
+}
+
+void CalcScore(vector<int>& ryan, vector<int>& apeach)
+{
+    int ryanScore = 0;
+    int apeachScore = 0;
+
+    // 점수 계산
+    for (int i = 0; i < 11; i++)
+    {
+        // 맞힌 화살의 수가 더 많은 경우 점수 누적
+        if (ryan[i] > apeach[i])
+            ryanScore += 10 - i;
+        else if (apeach[i] > 0)
+            apeachScore += 10 - i;
+    }
+
+    int diff = ryanScore - apeachScore;
+
+    // 만약 점수차가 이전에 기록했던 점수차보다 크거나 같다면
+    if (diff > 0 && diff >= MAX_DIFF)
+    {
+        // 만약 같고 문제에서 주어진 조건에 만족하지 않는다면 반환
+        if (MAX_DIFF == diff && !IsBetter(ryan))
+            return;
+        // 갱신
+        MAX_DIFF = diff;
+        answer = ryan;
+    }
+}
+
+void DFS(int depth, int n, vector<int>& ryan, vector<int>& apeach)
+{
+    // 만약 끝까지 도달했거나 화살의 수가 0개라면
+    if (depth == 11 || n == 0)
+    {
+        // 남은 화살 전부 쏜다.
+        ryan[10] += n;
+        // 점수계산
+        CalcScore(ryan, apeach);
+        // 화살 회수
+        ryan[10] -= n;
+        return;
+    }
+
+    // 현재 남은 화살의 수로 점수 획득이 가능한경우
+    if (apeach[depth] < n)
+    {
+        // 점수를 획득한다. 이때 화살 한발을 더 쏴서 점수를 획득한다.
+        ryan[depth] += apeach[depth] + 1;
+        // 화살의 수는 어피치가 쏜 화살에서 하나 더 뺀다.
+        DFS(depth + 1, n - apeach[depth] - 1, ryan, apeach);
+        // 탐색후 원상 복구
+        ryan[depth] -= apeach[depth] + 1;
+    }
+
+    // 점수를 얻지 않고 그냥 넘어간다.
+    DFS(depth + 1, n, ryan, apeach);
+}
+
+vector<int> solution(int n, vector<int> info) 
+{
+    vector<int> ryan(11, 0);
+    // 완전 탐색 시작
+    DFS(0, n, ryan, info);
+
+    return answer;
+}
+```

@@ -1,0 +1,96 @@
+---
+layout: post
+title: 주차 요금 계산
+date: 2022-07-20 08:31:51 +0900
+categories: Programmers-Level2
+---
+
+# 주차 요금 계산
+## 문제 링크 -> [Programmers](https://school.programmers.co.kr/learn/courses/30/lessons/92341)
+
+# 문제 풀이
+문자열을 분단위로 바꿔서 누적시간을 구한다. 스택을 이용해서 입차 출차를 기록을 하고 만약 스택이 비어있지 않은경우 출차가 되지 않은 경우라고 판단해서 23:59분에 출차가 됬다고 계산한다. 맵을 이용해서 차 번호를 오름차 순으로 따로 정렬할 필요가 없이 간단하게 반복해서 요금을 계산했고 계산시에는 문제에 요구한대로 올림 처리를 해서 정답 벡터에 넣어서 반환했다. 
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <map>
+#include <stack>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(vector<int> fees, vector<string> records) 
+{
+    vector<int> answer;
+    // 입차, 출차를 기록할 맵
+    map<string, stack<int>> mapInOut;
+    // 누적 주차 시간
+    map<string, int> mapResult;
+
+    size_t size = records.size();
+
+    for (size_t i = 0; i < size; i++)
+    {
+        string s = records[i];
+
+        // 시간과 분은 정수형으로 구한다.
+        int h = stoi(s.substr(0, 2));
+        int m = stoi(s.substr(3, 2));
+        string carNum = s.substr(6, 4);
+        string option = s.substr(11, 2);
+
+        // 분단위로 바꾼다.
+        int total = h * 60 + m;
+
+        // 입차
+        if (option == "IN")
+            mapInOut[carNum].push(total);
+        // 출차일 경우 문제에서 입차되지 않은 차가 출차 되는 경우는 없다고했으니 바로 스택에서 꺼낸다.
+        else
+        {
+            int pop = mapInOut[carNum].top();
+            mapInOut[carNum].pop();
+
+            // 시간 차를 누적
+            mapResult[carNum] += total - pop;
+        }
+    }
+
+    // 입차기록은 있지만 출차기록이 없는 차를 찾는다/
+    for (auto it = mapInOut.begin(); it != mapInOut.end(); it++)
+    {
+        if (it->second.empty())
+            continue;
+
+        string carNum = it->first;
+        int pop = it->second.top();
+        it->second.pop();
+
+        // 문제에서 나온대로 23:59에 출차됬다고 판단
+        int total = 23 * 60 + 59;
+
+        mapResult[carNum] += total - pop;
+    }
+
+
+    // 결과를 순회하면서 정답을 계산
+    for (auto it = mapResult.begin(); it != mapResult.end(); it++)
+    {
+        // 만약 누적된 시간이 기본시간 이하라면 기본 요금
+        if (it->second <= fees[0])
+            answer.emplace_back(fees[1]);
+        else
+        {
+            // 아니라면 문제에서 제시한대로 계산해서 누적 요금을 계산한다.
+            int accFee = fees[1] + (int)ceil((it->second - fees[0]) / (float)fees[2]) * fees[3];
+            answer.emplace_back(accFee);
+        }
+    }
+
+
+    return answer;
+}
+```
