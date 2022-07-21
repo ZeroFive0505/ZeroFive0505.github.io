@@ -1,0 +1,81 @@
+---
+layout: post
+title: 파괴되지 않은 건물
+date: 2022-07-21 09:46:55 +0900
+categories: Programmers-Level3
+---
+
+# 파괴되지 않은 건물
+## 문제 링크 -> [Programmers](https://school.programmers.co.kr/learn/courses/30/lessons/92344)
+
+# 문제 풀이
+간단하게 반복문으로 풀 수도 있겠지만 최악의 경우 250,000 * 1,000 * 1,000 으로 너무 많은 시간 복잡도가 생기게된다. 2차원 배열 누적합이라는 방법으로 풀 수가 있었는데 자세한 풀이는 [이 곳](https://yabmoons.tistory.com/728?category=946153)을 참조했다. 특정 부분의 누적합을 구하는데 시작점과 끝지점에 서로 대칭되는 값으로 마킹을 해놓고 그 마킹해놓은 값을 행, 열 순회하면서 누적하고 값을 비교하는 것으로 답을 구할 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int accmulatedSum[1005][1005];
+
+int solution(vector<vector<int>> board, vector<vector<int>> skill) 
+{
+    int answer = 0;
+
+    for (size_t i = 0; i < skill.size(); i++)
+    {
+        int t = skill[i][0];
+
+        int r1 = skill[i][1];
+        int c1 = skill[i][2];
+
+        int r2 = skill[i][3];
+        int c2 = skill[i][4];
+
+        int degree = skill[i][5];
+
+        degree = t == 1 ? degree * -1 : degree;
+
+        // 시작점과 끝점
+        accmulatedSum[r1][c1] += degree;
+        accmulatedSum[r2 + 1][c2 + 1] += degree;
+
+        // 그와 대칭되는 지점
+        accmulatedSum[r1][c2 + 1] -= degree;
+        accmulatedSum[r2 + 1][c1] -= degree;
+    }
+
+    // 먼저 열에 값을 누적한다.
+    for (size_t i = 0; i <= board.size(); i++)
+    {
+        for (size_t j = 0; j < board[0].size(); j++)
+        {
+            accmulatedSum[i][j + 1] += accmulatedSum[i][j];
+        }
+    }
+
+    // 행에 값을 누적한다.
+    for (size_t j = 0; j <= board[0].size(); j++)
+    {
+        for (size_t i = 0; i < board.size(); i++)
+        {
+            accmulatedSum[i + 1][j] += accmulatedSum[i][j];
+        }
+    }
+
+    // 최종적으로 0보다 큰곳의 개수를 검사한다.
+    for (size_t i = 0; i < board.size(); i++)
+    {
+        for (size_t j = 0; j < board[0].size(); j++)
+        {
+            if (board[i][j] + accmulatedSum[i][j] > 0)
+                answer++;
+        }
+    }
+
+    return answer;
+}
+```
