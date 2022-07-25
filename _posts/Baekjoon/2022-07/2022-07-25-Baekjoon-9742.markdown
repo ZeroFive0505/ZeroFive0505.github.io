@@ -1,0 +1,111 @@
+---
+layout: post
+title: 순열
+date: 2022-07-25 09:40:05 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/9742)
+# 순열
+
+# 문제
+> 집합의 순열이란 집합의 서로 다른 원소를 모두 사용해 만들 수 있는 순서이다. 예를 들어, {2,3,5}의 순열은 다음과 같다.
+> 1. 2 3 5
+> 2. 2 5 3
+> 3. 3 2 5
+> 4. 3 5 2
+> 5. 5 2 3
+> 6. 5 3 2
+
+....
+
+> 서로 다른 숫자와 문자로 이루어진 집합과 위치가 주어졌을 때, 그 집합의 순열 중 주어진 위치의 순열을 구하는 프로그램을 작성하시오.
+
+# 입력
+> 입력은 여러 개의 테스트 케이스로 이루어져 있다. 각 테스트 케이스는 한 줄로 이루어져 있다. 첫 번째 문자열은 서로 다른 숫자와 알파벳으로 이루어져 있으며, 길이는 최대 10이다. 또한, 사전순 순서대로 주어진다. 문자열 다음에는 찾아야 하는 위치가 주어지며, 이 값은 3,628,800보다 작거나 같은 자연수이다.
+
+# 출력
+> 각각의 테스트 케이스마다, 입력으로 주어진 위치에 해당하는 순열을 공백없이 출력한다. 만약, 해당하는 순열이 없는 경우에는 "No permutation"을 출력한다.
+
+# 풀이
+백트랙킹을 이용해서 풀 수 있었다. 입력은 정렬된 순서로 주어진다고 문제에 나와있어서 깊이에 도달할때마다 카운트를 늘리고 그 카운트가 위치에 도달할 경우 답을 갱신한다. 그전에 순열의 범위가 넘어가는지 체크를 해야하기에 먼저 1 ~ 10 팩토리얼까지 계산해놓고 그 값을 이용해서 순열의 존재 여부를 판단한다.
+
+# 코드
+```c++
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+string s;
+string perm;
+string answer;
+int num;
+int order = 0;
+
+int factorial_size[11] = {};
+bool used[10] = {};
+
+void DFS(int depth)
+{
+	if (depth == s.size())
+	{
+		order++;
+
+        // 해당 위치의 순열일 경우 갱신
+		if (order == num)
+			answer = perm;
+
+		return;
+	}
+
+	for (int i = 0; i < s.size(); i++)
+	{
+		if (!used[i])
+		{
+			used[i] = true;
+			perm.push_back(s[i]);
+			DFS(depth + 1);
+			perm.pop_back();
+			used[i] = false;
+		}
+	}
+}
+
+int main()
+{   
+    // 1 ~ 10 팩토리얼까지 계산
+	for (int i = 1; i <= 10; i++)
+	{
+		int num = i;
+
+		for (int j = i - 1; j >= 1; j--)
+		{
+			num *= j;
+		}
+
+		factorial_size[i] = num;
+	}
+
+	while (cin >> s >> num)
+	{
+		int len = s.size();
+
+		cout << s << " " << num << " = ";
+
+        // 범위가 넘아가는지 확인
+		if (num > factorial_size[len])
+			cout << "No permutation\n";
+		else
+		{
+			order = 0;
+			DFS(0);
+			cout << answer << "\n";
+		}
+	}
+
+
+	return 0;
+}
+```

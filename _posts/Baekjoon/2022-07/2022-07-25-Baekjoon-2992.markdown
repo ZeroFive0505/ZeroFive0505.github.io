@@ -1,0 +1,105 @@
+---
+layout: post
+title: 크면서 작은 수
+date: 2022-07-25 09:15:15 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/2992)
+# 크면서 작은 수
+
+# 문제
+> 정수 X가 주어졌을 때, X와 구성이 같으면서 X보다 큰 수 중 가장 작은 수를 출력한다.
+수의 구성이 같다는 말은, 수를 이루고 있는 각 자리수가 같다는 뜻이다. 예를 들어, 123과 321은 수의 구성이 같다. 하지만, 123과 432는 구성이 같지 않다.
+
+# 입력
+> 첫째 줄에 X가 주어진다. (1 ≤ X ≤ 999999) X는 0으로 시작하지 않는다.
+
+# 출력
+> 첫째 줄에 결과를 출력한다. 만약 그러한 숫자가 없는 경우에는 0을 출력한다.
+
+# 풀이
+간단한 백트랙킹을 이용해서 풀 수 있었던 문제 문자열로 바꿀까 생각도 했지만 그냥 정수형태에서 각 자릿수를 따로 저장해서 재귀호출로 풀었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int INF = 987654321;
+
+vector<int> v;
+vector<bool> used;
+vector<int> perm;
+
+int X;
+
+int ans = INF;
+
+void DFS(int depth)
+{   
+    // 깊이 만큼 도달했으면
+	if (depth == (int)v.size())
+	{
+        // 현재 저장된 값을 계산한다.
+		int num = 0;
+		int d = 1;
+		for (int i = perm.size() - 1; i >= 0; i--)
+		{
+			num = num + perm[i] * d;
+			d *= 10;
+		}
+
+        // 입력 값보단 크고 그 중에서 제일 작은 수를 찾는다.
+		if(num > X)
+			ans = min(ans, num);
+
+		return;
+	}
+
+
+    // 백트랙킹
+	for (int i = 0; i < v.size(); i++)
+	{
+		if (!used[i])
+		{
+			used[i] = true;
+			perm.push_back(v[i]);
+			DFS(depth + 1);
+			perm.pop_back();
+			used[i] = false;
+		}
+	}
+}
+
+int main()
+{
+	cin >> X;
+
+	int temp = X;
+
+    // 자릿수 분리 작업
+	while (temp)
+	{
+		v.push_back(temp % 10);
+		temp /= 10;
+	}
+
+    // 사용 여부
+	used.resize(v.size());
+	fill(used.begin(), used.end(), false);
+
+	DFS(0);
+
+    // 만약 갱신이 되지 않았다면 0
+	if (ans == INF)
+		cout << 0 << "\n";
+	else
+		cout << ans << "\n";
+
+	return 0;
+}
+```
