@@ -1,0 +1,147 @@
+---
+layout: post
+title: 매직 스퀘어 만들기
+date: 2022-07-26 09:04:55 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/16945)
+# 매직 스퀘어 만들기
+
+# 문제
+> 1부터 N2까지의 수가 하나씩 채워져 있는 크기가 N×N인 배열이 있고, 이 배열의 모든 행, 열, 길이가 N인 대각선의 합이 모두 같을 때, 매직 스퀘어라고 한다.
+크기가 3×3인 배열 A가 주어졌을 때, 이 배열을 매직 스퀘어로 변경하려고 한다. 한 칸에 있는 수 a를 b로 변경하는 비용은 |a - b| 이다. 예를 들어, 아래와 같은 경우를 살펴보자.
+
+> 5 3 4
+1 5 8
+6 4 2
+
+> 이 배열의 수를 아래와 같이 변경하면 매직 스퀘어가 되고, 비용은 |5 - 8| + |8 - 9| + |4 - 7| = 7 이다.
+
+> 8 3 4
+1 5 9
+6 7 2
+
+> 3×3 크기의 배열 A가 주어졌을 때, 이 배열을 매직 스퀘어로 변경하는 비용의 최솟값을 구해보자. 배열 A는 1부터 9까지의 수로만 채워져 있고, 매직 스퀘어로 변경한 배열도 1부터 9까지의 수로만 채워져 있어야 한다.
+
+ # 입력
+ > 총 세 개의 줄에 걸쳐서 배열 A의 원소가 주어진다.
+
+# 출력
+> 첫째 줄에 배열 A를 매직 스퀘어로 변경하는 비용의 최솟값을 출력한다.
+
+# 풀이
+처음에는 이걸 2차원 배열을 이용해서 사용한 수, 사용하지 않은 수 구분해서 바꿔가면서 해볼려고 했는데 코드도 복잡해지고 감이 오질 않길래 인터넷에서 약간 힌트를 찾아본 결과 정말 간단하게 1차원 배열의 순열을 이용해서 풀면 되는 문제였다. N도 9까지이고 제한시간도 2초라서 충분히 시간안에 풀 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+vector<int> a;
+vector<int> b;
+
+const int INF = 987654321;
+
+const int ROW = 3;
+
+const int COL = 3;
+
+int ans = INF;
+
+int GetCost()
+{
+	int diff = 0;
+
+	for (int i = 0; i < 9; i++)
+	{
+		diff += abs(a[i] - b[i]);
+	}
+
+	return diff;
+}
+
+bool CheckMagicSquare()
+{
+	int row1Sum = 0;
+
+	for (int i = 0; i < 3; i++)
+		row1Sum += b[i];
+
+	int row2Sum = 0;
+
+	for (int i = 3; i < 6; i++)
+		row2Sum += b[i];
+
+	int row3Sum = 0;
+
+	for (int i = 6; i < 9; i++)
+		row3Sum += b[i];
+
+	int col1Sum = 0;
+
+	for (int i = 0; i < 3; i++)
+		col1Sum += b[i * ROW];
+
+	int col2Sum = 0;
+
+	for (int i = 0; i < 3; i++)
+		col2Sum += b[i * ROW + 1];
+
+	int col3Sum = 0;
+
+	for (int i = 0; i < 3; i++)
+		col3Sum += b[i * ROW + 2];
+
+	int diag1Sum = 0;
+
+	for (int i = 0; i < 9; i += 4)
+		diag1Sum += b[i];
+
+	int diag2Sum = 0;
+
+	for (int i = 2; i < 8; i += 2)
+		diag2Sum += b[i];
+
+	if (row1Sum == row2Sum && row2Sum == row3Sum &&
+		col1Sum == col2Sum && col2Sum == col3Sum &&
+		row1Sum == col1Sum &&
+		row1Sum == diag1Sum &&
+		row1Sum == diag2Sum &&
+		diag1Sum == diag2Sum)
+		return true;
+	else
+		return false;
+}
+
+int main()
+{
+	for (int i = 0; i < 9; i++)
+	{
+		int num;
+		cin >> num;
+
+		a.emplace_back(num);
+		b.emplace_back(i + 1);
+	}
+
+	do
+	{
+        // 매직 스퀘어인지 확인
+		if (CheckMagicSquare())
+		{
+			int cost = GetCost();
+			ans = min(ans, cost);
+		}
+
+    // 순열을 돌리면서 가능한 모든 조합을 검사
+	} while (next_permutation(b.begin(), b.end()));
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
