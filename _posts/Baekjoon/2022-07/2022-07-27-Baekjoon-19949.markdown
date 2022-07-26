@@ -1,0 +1,100 @@
+---
+layout: post
+title: 영재의 시험
+date: 2022-07-27 07:04:21 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/19949)
+# 영재의 시험
+
+# 문제
+> 컴퓨터공학과 학생인 영재는 이번 학기에 알고리즘 수업을 수강한다.
+평소에 자신의 실력을 맹신한 영재는 시험 전날까지 공부를 하지 않았다.
+당연하게도 문제를 하나도 풀지 못하였지만 다행히도 문제가 5지 선다의 객관식 10문제였다.
+찍기에도 자신 있던 영재는 3개의 연속된 문제의 답은 같지 않게 한다는 자신의 비법을 이용하여 모든 문제를 찍었다.
+이때 영재의 점수가 5점 이상일 경우의 수를 구하여라.
+문제의 점수는 1문제당 1점씩이다.
+
+# 입력
+> 시험의 정답이 첫 줄에 주어진다.
+
+# 출력
+> 영재의 점수가 5점 이상일 경우의 수를 출력하여라.
+
+# 풀이
+DFS를 이용했을때 만약 깊이가 2 이상이라면 3개 이상 연속된 답을 고르지 않도록 조건문을 추가해서 정답을 얻을 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+
+using namespace std;
+
+int cnt = 0;
+
+int answers[10] = {};
+int arr[10] = {};
+
+void DFS(int depth, int score)
+{
+	if (depth >= 10)
+	{
+		if (score >= 5)
+			cnt++;
+
+		return;
+	}
+
+    // 문제가 3개 이상이라면
+	if (depth >= 2)
+	{
+		for (int i = 1; i <= 5; i++)
+		{
+            // 3개 이상 같은 답을 내지 않도록 한다.
+			if (i == arr[depth - 1] && arr[depth - 1] == arr[depth - 2])
+				continue;
+
+			arr[depth] = i;
+
+			if (i == answers[depth])
+				DFS(depth + 1, score + 1);
+			else
+				DFS(depth + 1, score);
+
+			arr[depth] = -1;
+		}
+	}
+	else
+	{
+		for (int i = 1; i <= 5; i++)
+		{
+			arr[depth] = i;
+
+			if (i == answers[depth])
+				DFS(depth + 1, score + 1);
+			else
+				DFS(depth + 1, score);
+
+			arr[depth] = -1;
+		}
+	}
+}
+
+int main()
+{
+	for (int i = 0; i < 10; i++)
+	{
+		cin >> answers[i];
+	}
+
+	for (int i = 0; i < 10; i++)
+		arr[i] = -1;
+
+	DFS(0, 0);
+
+	cout << cnt << "\n";
+
+	return 0;
+}
+```
