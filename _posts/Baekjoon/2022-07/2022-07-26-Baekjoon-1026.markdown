@@ -51,6 +51,7 @@ int main()
 		cin >> B[i];
 	}
 
+    // 각각 오름차, 내림차 순으로 정렬
 	sort(A, A + N);
 	sort(B, B + N, [](const int a, const int b) {
 		return b < a;
@@ -58,6 +59,7 @@ int main()
 
 	int ans = 0;
 
+    // 곱하면 최소가 된다.
 	for (int i = 0; i < N; i++)
 	{
 		ans += A[i] * B[i];
