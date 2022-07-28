@@ -1,0 +1,108 @@
+---
+layout: post
+title: 수 묶기
+date: 2022-07-28 10:26:56 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1744)
+# 수 묶기
+
+# 문제
+> 길이가 N인 수열이 주어졌을 때, 그 수열의 합을 구하려고 한다. 하지만, 그냥 그 수열의 합을 모두 더해서 구하는 것이 아니라, 수열의 두 수를 묶으려고 한다. 어떤 수를 묶으려고 할 때, 위치에 상관없이 묶을 수 있다. 하지만, 같은 위치에 있는 수(자기 자신)를 묶는 것은 불가능하다. 그리고 어떤 수를 묶게 되면, 수열의 합을 구할 때 묶은 수는 서로 곱한 후에 더한다.
+예를 들면, 어떤 수열이 {0, 1, 2, 4, 3, 5}일 때, 그냥 이 수열의 합을 구하면 0+1+2+4+3+5 = 15이다. 하지만, 2와 3을 묶고, 4와 5를 묶게 되면, 0+1+(2*3)+(4*5) = 27이 되어 최대가 된다.
+수열의 모든 수는 단 한번만 묶거나, 아니면 묶지 않아야한다.
+수열이 주어졌을 때, 수열의 각 수를 적절히 묶었을 때, 그 합이 최대가 되게 하는 프로그램을 작성하시오.
+
+# 입력
+> 첫째 줄에 수열의 크기 N이 주어진다. N은 50보다 작은 자연수이다. 둘째 줄부터 N개의 줄에 수열의 각 수가 주어진다. 수열의 수는 -1,000보다 크거나 같고, 1,000보다 작거나 같은 정수이다.
+
+# 출력
+> 수를 합이 최대가 나오게 묶었을 때 합을 출력한다. 정답은 항상 2<sup>31</sup>보다 작다.
+
+# 풀이
+처음에는 정렬해서 시작과 끝의 두 원소에 대한 연산을 하는 식으로 해보려고 했는데 잘 되지 않았고 인터넷을 참조했는데 [이 곳](https://jaimemin.tistory.com/723)의 풀이를 참조했다. 우선 순위 큐를 이용했고 양수는 내림차 순, 음수는 오름차 순으로 우선 순위 큐에 넣어놓고 0과 1에 대해서는 따로 갯수를 세서 두 우선순위 큐 중에 만약 양수 우선 순위 큐가 홀수라면 간단하게 1을 하나 더 넣어준다. 어차피 1이랑 묶어서 곱해도 값은 변하지 않으니 문제는 없다. 음수 큐가 홀수이고 만약 0이 하나도 입력이 되지 않았다면 음수 큐에는 1을 만약 0이 하나라도 입력되었다면 음수 큐에는 0을 넣어 가장 큰 음수에 0을 곱해서 없애버린다. 이 두가지 큐를 반복하면서 누적치를 구하고 1의 입력받을때 센 1의 숫자만큼 더해준다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+priority_queue<int, vector<int>, greater<int>> positives;
+priority_queue<int> negatives;
+
+int main()
+{
+	int N;
+
+	cin >> N;
+
+	int ones = 0;
+	int zeros = 0;
+
+	for (int i = 0; i < N; i++)
+	{
+		int num;
+
+		cin >> num;
+
+        // 1의 갯수 카운트
+		if (num == 1)
+			ones++;
+		else if (num > 0)
+			positives.push(num);
+        // 0의 갯수 카운트
+		else if (num == 0)
+			zeros++;
+		else
+			negatives.push(num);
+	}
+
+    // 만약 양수 큐가 사이즈가 홀수라면 1을 하나 더해준다.
+	if (positives.size() % 2 != 0)
+		positives.push(1);
+
+    // 만약 음수 큐가 홀수라면
+	if (negatives.size() % 2 != 0)
+	{
+        // 만약 0이 하나도 입력이 되지 않았었다면 1을 넣어 맞춰준다.
+		if (zeros == 0)
+			negatives.push(1);
+        // 만약 0이 입력이 되었다면 하나 추개해줘서 음수 큐에서 가장 큰 값과 0을 곱해서 없애버린다.
+		else
+			negatives.push(0);
+	}
+
+	int sum = 0;
+
+	while (!positives.empty())
+	{
+		int n1 = positives.top();
+		positives.pop();
+		int n2 = positives.top();
+		positives.pop();
+
+		sum += (n1 * n2);
+	}
+
+	while (!negatives.empty())
+	{
+		int n1 = negatives.top();
+		negatives.pop();
+		int n2 = negatives.top();
+		negatives.pop();
+
+		sum += (n1 * n2);
+	}
+
+
+    // 1은 무조건 더한다.
+	cout << sum + ones << "\n";
+
+	return 0;
+}
+```

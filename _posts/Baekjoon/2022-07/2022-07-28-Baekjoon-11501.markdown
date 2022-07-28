@@ -1,0 +1,150 @@
+---
+layout: post
+title: 주식
+date: 2022-07-28 09:45:29 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/11501)
+# 주식
+
+# 문제
+> 홍준이는 요즘 주식에 빠져있다. 그는 미래를 내다보는 눈이 뛰어나, 날 별로 주가를 예상하고 언제나 그게 맞아떨어진다. 매일 그는 아래 세 가지 중 한 행동을 한다.
+> 1. 주식 하나를 산다.
+> 2. 원하는 만큼 가지고 있는 주식을 판다.
+> 3. 아무것도 안한다.
+
+> 홍준이는 미래를 예상하는 뛰어난 안목을 가졌지만, 어떻게 해야 자신이 최대 이익을 얻을 수 있는지 모른다. 따라서 당신에게 날 별로 주식의 가격을 알려주었을 때, 최대 이익이 얼마나 되는지 계산을 해달라고 부탁했다.
+
+> 예를 들어 날 수가 3일이고 날 별로 주가가 10, 7, 6일 때, 주가가 계속 감소하므로 최대 이익은 0이 된다. 그러나 만약 날 별로 주가가 3, 5, 9일 때는 처음 두 날에 주식을 하나씩 사고, 마지막날 다 팔아 버리면 이익이 10이 된다.
+
+# 입력
+> 입력의 첫 줄에는 테스트케이스 수를 나타내는 자연수 T가 주어진다. 각 테스트케이스 별로 첫 줄에는 날의 수를 나타내는 자연수 N(2 ≤ N ≤ 1,000,000)이 주어지고, 둘째 줄에는 날 별 주가를 나타내는 N개의 자연수들이 공백으로 구분되어 순서대로 주어진다. 날 별 주가는 10,000이하다.
+
+# 출력
+> 각 테스트케이스 별로 최대 이익을 나타내는 정수 하나를 출력한다. 답은 부호있는 64bit 정수형으로 표현 가능하다.
+
+# 첫 시도
+그냥 간단하게 주식이 오르기까지는 매일 주식을 사고 감소하는 날 전에는 소유하고 있는 주식을 전부 다 파는 형식으로 했는데 예제 케이스에서는 정답을 출력했지만 제출 했더니 약 8%에서 오답 처리가 됬다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int T, N;
+
+const int MAX = 1000001;
+
+long long arr[MAX] = {};
+
+int main()
+{
+	cin >> T;
+
+	while (T--)
+	{
+		cin >> N;
+		
+		long long sum = 0;
+		vector<long long> v;
+		for (int i = 0; i < N; i++)
+		{
+			cin >> arr[i];
+		}
+
+		for (int i = 0; i < N - 1; i++)
+		{
+			long long today = arr[i];
+			long long tomorrow = arr[i + 1];
+
+			if (today <= tomorrow)
+				v.emplace_back(today);
+			else if (tomorrow < today)
+			{
+				for (int j = 0; j < v.size(); j++)
+				{
+					long long diff = today - v[j];
+
+					sum += diff;
+				}
+
+				v.clear();
+			}
+		}
+
+		if (!v.empty())
+		{
+			long long today = arr[N - 1];
+
+			for (int i = 0; i < v.size(); i++)
+			{
+				long long diff = today - v[i];
+
+				sum += diff;
+			}
+		}
+
+		cout << sum << "\n";
+	}
+
+	return 0;
+}
+```
+
+# 뒤에서 부터 확인하는 풀이법
+[이 곳](https://kangwlgns.tistory.com/18)의 풀이법으로 풀 수 있었는데 뒤에서부터 주식이 최대치인 날을 찾고 최대치인 날과 아닌 날의 차를 누적하는 방법으로 정답을 구할 수 있었다.
+
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main()
+{
+	int T;
+
+	cin >> T;
+
+	while (T--)
+	{
+		int N;
+
+		cin >> N;
+
+		vector<int> stocks;
+
+		stocks.resize(N);
+
+		for (int i = 0; i < N; i++)
+		{
+			cin >> stocks[i];
+		}
+
+        // 맨 뒤에서부터 시작
+		int index = N - 1;
+
+		long long sum = 0;
+
+        // 그 이전 인덱스부터 0까지 반복한다.
+		for (int i = N - 2; i >= 0; i--)
+		{
+            // 만약 현재 주식이 최대치가 아니라면
+            // 그 차만큼 더 해준다.
+			if (stocks[i] < stocks[index])
+				sum += stocks[index] - stocks[i];
+            // 만약 현재 주식이 더 비싸다면 인덱스를 갱신한다.
+			else
+				index = i;
+		}
+
+		cout << sum << "\n";
+	}
+
+	return 0;
+}
+```
