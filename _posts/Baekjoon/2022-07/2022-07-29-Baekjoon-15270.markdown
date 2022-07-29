@@ -1,0 +1,100 @@
+---
+layout: post
+title: 친구 팰린드롬
+date: 2022-07-29 09:14:14 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/15270)
+# 친구 팰린드롬
+
+# 문제
+> 초등학생인 재홍이는 이번 봄 학예회 때, 재홍이가 지휘를 맡고 반 친구들이 춤을 추기로 계획했다. 이 춤은 시작할 때 춤추는 친구들이 일렬로 쭉 서서 각자 막춤을 추다가, 가운데 있는 친구를 기준으로 왼쪽과 오른쪽에 있던 친구들이 두손을 마주잡고 춤을 춘다. 즉 5명의 친구가 일렬로 서있었다면, 첫 번째 친구와 다섯 번째 친구가 함께 춤을 추게 되며, 두 번째 친구와 네 번째 친구가 함께 춤을 추게 된다. 세 번째에 있던 친구는 같이 출 수 있는 친구가 없기 때문에 혼자 로봇 댄스를 춘다.
+재홍이네 반 친구들은 모두 자신과 친한 친구하고만 춤을 추고 싶어한다. 재홍이는 이번 학예회에 스케일 크게 해보고 싶기 때문에 최대한 많은 친구를 무대에 세우려고 한다. 친구 관계도가 주어졌을 때, 최대 몇 명을 무대로 올려보낼 수 있는지 구해서 재홍이에게 알려주자. 친구들은 출석번호로 나타내며, 1부터 시작해서 N까지 있다. 각 친구는 오로지 하나의 출석번호를 갖는다.
+A와 B가 친한 친구고, B와 C가 친한 친구라고해서 반드시 A와 C가 친한 친구는 아니다. 로봇 댄스를 추는 친구를 제외한 무대에 올라가는 친구들은 모두 각자 자신과 친한 친구하고만 춤을 춰야한다. 또한 재홍이 반 친구들은 모두 로봇 댄스를 출 수 있다.
+
+# 입력
+> 첫째 줄에 총 반친구 수 N(2<=N<=20, 재홍이 제외)와 관계도 수 M(0<=M<=(N^2-N)/2, 최대 50 제한)이 주어진다. 둘째 줄부터 M+1줄까지 친한 친구 관계는 출석번호 u, v로 나타나며 u와 v는 같지 않고, u와 v가 친한 친구라면 v와 u도 친한 친구다.
+똑같은 입력은 두 번 이상 나오지 않는다. 가령 1 2 가 이미 나왔다면 1 2 또는 2 1는 입력으로 들어오지 않는다.
+
+# 출력
+> 무대에 최대한 세울 수 있는 친구의 수를 출력한다.
+
+# 풀이
+처음에는 N을 반으로 나눠서 짝을 맞춰볼까 했는데 만약 반보다 적은 수가 최대치라면 이 방법으로는 안될 거 같고 고민해봐도 마땅한 방법이 안 떠올라서 인터넷을 참조했고 [이 곳](https://coloredrabbit.tistory.com/72)의 풀이를 참조했다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 25;
+
+bool visited[MAX];
+
+vector<vector<int>> adj;
+
+int N, M;
+
+int DFS(int depth, int cnt)
+{
+	if (depth == N)
+		return cnt;
+
+    // 이미 짝을 지었을 경우
+	if (visited[depth])
+		return DFS(depth + 1, cnt);
+
+	int ret = 0;
+
+    // 현재 노드에서 연결된 노드 전부 탐색
+	for (const int to : adj[depth])
+	{
+        // 만약 아직 탐색하지 않았다면
+		if (!visited[to])
+		{   
+            // 탐색 시작
+			visited[to] = true;
+			ret = max(ret, DFS(depth + 1, cnt + 1));
+			visited[to] = false;
+		}
+	}
+
+	return max(ret, DFS(depth + 1, cnt));
+}
+
+int main()
+{
+	cin >> N >> M;
+
+	adj = vector<vector<int>>(N);
+
+	for (int i = 0; i < M; i++)
+	{
+		int u, v;
+
+		cin >> u >> v;
+
+		if (u > v)
+			adj[v].emplace_back(u);
+		else
+			adj[u].emplace_back(v);
+	}
+
+    // 백트랙킹 시작
+	int ret = DFS(0, 0);
+
+    // 2배로 늘려준다.
+	ret *= 2;
+    
+    // 만약 N명의 친구들을 모두 무대위로 올리지 못했다면 1명 추가
+	ret = N > ret ? (ret + 1) : ret;
+
+	cout << ret << "\n";
+
+	return 0;
+}
+```
