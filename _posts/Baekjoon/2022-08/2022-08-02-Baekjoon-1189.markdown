@@ -1,0 +1,103 @@
+---
+layout: post
+title: 컴백홈
+date: 2022-08-02 08:03:32 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/1189)
+# 컴백홈
+
+# 문제
+> 한수는 캠프를 마치고 집에 돌아가려 한다. 한수는 현재 왼쪽 아래점에 있고 집은 오른쪽 위에 있다. 그리고 한수는 집에 돌아가는 방법이 다양하다. 단, 한수는 똑똑하여 한번 지나친 곳을 다시 방문하지는 않는다.
+문제는 R x C 맵에 못가는 부분이 주어지고 거리 K가 주어지면 한수가 집까지도 도착하는 경우 중 거리가 K인 가짓수를 구하는 것이다.
+
+# 입력
+> 첫 줄에 정수 R(1 ≤ R ≤ 5), C(1 ≤ C ≤ 5), K(1 ≤ K ≤ R×C)가 공백으로 구분되어 주어진다. 두 번째부터 R+1번째 줄까지는 R×C 맵의 정보를 나타내는 '.'과 'T'로 구성된 길이가 C인 문자열이 주어진다.
+
+# 출력
+> 첫 줄에 거리가 K인 가짓수를 출력한다.
+
+# 풀이
+시작 위치가 왼쪽 아래, 도착 위치가 오른쪽 위라고 해서 간단하게 위로 올라가거나 오른쪽으로 한칸 가는 경우만 생각하고 문제를 풀었는데 7%에서 오답 판정을 받았다. 위랑 오른쪽으로 가는 경우뿐만 아니라 4방향 모든 경우의 수를 생각해야 했다.
+
+# 코드
+```c++
+#include <iostream>
+
+using namespace std;
+
+const int MAX = 7;
+
+char arr[MAX][MAX] = {};
+bool visited[MAX][MAX] = {};
+
+int R, C, K;
+
+int ans = 0;
+
+void DFS(int r, int c, int dist)
+{
+	if (r < 0 || c < 0 || r >= R || c >= C)
+		return;
+
+	if (arr[r][c] == 'T')
+		return;
+
+	if (dist >= K)
+	{
+		if (r == 0 && c == C - 1)
+			ans++;
+
+		return;
+	}
+
+	if (r - 1 >= 0 && !visited[r - 1][c])
+	{
+		visited[r - 1][c] = true;
+		DFS(r - 1, c, dist + 1);
+		visited[r - 1][c] = false;
+	}
+	
+	if (c + 1 < C && !visited[r][c + 1])
+	{
+		visited[r][c + 1] = true;
+		DFS(r, c + 1, dist + 1);
+		visited[r][c + 1] = false;
+	}
+
+	if (r + 1 < R && !visited[r + 1][c])
+	{
+		visited[r + 1][c] = true;
+		DFS(r + 1, c, dist + 1);
+		visited[r + 1][c] = false;
+	}
+
+	if (c - 1 >= 0 && !visited[r][c - 1])
+	{
+		visited[r][c - 1] = true;
+		DFS(r, c - 1, dist + 1);
+		visited[r][c - 1] = false;
+	}
+}
+
+int main()
+{
+	cin >> R >> C >> K;
+
+	for (int i = 0; i < R; i++)
+	{
+		for (int j = 0; j < C; j++)
+		{
+			cin >> arr[i][j];
+		}
+	}
+
+	visited[R - 1][0] = true;
+	DFS(R - 1, 0, 1);
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```

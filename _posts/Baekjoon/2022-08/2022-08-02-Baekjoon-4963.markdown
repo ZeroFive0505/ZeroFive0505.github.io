@@ -1,0 +1,121 @@
+---
+layout: post
+title: 섬의 개수
+date: 2022-08-02 09:36:11 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/4963)
+# 섬의 개수
+
+# 문제
+> 정사각형으로 이루어져 있는 섬과 바다 지도가 주어진다. 섬의 개수를 세는 프로그램을 작성하시오.
+![img](https://www.acmicpc.net/upload/images/island.png)
+한 정사각형과 가로, 세로 또는 대각선으로 연결되어 있는 사각형은 걸어갈 수 있는 사각형이다. 
+두 정사각형이 같은 섬에 있으려면, 한 정사각형에서 다른 정사각형으로 걸어서 갈 수 있는 경로가 있어야 한다. 지도는 바다로 둘러싸여 있으며, 지도 밖으로 나갈 수 없다.
+
+# 입력
+> 입력은 여러 개의 테스트 케이스로 이루어져 있다. 각 테스트 케이스의 첫째 줄에는 지도의 너비 w와 높이 h가 주어진다. w와 h는 50보다 작거나 같은 양의 정수이다.
+둘째 줄부터 h개 줄에는 지도가 주어진다. 1은 땅, 0은 바다이다.
+입력의 마지막 줄에는 0이 두 개 주어진다.
+
+# 출력
+> 각 테스트 케이스에 대해서, 섬의 개수를 출력한다.
+
+# 풀이
+BFS, DFS로 풀 수 있는 문제, 섬에서 8방향으로 방문할 수 있는 곳을 전부다 방문해가면서 숫자를 세면 된다.
+
+# 코드
+```c++
+#include <iostream>
+#include <stack>
+
+using namespace std;
+
+const int MAX = 51;
+
+int arr[MAX][MAX] = {};
+bool visited[MAX][MAX] = {};
+
+struct sDelta
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1},
+	{1, 1},
+	{-1, 1},
+	{1, -1},
+	{-1, -1}
+};
+
+int main()
+{
+
+	int w, h;
+
+	while (1)
+	{
+		cin >> w >> h;
+
+		if (w == 0 && h == 0)
+			break;
+
+		for (int i = 0; i < h; i++)
+		{
+			for (int j = 0; j < w; j++)
+			{
+				cin >> arr[i][j];
+				visited[i][j] = false;
+			}
+		}
+
+		int landCnt = 0;
+
+		for (int i = 0; i < h; i++)
+		{
+			for (int j = 0; j < w; j++)
+			{
+				if (arr[i][j] == 1 && !visited[i][j])
+				{
+					stack<pair<int, int>> st;
+
+					landCnt++;
+
+					st.push({ i, j });
+
+					visited[i][j] = true;
+
+					while (!st.empty())
+					{
+						pair<int, int> t = st.top();
+						st.pop();
+
+						for (int i = 0; i < 8; i++)
+						{
+							int nr = t.first + Delta[i].r;
+							int nc = t.second + Delta[i].c;
+
+							if (nr < 0 || nc < 0 || nr >= h || nc >= w)
+								continue;
+
+							if (!visited[nr][nc] && arr[nr][nc] == 1)
+							{
+								visited[nr][nc] = true;
+								st.push({ nr, nc });
+							}
+						}
+					}
+				}
+			}
+		}
+
+		cout << landCnt << "\n";
+	}
+
+	return 0;
+}
+```
