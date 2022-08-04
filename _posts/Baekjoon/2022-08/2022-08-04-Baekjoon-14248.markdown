@@ -1,0 +1,90 @@
+---
+layout: post
+title: 점프 점프
+date: 2022-08-04 09:44:19 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14248)
+# 점프 점프
+
+# 문제
+> 영우는 개구리다 개굴개굴개굴
+영우는 지금 n개의 돌이 일렬로 놓여있는 돌다리에 있다. 그리고 돌다리의 돌에는 숫자가 하나씩 적혀있다. 영우는 이 숫자가 적혀있는 만큼 왼쪽이나 오른쪽으로 점프할 수 있는데, 이때 돌다리 밖으로 나갈 수는 없다.
+영우는 이 돌다리에서 자기가 방문 가능한 돌들의 개수를 알고 싶어한다. 방문 가능하다는 것은 현재위치에서 다른 돌을 적절히 밟아 해당하는 위치로 이동이 가능하다는 뜻이다.
+현재 위치가 주어졌을 때, 영우가 방문 가능한 돌들의 개수를 출력하시오.
+
+# 입력
+> 첫 번째 줄에는 돌다리의 돌 개수 n이 주어진다.(1≤n≤100,000) 돌의 번호는 왼쪽부터 1번에서 n번이다. 다음 줄에는 그 위치에서 점프할 수 있는 거리 Ai가 주어진다.(1≤Ai≤100,000)
+다음 줄에는 출발점 s가 주어진다.(1≤s≤n)
+
+# 출력
+> 영우가 방문 가능한 돌들의 개수를 출력하시오.
+
+# 풀이
+BFS, DFS로 풀 수 있는 문제 시작점에서 왼쪽, 오른쪽으로 이동하면서 밟은 돌의 갯수를 세면 된다.
+
+# 코드
+```c++
+#include <iostream>
+#include <stack>
+
+using namespace std;
+
+const int MAX = 100005;
+
+int n;
+
+int arr[MAX] = {};
+bool visited[MAX] = {};
+
+int main()
+{
+	cin >> n;
+	
+	for (int i = 1; i <= n; i++)
+	{
+		cin >> arr[i];
+	}
+
+	int s;
+
+	cin >> s;
+
+	visited[s] = true;
+
+	int cnt = 1;
+
+	stack<int> st;
+
+	st.push(s);
+
+	while (!st.empty())
+	{
+		int t = st.top();
+		st.pop();
+
+		int right = t + arr[t];
+		int left = t - arr[t];
+
+		if (right <= n && !visited[right])
+		{
+			visited[right] = true;
+			cnt++;
+			st.push(right);
+		}
+
+		if (left >= 1 && !visited[left])
+		{
+			visited[left] = true;
+			cnt++;
+			st.push(left);
+		}
+	}
+
+	cout << cnt << "\n";
+
+
+	return 0;
+}
+```
