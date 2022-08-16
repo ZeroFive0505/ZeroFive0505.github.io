@@ -1,0 +1,96 @@
+---
+layout: post
+title: 순열장난
+date: 2022-08-17 08:42:20 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/10597)
+# 순열장난
+
+# 문제
+> kriii는 1부터 N까지의 수로 이루어진 순열을 파일로 저장해 놓았다. 모든 수는 10진수로 이루어져 있고, 모두 공백으로 분리되어 있다.
+그런데 sujin이 그 파일의 모든 공백을 지워버렸다!
+kriii가 순열을 복구하도록 도와주자.
+
+# 입력
+> 첫 줄에 공백이 사라진 kriii의 수열이 주어진다.
+kriii의 순열은 최소 1개 최대 50개의 수로 이루어져 있다.
+
+# 출력
+> 복구된 수열을 출력한다. 공백을 잊으면 안된다.
+복구한 수열의 경우가 여러 가지 일 경우, 그 중 하나를 출력한다.
+
+# 풀이
+첫 시도는 간단하게 DFS를 하면서 빈 문자열에 문자를 하나씩 추가해가면서 만약 아직 사용하지 않은 문자라면 사용 처리를 하고 문자열을 비우는 방식으로 처리했는데 예제에서는 정답을 잘 출력하길래 제출해봤지만 오답 판정을 받았고 [이 곳](https://ariz1623.tistory.com/60)을 참조해서 풀 수 있었는데 주어진 문자열에서 최대 값을 찾아내서 이 값보다 크면 무시하는 방식으로 모든 경우의 수를 찾을 수 있었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+string s;
+int len;
+int max_num;
+
+bool used[51] = {};
+
+vector<int> v;
+
+void DFS(int depth)
+{
+    // 만약 문자열의 길이에 도달했다면 출력하고 종료
+	if (depth >= len)
+	{
+		for (int i = 0; i < max_num; i++)
+		{
+			cout << v[i] << " ";
+		}
+		cout << "\n";
+		exit(0);
+	}
+
+	int num;
+	string t;
+
+    // 현재 인덱스에서 숫자로 만들어본다. 2회 반복으로 두자리수까지 검사
+	for (int i = depth; i <= depth + 1; i++)
+	{
+		t = t + s[i];
+		num = stoi(t);
+
+		if (num > max_num)
+			continue;
+
+		if (used[num])
+			continue;
+
+		v.push_back(num);
+		used[num] = true;
+		DFS(i + 1);
+		used[num] = false;
+		v.pop_back();
+	}
+}
+
+int main()
+{
+	cin >> s;
+	len = s.length();
+
+    // 만약 길이가 10이상이라면
+    // 그 문자열에서 가능한 최댓값은 아래와 같다.
+	if (len > 9)
+		max_num = 9 + (len - 9) / 2;
+    // 만약 9이하라면 길이가 그 순열에서 최댓값
+	else
+		max_num = len;
+
+	DFS(0);
+
+	return 0;
+}
+```
