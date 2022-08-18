@@ -1,0 +1,106 @@
+---
+layout: post
+title: 선 긋기
+date: 2022-08-18 08:59:11 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon]https://www.acmicpc.net/problem/2170)
+# 선 긋기
+
+# 문제
+> 매우 큰 도화지에 자를 대고 선을 그으려고 한다. 선을 그을 때에는 자의 한 점에서 다른 한 점까지 긋게 된다. 선을 그을 때에는 이미 선이 있는 위치에 겹쳐서 그릴 수도 있는데, 여러 번 그은 곳과 한 번 그은 곳의 차이를 구별할 수 없다고 하자.
+이와 같은 식으로 선을 그었을 때, 그려진 선(들)의 총 길이를 구하는 프로그램을 작성하시오. 선이 여러 번 그려진 곳은 한 번씩만 계산한다.
+
+# 입력
+> 첫째 줄에 선을 그은 횟수 N(1 ≤ N ≤ 1,000,000)이 주어진다. 다음 N개의 줄에는 선을 그을 때 선택한 두 점의 위치 x, y(-1,000,000,000 ≤ x < y ≤ 1,000,000,000)가 주어진다.
+
+# 출력
+> 첫째 줄에 그은 선의 총 길이를 출력한다.
+
+# 풀이
+선을 계속 벡터에 조건이 맞으면 덧붙여간다는 방식으로 문제를 풀어봤는데 약 7%에서 시간 초과가 떴다. 문제는 입출력할때 속도 향상하는 조건문을 안 넣어서 이것이 문제가 되서 초과가 떴던 것이었다.
+
+# 코드
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int N;
+vector<pair<long long, long long>> v;
+
+int main()
+{
+	cin >> N;
+
+    // 입출력 속도 개선
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+
+	v.reserve(1000000);
+
+	for (int i = 0; i < N; i++)
+	{
+		long long x, y;
+
+		cin >> x >> y;
+
+        // 순서를 일관되게 하기 위해서 교체한다.
+
+		if (x > 0 && y > 0 && x > y)
+			swap(x, y);
+
+		if (x < 0 && y < 0 && x > y)
+			swap(x, y);
+
+		v.push_back({ x, y });
+	}
+
+	sort(v.begin(), v.end(), [](const pair<long long, long long>& a, const pair<long long, long long>& b) {
+		return a.first < b.first;
+	});
+
+	vector<pair<long long, long long>> t;
+
+	t.push_back(v.front());
+
+	long long sum = 0;
+
+	for (int i = 1; i < v.size(); i++)
+	{
+        // 만약 선이 겹치고
+		if (t.back().second >= v[i].first)
+		{
+            // 연장이 가능하면 연장한다.
+			if (v[i].second > t.back().second)
+				t.push_back(v[i]);
+		}
+        // 연장이 불가능할 경우
+		else if (v[i].first > t.back().second)
+		{
+            // 지금까지 연장한 선의 합을 더한다.
+			sum += abs(t.back().second - t.front().first);
+			t.clear();
+            // 다시 선을 추가한다.
+			t.push_back(v[i]);
+		}
+	}
+
+	if (!t.empty())
+	{
+		if (t.size() == 1)
+			sum += abs(t.back().second - t.back().first);
+		else
+			sum += abs(t.back().second - t.front().first);
+	}
+
+	cout << sum << "\n";
+
+	return 0;
+}
+```
