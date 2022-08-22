@@ -5,7 +5,7 @@ date: 2022-08-22 08:53:12 +0900
 categories: Baekjoon
 ---
 
-## 문제 링크 -> [Baekjoon]https://www.acmicpc.net/problem/14629)
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/14629)
 # 숫자 조각
 
 # 문제

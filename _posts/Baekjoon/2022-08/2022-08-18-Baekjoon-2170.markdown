@@ -5,7 +5,7 @@ date: 2022-08-18 08:59:11 +0900
 categories: Baekjoon
 ---
 
-## 문제 링크 -> [Baekjoon]https://www.acmicpc.net/problem/2170)
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/2170)
 # 선 긋기
 
 # 문제
