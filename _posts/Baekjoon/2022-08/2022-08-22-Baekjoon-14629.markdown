@@ -1,0 +1,116 @@
+---
+layout: post
+title: 숫자 조각
+date: 2022-08-22 08:53:12 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon]https://www.acmicpc.net/problem/14629)
+# 숫자 조각
+
+# 문제
+> ![Img](https://onlinejudgeimages.s3-ap-northeast-1.amazonaws.com/problem/14629/1.png)
+
+> 곧 7살을 맞이하는 준하는 유치원에서 숫자가 적힌 나무 조각들을 가지고 노는 것을 좋아한다. 숫자 조각은 총 10개이며, 각각의 조각엔 0부터 9까지의 숫자가 한 숫자씩 적혀있다. 준하는 각 숫자 조각을 이어 붙이면 더 큰 숫자를 만들 수 있고, 정말 다양한 조합이 존재한다는 점이 마음에 무척 들었다. 오늘도 준하는 숫자 조각으로 만들 수 있는 가장 큰 숫자인 9876543210을 보면서 흥분을 감추지 못하고 있었다. 그러나 그런 준하를 보다 못 한 강민이는 준하에게 딴지를 걸기 시작했다.
+“그거 가지고는 333도 못 만들지? 깔깔깔”
+강민이의 도발에 화가 난 준하는 숫자 조각을 빠르게 조합한 후, 강민이에게 대답했다.
+“333은 못 만들어도 329를 만들면 별로 차이 안 나!”
+그 말을 들은 강민이는 어이가 없었지만 준하를 놀려먹기로 하고 다음과 같이 말했다.
+“그래? 그럼 44223344는?”
+순간 준하는 머리가 멍해지며 아무런 생각이 들지 않았다. 이대로 가면 준하는 미래에 수포자가 될 것이다. 준하가 수학을 포기하지 않도록 대신 계산해주는 프로그램을 만들어주자.
+
+# 입력
+> 첫째 줄에 강민이가 질문하는 숫자 N이 주어진다. (1 ≤ N ≤ 1,000,000,000,000)
+
+# 출력
+> 첫째 줄에 0부터 9까지의 숫자를 한 번만 사용하여 만든 숫자 중에 N과 가장 차이가 적은 숫자를 출력한다. 답이 여러 개일 경우, 더 작은 숫자를 출력한다.
+
+# 풀이
+3자리 숫자면 최소치가 되는 경우는 3자리 숫자일거라고 생각해서 계속 9%에서 오답 판정을 받았다. 인터넷에서 다른 사람들의 풀이법을 참조하여 [이 곳](https://velog.io/@lifeisbeautiful/%EB%B0%B1%EC%A4%80-14629%EB%B2%88-%EC%88%AB%EC%9E%90-%EC%A1%B0%EA%B0%81-DP-Java-Kotlin)의 풀이법을 이용해서 풀 수 있었다. 현재 자리수에서 한 자리 작은수는 9에서 DFS를 시작하고 그 다음은 현재 입력받은 숫자의 첫번째 숫자부터 시작해서 같은 자리수에서 최소 값을 찾고 그 다음은 한 자리 더 많은 수에서 최솟값을 찾는데 이때 1부터 시작해서 찾는다. 예를들어 숫자가 958일 경우 한자리 더 큰 숫자는 1000부터 시작해서 답을 찾는다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+
+using namespace std;
+
+bool used[10] = {};
+
+long long ans = 0;	
+long long max_diff = 9976543210;
+string N;
+
+void DFS(string s, int depth, int max_depth)
+{
+	if (depth >= max_depth)
+	{
+		long long num = stoll(s);
+		long long diff = abs(stoll(N) - num);
+
+		if (max_diff > diff)
+		{
+			max_diff = diff;
+			ans = num;
+		}
+
+		return;
+	}
+
+	for (int i = 0; i < 10; i++)
+	{
+		if (!used[i])
+		{
+			used[i] = true;
+			s.push_back(i + '0');
+			DFS(s, depth + 1, max_depth);
+			s.pop_back();
+			used[i] = false;
+		}
+	}
+}
+
+int main()
+{
+
+	cin >> N;
+
+	int len = N.length();
+
+	long long num = stoll(N);
+
+    // 만약 숫자가 너무 커서 쓸 수 있는 숫자로 표현이 안될 경우
+	if (num >= 9876543210)
+		cout << 9876543210 << "\n";
+    // 10이하의 수는 그대로 표현이 가능하다.
+	else if (num <= 10)
+		cout << num << "\n";
+	else
+	{
+        // 만약 2자리 이상의 수라면
+		if (len != 2)
+		{
+			used[9] = true;
+            // 9를 넣어서 시작한다. (한 자리 더 작은 수면서 제일 큰 수 부터 시작)
+			DFS("9", 0, len - 2);
+			used[9] = false;
+		}
+
+        // 현재 입력받은 숫자의 첫번째 숫자부터 시작 (같은 자리 수면서 최소가 되는 값을 찾는다.)
+		used[N[0] - '0'] = true;
+		DFS(to_string(N[0] - '0'), 0, len - 1);
+		used[N[0] - '0'] = false;
+
+        // 만약 최대치는 아닐경우 한 자리 더 큰 수도 확인해본다.
+		if (len != 10)
+		{
+			used[1] = true;
+			DFS("1", 0, len);
+			used[1] = false;
+		}
+
+		cout << ans << "\n";
+	}
+}
+```
