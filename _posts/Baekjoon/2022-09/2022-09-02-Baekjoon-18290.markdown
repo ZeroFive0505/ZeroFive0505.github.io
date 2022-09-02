@@ -1,0 +1,127 @@
+---
+layout: post
+title: NM과 K (1) 
+date: 2022-09-02 09:07:20 +0900
+categories: Baekjoon
+---
+
+## 문제 링크 -> [Baekjoon](https://www.acmicpc.net/problem/18290)
+# NM과 K (1)
+
+# 문제
+> 크기가 N×M인 격자판의 각 칸에 정수가 하나씩 들어있다. 이 격자판에서 칸 K개를 선택할 것이고, 선택한 칸에 들어있는 수를 모두 더한 값의 최댓값을 구하려고 한다. 단, 선택한 두 칸이 인접하면 안된다. r행 c열에 있는 칸을 (r, c)라고 했을 때, (r-1, c), (r+1, c), (r, c-1), (r, c+1)에 있는 칸이 인접한 칸이다.
+
+# 입력
+> 첫째 줄에 N, M, K가 주어진다. 둘째 줄부터 N개의 줄에 격자판에 들어있는 수가 주어진다.
+
+# 출력
+> 선택한 칸에 들어있는 수를 모두 더한 값의 최댓값을 출력한다.
+
+# 제한
+> - 1 ≤ N, M ≤ 10
+> - 1 ≤ K ≤ min(4, N×M)
+> - 격자판에 들어있는 수는 -10,000보다 크거나 같고, 10,000보다 작거나 같은 정수이다.
+> - 항상 K개의 칸을 선택할 수 있는 경우만 입력으로 주어진다.
+
+# 풀이
+4방향으로 백트랙킹을 하려고했는데 디버깅도 힘들어지고 스택 오버플로우도 계속 발생해서 일단 행은 고정을 하고 열을 늘려가면서 선택할지 선택을 안 할지를 정했다. 기저 조건으로는 K개를 다 선택했을 경우나 행이 범위를 넘어간 경우를 기저 조건으로 해서 문제를 풀 수 있었다. 단 기저 조건의 순서가 K개를 선택했는지를 먼저 체크하고 그 이후에 행을 검사해야 한다. 이 순서가 뒤바뀌면 선택을 더 할 수 있는데 바로 반환이 되면서 올바른 답을 출력하지 못해 오답 판정을 받았다.
+
+# 코드
+```c++
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int MAX = 11;
+
+const int INF = 987654321;
+
+struct sDelta
+{
+	int r;
+	int c;
+}Delta[] = {
+	{-1, 0},
+	{1, 0},
+	{0, -1},
+	{0, 1}
+};
+
+int board[MAX][MAX] = {};
+bool selected[MAX][MAX] = {};
+
+int ans = -INF;
+
+int N, M, K;
+
+// 인접한 위치를 선택했는지 안했는지 체크
+bool Check(int r, int c)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		int nr = r + Delta[i].r;
+		int nc = c + Delta[i].c;
+
+		if (nr < 0 || nc < 0 || nr >= N || nc >= M)
+			continue;
+
+		if (selected[nr][nc])
+			return false;
+	}
+
+	return true;
+}
+
+void DFS(int r, int c, int sum, int depth)
+{   
+    // 열이 넘어갔다면 행을 하나 늘려주고 열은 다시 0부터 시작
+	if (c >= M)
+	{
+		c = 0;
+		r++;
+	}
+
+    // 만약 K개를 다 골랐다면
+	if (depth >= K)
+	{
+		ans = max(ans, sum);
+		return;
+	}
+
+    // 만약 범위를 넘어가는 경우는 그냥 반환
+	if (r >= N)
+		return;
+
+	if (!selected[r][c])
+	{
+		if (Check(r, c))
+		{
+			selected[r][c] = true;
+			DFS(r, c + 1, sum + board[r][c], depth + 1);
+			selected[r][c] = false;
+		}
+	}
+
+	DFS(r, c + 1, sum, depth);
+}
+
+int main()
+{
+	cin >> N >> M >> K;
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < M; j++)
+		{
+			cin >> board[i][j];
+		}
+	}
+
+	DFS(0, 0, 0, 0);
+
+	cout << ans << "\n";
+
+	return 0;
+}
+```
