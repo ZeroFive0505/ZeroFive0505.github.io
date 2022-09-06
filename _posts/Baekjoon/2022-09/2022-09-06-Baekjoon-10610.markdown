@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 30
-date: 2022-09-05 10:31:15 +0900
+date: 2022-09-06 08:40:39 +0900
 categories: Baekjoon
 ---
 
